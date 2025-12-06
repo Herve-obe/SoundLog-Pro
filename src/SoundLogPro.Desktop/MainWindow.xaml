@@ -13,16 +13,6 @@
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}">
 
-    <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:OffloadViewModel}">
-            <views:OffloadView />
-        </DataTemplate>
-        <!-- Simple String Template for placeholders -->
-        <DataTemplate DataType="{x:Type sys:String}">
-            <TextBlock Text="{Binding}" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
-        </DataTemplate>
-    </Window.Resources>
-    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>

@@ -15,57 +15,90 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Zone Source -->
+        <!-- Section 1 : SOURCE -->
         <materialDesign:Card Grid.Row="0" Margin="0,0,0,20" Padding="20">
             <StackPanel>
-                <TextBlock Text="SOURCE" Style="{StaticResource MaterialDesignOverlineTextBlock}" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <materialDesign:PackIcon Kind="FolderSearch" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    <TextBlock Text="SOURCE MÉDIA" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                </StackPanel>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox Grid.Column="0" Text="{Binding SourcePath}" IsReadOnly="True" 
+                             materialDesign:HintAssist.Hint="Chemin du dossier source" 
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    
+                    <Button Grid.Column="1" Command="{Binding PickSourceCommand}" Content="CHOISIR LE DOSSIER" 
+                            Style="{StaticResource MaterialDesignFlatButton}" VerticalAlignment="Center"/>
+                </Grid>
+            </StackPanel>
+        </materialDesign:Card>
+
+        <!-- Section 2 : DESTINATIONS -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,20" Padding="20">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <materialDesign:PackIcon Kind="BackupRestore" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                    <TextBlock Text="BACKUP &amp; SÉCURISATION" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                </StackPanel>
+
+                <!-- Destination A -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Harddisk" VerticalAlignment="Center" Margin="0,0,15,0" Width="20" Height="20" Opacity="0.7"/>
+                    
+                    <TextBox Grid.Column="1" Text="{Binding Destination1Path}" IsReadOnly="True"
+                             materialDesign:HintAssist.Hint="Destination Principale (A)" 
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    
+                    <Button Grid.Column="2" Command="{Binding PickDest1Command}" Content="CHOISIR" 
+                            Style="{StaticResource MaterialDesignOutlinedButton}" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Destination B -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" Margin="0,0,20,0" ToolTip="Choisir Source">
-                        <materialDesign:PackIcon Kind="FolderOpen" />
-                    </Button>
-                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Chemin de la source" VerticalAlignment="Center" FontSize="16"/>
+
+                    <materialDesign:PackIcon Grid.Column="0" Kind="HarddiskPlus" VerticalAlignment="Center" Margin="0,0,15,0" Width="20" Height="20" Opacity="0.7"/>
+
+                    <TextBox Grid.Column="1" Text="{Binding Destination2Path}" IsReadOnly="True"
+                             materialDesign:HintAssist.Hint="Destination Secondaire (B) - Optionnel" 
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+
+                    <Button Grid.Column="2" Command="{Binding PickDest2Command}" Content="CHOISIR" 
+                            Style="{StaticResource MaterialDesignOutlinedButton}" VerticalAlignment="Center"/>
                 </Grid>
             </StackPanel>
         </materialDesign:Card>
 
-        <!-- Zone Destinations -->
-        <materialDesign:Card Grid.Row="1" Margin="0,0,0,20" Padding="20">
-            <StackPanel>
-                <TextBlock Text="DESTINATIONS" Style="{StaticResource MaterialDesignOverlineTextBlock}" Margin="0,0,0,10"/>
-                
-                <!-- Destination A -->
-                <Grid Margin="0,0,0,15">
-                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Grid.Column="0" Kind="Harddisk" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Destination A" VerticalAlignment="Center"/>
-                </Grid>
-
-                 <!-- Destination B -->
-                <Grid>
-                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Grid.Column="0" Kind="HarddiskPlus" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Destination B (Optionnel)" VerticalAlignment="Center"/>
-                </Grid>
-            </StackPanel>
-        </materialDesign:Card>
-        
         <!-- Spacer -->
         <Border Grid.Row="2"/>
 
-        <!-- Zone Action -->
+        <!-- Section 3 : ACTIONS -->
         <StackPanel Grid.Row="3">
-            <Button Content="DÉMARRER LA COPIE" Height="50" FontSize="18" Margin="0,0,0,20" Style="{StaticResource MaterialDesignRaisedAccentButton}"/>
-            <ProgressBar Height="20" Value="0" Maximum="100"/>
+            <Button Command="{Binding StartCopyCommand}" Content="DÉMARRER LA COPIE" 
+                    Height="50" FontSize="18" Margin="0,0,0,20" 
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{DynamicResource SecondaryHueMidBrush}"
+                    BorderBrush="{DynamicResource SecondaryHueMidBrush}"/>
+            
+            <ProgressBar Value="0" Maximum="100" Height="20" IsIndeterminate="False"/>
+            
+            <TextBlock Text="{Binding LogText}" Margin="0,10,0,0" Opacity="0.6" HorizontalAlignment="Center"/>
         </StackPanel>
     </Grid>
 </UserControl>
