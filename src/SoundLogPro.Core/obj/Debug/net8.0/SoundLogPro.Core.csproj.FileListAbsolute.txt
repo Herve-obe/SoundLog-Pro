@@ -1,0 +1,12 @@
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\bin\Debug\net8.0\SoundLogPro.Core.deps.json
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\bin\Debug\net8.0\SoundLogPro.Core.dll
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\bin\Debug\net8.0\SoundLogPro.Core.pdb
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.AssemblyInfoInputs.cache
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.AssemblyInfo.cs
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.csproj.CoreCompileInputs.cache
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.sourcelink.json
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.dll
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\refint\SoundLogPro.Core.dll
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\SoundLogPro.Core.pdb
+D:\ELEMENT\SOUNDLOG PRO\src\SoundLogPro.Core\obj\Debug\net8.0\ref\SoundLogPro.Core.dll

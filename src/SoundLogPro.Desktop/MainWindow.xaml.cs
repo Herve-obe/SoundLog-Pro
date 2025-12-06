@@ -19,5 +19,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        DataContext = new SoundLogPro.Desktop.ViewModels.MainViewModel();
     }
 }
