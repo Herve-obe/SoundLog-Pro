@@ -13,6 +13,10 @@
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}">
 
+    <Window.InputBindings>
+        <KeyBinding Key="Space" Command="{Binding CurrentViewModel.TogglePlayPauseCommand}" />
+    </Window.InputBindings>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>

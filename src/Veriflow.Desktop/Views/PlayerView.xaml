@@ -6,10 +6,13 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Veriflow.Desktop.Views"
              xmlns:vm="clr-namespace:Veriflow.Desktop.ViewModels"
+             xmlns:conv="clr-namespace:Veriflow.Desktop.Converters"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1024">
     <UserControl.Resources>
+        <conv:PercentToPositionConverter x:Key="PercentToPositionConverter"/>
+
         <!-- Mute Button Style -->
         <Style x:Key="DawMuteButtonStyle" TargetType="ToggleButton">
             <Setter Property="Width" Value="25"/>
@@ -56,7 +59,13 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="20" AllowDrop="True" Background="Transparent">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="Drop">
+                <i:InvokeCommandAction Command="{Binding DropFileCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>   <!-- Console (Left) -->
             <ColumnDefinition Width="350"/>  <!-- Metadata (Right) -->
@@ -67,6 +76,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->
                 <RowDefinition Height="Auto"/> <!-- Transport -->
+                <RowDefinition Height="30"/>   <!-- Ruler Header -->
                 <RowDefinition Height="*"/>    <!-- Tracks -->
             </Grid.RowDefinitions>
 
@@ -96,11 +106,15 @@
             <Border Grid.Row="1" Background="{DynamicResource MaterialDesignPaper}" Margin="0,0,0,10" Padding="10" CornerRadius="4">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="80"/>  <!-- Name -->
+                        <ColumnDefinition Width="120"/> <!-- Volume -->
+                        <ColumnDefinition Width="60"/>  <!-- Pan -->
+                        <ColumnDefinition Width="70"/> <!-- Buttons -->
+                        <ColumnDefinition Width="*"/>    <!-- Timeline/Slider -->
                     </Grid.ColumnDefinitions>
                     
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <!-- Transport Buttons (Col 0-3 spanning) -->
+                    <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
                         <Button Command="{Binding StopCommand}" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" Margin="0,0,10,0" Background="IndianRed" BorderBrush="IndianRed" ToolTip="Stop" IsEnabled="True">
                             <materialDesign:PackIcon Kind="Square" Width="16" Height="16"/>
                         </Button>
@@ -112,111 +126,204 @@
                         </Button>
                     </StackPanel>
                     
-                    <Slider Grid.Column="1" Minimum="0" Maximum="{Binding PlaybackMaximum}" Value="{Binding PlaybackPosition}" Margin="20,0,0,0" VerticalAlignment="Center" IsEnabled="True"/> 
+                    <!-- Main Timeline Slider (Col 4 - Aligned with Waveforms) -->
+                    <Slider Grid.Column="4" Minimum="0" Maximum="{Binding PlaybackMaximum}" 
+                            Value="{Binding PlaybackPosition, Mode=TwoWay}" 
+                            IsMoveToPointEnabled="True"
+                            Margin="5,0,0,0" VerticalAlignment="Center" IsEnabled="True"/> 
                 </Grid>
             </Border>
 
-            <!-- Tracks List (Pro DAW Layout) -->
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Background="Transparent">
-                <ItemsControl ItemsSource="{Binding Tracks}" Background="Transparent" BorderThickness="0">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:TrackViewModel}">
-                            <!-- Pro DAW Layout -->
-                            <Border Background="#2E2E2E" Margin="0,0,0,1" BorderBrush="#111111" BorderThickness="0,0,0,2">
-                                <Grid Height="50">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="80"/>  <!-- Name -->
-                                        <ColumnDefinition Width="120"/> <!-- Volume -->
-                                        <ColumnDefinition Width="60"/>  <!-- Pan -->
-                                        <ColumnDefinition Width="Auto"/> <!-- Buttons -->
-                                        <ColumnDefinition Width="*"/>    <!-- Waveform -->
-                                    </Grid.ColumnDefinitions>
+            <!-- Ruler / Column Headers -->
+            <Grid Grid.Row="2" Background="Transparent" Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80"/>  <!-- Name -->
+                    <ColumnDefinition Width="120"/> <!-- Volume -->
+                    <ColumnDefinition Width="60"/>  <!-- Pan -->
+                    <ColumnDefinition Width="70"/> <!-- Buttons -->
+                    <ColumnDefinition Width="*"/>    <!-- Ruler -->
+                </Grid.ColumnDefinitions>
 
-                                    <!-- Col 0: Track Name -->
-                                    <TextBlock Grid.Column="0" Text="{Binding TrackName}" 
+                <TextBlock Grid.Column="0" Text="NAME" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Opacity="0.5" FontSize="10" FontWeight="Bold"/>
+                <TextBlock Grid.Column="1" Text="VOL" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.5" FontSize="10" FontWeight="Bold"/>
+                <TextBlock Grid.Column="2" Text="PAN" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.5" FontSize="10" FontWeight="Bold"/>
+
+                <!-- Ruler Canvas -->
+                <Border Grid.Column="4" ClipToBounds="True" Margin="5,0">
+                    <Canvas x:Name="RulerCanvas">
+                        <ItemsControl ItemsSource="{Binding RulerTicks}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas IsItemsHost="True"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left">
+                                        <Setter.Value>
+                                            <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
+                                                <Binding Path="Percent"/>
+                                                <Binding ElementName="RulerCanvas" Path="ActualWidth"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <!-- Tick Mark -->
+                                        <Rectangle Width="1" Height="10" Fill="White" Opacity="0.3" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                        <!-- Time Label -->
+                                        <TextBlock Text="{Binding Label}" FontSize="9" Opacity="0.7" Margin="2,10,0,0" Foreground="White" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Canvas>
+                </Border>
+            </Grid>
+
+            <!-- Tracks List (Pro DAW Layout) + Overlay -->
+            <Grid Grid.Row="3">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+                    <ItemsControl ItemsSource="{Binding Tracks}" Background="Transparent" BorderThickness="0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+                                <!-- Pro DAW Layout -->
+                                <Border Background="#2E2E2E" Margin="0,0,0,1" BorderBrush="#111111" BorderThickness="0,0,0,2">
+                                    <Grid Height="50">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>  <!-- Name -->
+                                            <ColumnDefinition Width="120"/> <!-- Volume -->
+                                            <ColumnDefinition Width="60"/>  <!-- Pan -->
+                                            <ColumnDefinition Width="70"/> <!-- Buttons (Fixed) -->
+                                            <ColumnDefinition Width="*"/>    <!-- Waveform -->
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Col 0: Track Name -->
+                                        <TextBlock Grid.Column="0" Text="{Binding TrackName}" 
                                                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0"
                                                FontWeight="SemiBold" Foreground="#B0BEC5" 
                                                TextTrimming="CharacterEllipsis" 
                                                ToolTip="{Binding TrackName}" FontSize="11"/>
 
-                                    <!-- Col 1: Volume Slider (Fader Look) -->
-                                    <Slider Grid.Column="1" Value="{Binding Volume}" 
+                                        <!-- Col 1: Volume Slider (Fader Look) -->
+                                        <Slider Grid.Column="1" Value="{Binding Volume}" 
                                             Minimum="0" Maximum="1" 
                                             VerticalAlignment="Center" Margin="5,0"
                                             AutoToolTipPlacement="None"
                                             ToolTip="Volume (Double-Click Reset)">
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="PreviewMouseDoubleClick">
-                                                <i:InvokeCommandAction Command="{Binding ResetVolumeCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
-                                        <Slider.Resources>
-                                            <Style TargetType="Thumb">
-                                                 <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="Thumb">
-                                                            <Border Background="#757575" BorderBrush="#424242" BorderThickness="1" Width="10" Height="20" CornerRadius="1"/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </Slider.Resources>
-                                    </Slider>
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="PreviewMouseDoubleClick">
+                                                    <i:InvokeCommandAction Command="{Binding ResetVolumeCommand}" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <Slider.Resources>
+                                                <Style TargetType="Thumb">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Thumb">
+                                                                <Border Background="#757575" BorderBrush="#424242" BorderThickness="1" Width="10" Height="20" CornerRadius="1"/>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Slider.Resources>
+                                        </Slider>
 
-                                    <!-- Col 2: Pan Slider -->
-                                    <Slider Grid.Column="2" Value="{Binding Pan}" 
+                                        <!-- Col 2: Pan Slider -->
+                                        <Slider Grid.Column="2" Value="{Binding Pan}" 
                                             Minimum="-1" Maximum="1" 
                                             VerticalAlignment="Center" Margin="5,0"
                                             AutoToolTipPlacement="None"
                                             ToolTip="Pan (Double-Click Reset)">
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="PreviewMouseDoubleClick">
-                                                <i:InvokeCommandAction Command="{Binding ResetPanCommand}" />
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
-                                        <Slider.Resources>
-                                            <Style TargetType="Thumb">
-                                                 <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="Thumb">
-                                                            <Ellipse Fill="#B0BEC5" Width="12" Height="12" Stroke="#424242" StrokeThickness="1"/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </Slider.Resources>
-                                    </Slider>
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="PreviewMouseDoubleClick">
+                                                    <i:InvokeCommandAction Command="{Binding ResetPanCommand}" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <Slider.Resources>
+                                                <Style TargetType="Thumb">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Thumb">
+                                                                <Ellipse Fill="#B0BEC5" Width="12" Height="12" Stroke="#424242" StrokeThickness="1"/>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Slider.Resources>
+                                        </Slider>
 
-                                    <!-- Col 3: Buttons (Mute/Solo) -->
-                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
-                                        <ToggleButton IsChecked="{Binding IsMuted}"
+                                        <!-- Col 3: Buttons (Mute/Solo) -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                                            <ToggleButton IsChecked="{Binding IsMuted}"
                                                       Style="{StaticResource DawMuteButtonStyle}"
                                                       ToolTip="Mute"/>
 
-                                        <ToggleButton IsChecked="{Binding IsSoloed}"
+                                            <ToggleButton IsChecked="{Binding IsSoloed}"
                                                       Style="{StaticResource DawSoloButtonStyle}"
                                                       ToolTip="Solo"/>
-                                    </StackPanel>
+                                        </StackPanel>
 
-                                    <!-- Col 4: Waveform (Viewbox forced) -->
-                                    <Border Grid.Column="4" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ClipToBounds="True" Margin="5,2">
-                                        <Viewbox Stretch="Fill">
-                                            <Polyline Points="{Binding WaveformPoints}" 
+                                        <!-- Col 4: Waveform (Viewbox forced) -->
+                                        <Border Grid.Column="4" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ClipToBounds="True" Margin="5,2">
+                                            <Viewbox Stretch="Fill">
+                                                <Polyline Points="{Binding WaveformPoints}" 
                                                       Stroke="#B0BEC5" 
                                                       StrokeThickness="1"/>
-                                        </Viewbox>
-                                    </Border>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                            </Viewbox>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                
+                <!-- Overlay Canvas (Global Playhead & Interaction) -->
+                <Grid IsHitTestVisible="True" Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>  <!-- Name -->
+                        <ColumnDefinition Width="120"/> <!-- Volume -->
+                        <ColumnDefinition Width="60"/>  <!-- Pan -->
+                        <ColumnDefinition Width="70"/> <!-- Buttons -->
+                        <ColumnDefinition Width="*"/>    <!-- Waveform Area -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Click-to-Seek Area -->
+                    <Canvas Grid.Column="4" Background="Transparent" x:Name="WaveformOverlay">
+                         <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                <i:InvokeCommandAction Command="{Binding SeekCommand}" PassEventArgsToCommand="True"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    
+                        <!-- Playhead Line -->
+                        <Line Y1="0" Y2="{Binding ActualHeight, ElementName=WaveformOverlay}" 
+                              Stroke="White" StrokeThickness="1.5" Opacity="0.8">
+                            <Line.X1>
+                                <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
+                                    <Binding Path="PlaybackPercent" />
+                                    <Binding ElementName="WaveformOverlay" Path="ActualWidth"/>
+                                </MultiBinding>
+                            </Line.X1>
+                            <Line.X2>
+                                <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
+                                    <Binding Path="PlaybackPercent" />
+                                    <Binding ElementName="WaveformOverlay" Path="ActualWidth"/>
+                                </MultiBinding>
+                            </Line.X2>
+                        </Line>
+                    </Canvas>
+                </Grid>
+            </Grid>
         </Grid>
 
         <!-- RIGHT COLUMN: METADATA -->

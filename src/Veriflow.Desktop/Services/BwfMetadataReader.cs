@@ -85,6 +85,8 @@ namespace Veriflow.Desktop.Services
             long samplesSinceMidnight = low + (high << 32);
 
             metadata.TimecodeStart = SamplesToTimecode(samplesSinceMidnight, sampleRate);
+            if (sampleRate > 0)
+                metadata.TimeReferenceSeconds = (double)samplesSinceMidnight / sampleRate;
         }
 
         private void ParseIXmlBytes(byte[] data, AudioMetadata metadata)
@@ -143,11 +145,6 @@ namespace Veriflow.Desktop.Services
         private string SamplesToTimecode(long samples, int sampleRate)
         {
             if (sampleRate == 0) return "00:00:00:00";
-            
-            // Assume 24fps, 25fps, 30fps? Or use Timecode rate if available.
-            // BEXT doesn't strictly define FPS.
-            // Standard approach: Audio Time (H:M:S) is easy. Frames is variable.
-            // Lets just do: HH:MM:SS
             
             double totalSeconds = (double)samples / sampleRate;
             TimeSpan t = TimeSpan.FromSeconds(totalSeconds);

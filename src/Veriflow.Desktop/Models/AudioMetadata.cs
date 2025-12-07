@@ -11,6 +11,7 @@ namespace Veriflow.Desktop.Models
         public string Tape { get; set; } = string.Empty;
         public string Duration { get; set; } = string.Empty;
         public string TimecodeStart { get; set; } = string.Empty; // HH:MM:SS:FF
+        public double TimeReferenceSeconds { get; set; } // Absolute start in seconds
         public string Originator { get; set; } = string.Empty;
         public string CreationDate { get; set; } = string.Empty;
         public List<string> TrackNames { get; set; } = new List<string>();

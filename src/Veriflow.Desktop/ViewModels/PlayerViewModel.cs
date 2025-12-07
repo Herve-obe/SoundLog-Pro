@@ -51,6 +51,9 @@ namespace Veriflow.Desktop.ViewModels
         private double _playbackMaximum = 1;
 
         [ObservableProperty]
+        private double _playbackPercent = 0;
+
+        [ObservableProperty]
         private AudioMetadata _currentMetadata = new();
 
         public ObservableCollection<TrackViewModel> Tracks { get; } = new();
@@ -59,9 +62,58 @@ namespace Veriflow.Desktop.ViewModels
         {
             _playbackTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(50) // Faster for meters if we had them
+                Interval = TimeSpan.FromMilliseconds(50)
             };
             _playbackTimer.Tick += OnTimerTick;
+        }
+
+        private bool _isTimerUpdating;
+
+        private void OnTimerTick(object? sender, EventArgs e)
+        {
+            if (_audioFile != null)
+            {
+                CurrentTimeDisplay = _audioFile.CurrentTime.ToString(@"hh\:mm\:ss");
+                
+                _isTimerUpdating = true;
+                PlaybackPosition = _audioFile.CurrentTime.TotalSeconds;
+                if (PlaybackMaximum > 0)
+                    PlaybackPercent = PlaybackPosition / PlaybackMaximum;
+                _isTimerUpdating = false;
+            }
+        }
+
+        partial void OnPlaybackPositionChanged(double value)
+        {
+            if (_audioFile != null && !_isTimerUpdating)
+            {
+                // User is scrubbing
+                if (value >= 0 && value <= _playbackMaximum)
+                {
+                    _audioFile.CurrentTime = TimeSpan.FromSeconds(value);
+                    if (PlaybackMaximum > 0)
+                        PlaybackPercent = value / PlaybackMaximum;
+                }
+            }
+        }
+
+
+        [RelayCommand]
+        private void DropFile(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files != null && files.Length > 0)
+                {
+                    string file = files[0];
+                    string ext = System.IO.Path.GetExtension(file).ToLower();
+                    if (ext == ".wav" || ext == ".bwf")
+                    {
+                        LoadAudio(file);
+                    }
+                }
+            }
         }
 
         [RelayCommand]
@@ -124,10 +176,70 @@ namespace Veriflow.Desktop.ViewModels
 
                 InitializeTracks(CurrentMetadata.ChannelCount > 0 ? CurrentMetadata.ChannelCount : _audioFile.WaveFormat.Channels);
                 GenerateWaveforms(path);
+                GenerateRuler();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors du chargement : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [ObservableProperty]
+        private ObservableCollection<RulerTick> _rulerTicks = new();
+
+        private void GenerateRuler()
+        {
+            RulerTicks.Clear();
+            if (_audioFile == null) return;
+
+            var totalSeconds = _audioFile.TotalTime.TotalSeconds;
+            if (totalSeconds <= 0) return;
+
+            // Absolute Start (SamplesSinceMidnight / Rate)
+            double absStart = CurrentMetadata?.TimeReferenceSeconds ?? 0;
+
+            // Determine step (e.g. every 10s, or adaptive)
+            int tickCount = 10;
+            double step = totalSeconds / tickCount;
+
+            for (int i = 0; i <= tickCount; i++)
+            {
+                double time = i * step; // Relative time
+                double absoluteTime = absStart + time;
+                
+                var tsRel = TimeSpan.FromSeconds(absoluteTime);
+                
+                RulerTicks.Add(new RulerTick
+                {
+                    Percent = (double)i / tickCount,
+                    Label = tsRel.ToString(@"hh\:mm\:ss") // Source Timecode
+                });
+            }
+        }
+
+        [RelayCommand]
+        private void Seek(System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (_audioFile == null) return;
+
+            // Resolve position relative to the container (sender)
+            if (e.Source is FrameworkElement element)
+            {
+                var position = e.GetPosition(element);
+                var width = element.ActualWidth;
+
+                if (width > 0)
+                {
+                    double percent = position.X / width;
+                    double seekTime = percent * _audioFile.TotalTime.TotalSeconds;
+                    
+                    // Clamp
+                    if (seekTime < 0) seekTime = 0;
+                    if (seekTime > _audioFile.TotalTime.TotalSeconds) seekTime = _audioFile.TotalTime.TotalSeconds;
+
+                    _audioFile.CurrentTime = TimeSpan.FromSeconds(seekTime);
+                    PlaybackPosition = seekTime;
+                }
             }
         }
 
@@ -276,14 +388,7 @@ namespace Veriflow.Desktop.ViewModels
                 _audioFile.Position = 0;
         }
 
-        private void OnTimerTick(object? sender, EventArgs e)
-        {
-            if (_audioFile != null)
-            {
-                CurrentTimeDisplay = _audioFile.CurrentTime.ToString(@"hh\:mm\:ss");
-                PlaybackPosition = _audioFile.CurrentTime.TotalSeconds;
-            }
-        }
+
 
         [RelayCommand(CanExecute = nameof(CanPlay))]
         private void Play()
@@ -294,6 +399,15 @@ namespace Veriflow.Desktop.ViewModels
                 _playbackTimer.Start();
                 IsPlaying = true;
             }
+        }
+
+        [RelayCommand]
+        private void TogglePlayPause()
+        {
+            if (IsPlaying)
+                Pause();
+            else if (CanPlay())
+                Play();
         }
 
         [RelayCommand(CanExecute = nameof(CanStop))]
