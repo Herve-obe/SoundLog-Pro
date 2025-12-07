@@ -23,9 +23,9 @@
             <StackPanel Margin="10">
                 <TextBlock Text="VERIFLOW" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,20" HorizontalAlignment="Center"/>
                 
-                <Button Command="{Binding NavigatePlayerCommand}" Content="PLAYER / META" Margin="0,5" Style="{StaticResource MaterialDesignFlatButton}" HorizontalContentAlignment="Left"/>
-                <Button Command="{Binding NavigateOffloadCommand}" Content="OFFLOAD" Margin="0,5" Style="{StaticResource MaterialDesignFlatButton}" HorizontalContentAlignment="Left"/>
-                <Button Command="{Binding NavigateReportsCommand}" Content="RAPPORTS" Margin="0,5" Style="{StaticResource MaterialDesignFlatButton}" HorizontalContentAlignment="Left"/>
+                <Button Command="{Binding NavigatePlayerCommand}" Content="DERUSH MÉDIAS" Margin="0,5" Style="{StaticResource MaterialDesignFlatButton}" HorizontalContentAlignment="Left"/>
+                <Button Command="{Binding NavigateOffloadCommand}" Content="SECURE COPY" Margin="0,5" Style="{StaticResource MaterialDesignFlatButton}" HorizontalContentAlignment="Left"/>
+                <Button Command="{Binding NavigateReportsCommand}" Content="REPORTS" Margin="0,5" Style="{StaticResource MaterialDesignFlatButton}" HorizontalContentAlignment="Left"/>
             </StackPanel>
         </materialDesign:Card>
 

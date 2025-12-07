@@ -33,3 +33,12 @@ D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\obj\Debug\net8.0-windows\refint\Veriflo
 D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\obj\Debug\net8.0-windows\Veriflow.Desktop.pdb
 D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\obj\Debug\net8.0-windows\Veriflow.Desktop.genruntimeconfig.cache
 D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\obj\Debug\net8.0-windows\ref\Veriflow.Desktop.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.Asio.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.Core.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.Midi.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.Wasapi.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.WinForms.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\bin\Debug\net8.0-windows\NAudio.WinMM.dll
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\obj\Debug\net8.0-windows\Views\PlayerView.g.cs
+D:\ELEMENT\VERIFLOW\src\Veriflow.Desktop\obj\Debug\net8.0-windows\Views\PlayerView.baml

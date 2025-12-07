@@ -18,6 +18,10 @@
             <DataTemplate DataType="{x:Type vm:OffloadViewModel}">
                 <views:OffloadView />
             </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:PlayerViewModel}">
+                <views:PlayerView />
+            </DataTemplate>
             
             <!-- Fallback for String Placeholders -->
             <DataTemplate DataType="{x:Type sys:String}">

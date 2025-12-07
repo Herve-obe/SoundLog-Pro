@@ -14,7 +14,7 @@ namespace Veriflow.Desktop.ViewModels
 
         // ViewModels
         private readonly OffloadViewModel _offloadViewModel = new();
-        private readonly string _playerView = "Player / Metadata View (Coming Soon)"; 
+        private readonly PlayerViewModel _playerViewModel = new(); 
         private readonly string _reportsView = "Reports View (Coming Soon)";
 
         public ICommand NavigatePlayerCommand { get; }
@@ -23,12 +23,12 @@ namespace Veriflow.Desktop.ViewModels
 
         public MainViewModel()
         {
-            NavigatePlayerCommand = new RelayCommand(() => CurrentView = _playerView);
+            NavigatePlayerCommand = new RelayCommand(() => CurrentView = _playerViewModel);
             NavigateOffloadCommand = new RelayCommand(() => CurrentView = _offloadViewModel);
             NavigateReportsCommand = new RelayCommand(() => CurrentView = _reportsView);
 
             // Default to Player view
-            CurrentView = _playerView;
+            CurrentView = _playerViewModel;
         }
     }
 }
