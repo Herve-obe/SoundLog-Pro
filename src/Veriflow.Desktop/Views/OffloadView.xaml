@@ -3,45 +3,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Veriflow.Desktop.Views"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="800">
-    <Grid Margin="20">
+             
+    <!-- NATIVE OPTICAL LAYOUT (1/Auto/2/Auto) -->
+    <Grid Margin="30">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>   <!-- TOP SPACE -->
+            <RowDefinition Height="Auto"/> <!-- FORM -->
+            <RowDefinition Height="2*"/>   <!-- BOTTOM SPACE -->
+            <RowDefinition Height="Auto"/> <!-- FOOTER -->
         </Grid.RowDefinitions>
 
-        <!-- Section 1 : SOURCE -->
-        <materialDesign:Card Grid.Row="0" Margin="0,0,0,20" Padding="20">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                    <materialDesign:PackIcon Kind="FolderSearch" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                    <TextBlock Text="SOURCE MÉDIA" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+        <!-- FORM CONTENT -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" MaxWidth="1000" Width="800">
+            
+            <!-- SOURCE -->
+            <Grid Margin="0,0,0,25">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Style="{StaticResource HeaderStyle}">
+                        <Run Text="[DIR] " Foreground="{DynamicResource Brush.Accent}"/>
+                        <Run Text="SOURCE MÉDIA"/>
+                    </TextBlock>
                 </StackPanel>
                 
-                <Grid>
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
-                    <materialDesign:PackIcon Grid.Column="0" Kind="SdStorage" VerticalAlignment="Center" Margin="0,0,15,0" Width="20" Height="20" Opacity="0.7"/>
-
-                    <TextBox Grid.Column="1" Text="{Binding SourcePath}"
-                             materialDesign:HintAssist.Hint="Chemin du dossier source"
-                             materialDesign:HintAssist.IsFloating="True"
-                             materialDesign:HintAssist.FloatingScale="0.9"
-                             Background="#454545"
-                             materialDesign:TextFieldAssist.HasClearButton="True"
-                             AllowDrop="True"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" VerticalAlignment="Center">
-                        <b:Interaction.Triggers>
+                    
+                    <TextBox Grid.Column="0" Text="{Binding SourcePath}" Margin="0,0,5,0" AllowDrop="True">
+                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="PreviewDragOver">
                                 <b:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True"/>
                             </b:EventTrigger>
@@ -51,107 +51,87 @@
                         </b:Interaction.Triggers>
                     </TextBox>
                     
-                    <Button Grid.Column="2" Command="{Binding PickSourceCommand}" Content="OUVRIR" 
-                            Style="{StaticResource MaterialDesignOutlinedButton}" 
-                            Foreground="White" BorderBrush="White"
-                            VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Command="{Binding PickSourceCommand}" Content="OUVRIR" Style="{StaticResource ActionButtonStyle}"/>
                 </Grid>
-            </StackPanel>
-        </materialDesign:Card>
+            </Grid>
 
-        <!-- Section 2 : DESTINATIONS -->
-        <materialDesign:Card Grid.Row="1" Margin="0,0,0,20" Padding="20">
+            <!-- DESTINATIONS -->
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                    <materialDesign:PackIcon Kind="BackupRestore" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource SecondaryHueMidBrush}"/>
-                    <TextBlock Text="SECURE COPY" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                    <TextBlock Style="{StaticResource HeaderStyle}">
+                        <Run Text="[DISK] " Foreground="{DynamicResource Brush.Accent}"/>
+                        <Run Text="SECURE COPY"/>
+                    </TextBlock>
                 </StackPanel>
 
-                <!-- Destination A -->
-                <Grid Margin="0,0,0,15">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- Dest A -->
+                <Grid Margin="0,0,0,10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     
-                    <materialDesign:PackIcon Grid.Column="0" Kind="Harddisk" VerticalAlignment="Center" Margin="0,0,15,0" Width="20" Height="20" Opacity="0.7"/>
+                    <TextBlock Text="DESTINATION PRINCIPALE (A)" Margin="0,0,0,3" Style="{StaticResource LabelStyle}" Opacity="0.5"/>
                     
-                    <TextBox Grid.Column="1" Text="{Binding Destination1Path}"
-                             materialDesign:HintAssist.Hint="Destination Principale (A)" 
-                             materialDesign:HintAssist.IsFloating="True"
-                             materialDesign:HintAssist.FloatingScale="0.9"
-                             Background="#454545"
-                             materialDesign:TextFieldAssist.HasClearButton="True"
-                             AllowDrop="True"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" VerticalAlignment="Center">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="PreviewDragOver">
-                                <b:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True"/>
-                            </b:EventTrigger>
-                            <b:EventTrigger EventName="PreviewDrop">
-                                <b:InvokeCommandAction Command="{Binding DropDest1Command}" PassEventArgsToCommand="True"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </TextBox>
-                    
-                    <Button Grid.Column="2" Command="{Binding PickDest1Command}" Content="OUVRIR" 
-                            Style="{StaticResource MaterialDesignOutlinedButton}" 
-                            Foreground="White" BorderBrush="White"
-                            VerticalAlignment="Center"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding Destination1Path}" Margin="0,0,5,0" AllowDrop="True">
+                             <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="PreviewDragOver">
+                                    <b:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True"/>
+                                </b:EventTrigger>
+                                <b:EventTrigger EventName="PreviewDrop">
+                                    <b:InvokeCommandAction Command="{Binding DropDest1Command}" PassEventArgsToCommand="True"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </TextBox>
+                        <Button Grid.Column="1" Command="{Binding PickDest1Command}" Content="OUVRIR" Style="{StaticResource ActionButtonStyle}"/>
+                    </Grid>
                 </Grid>
 
-                <!-- Destination B -->
+                <!-- Dest B -->
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <materialDesign:PackIcon Grid.Column="0" Kind="HarddiskPlus" VerticalAlignment="Center" Margin="0,0,15,0" Width="20" Height="20" Opacity="0.7"/>
-
-                    <TextBox Grid.Column="1" Text="{Binding Destination2Path}"
-                             materialDesign:HintAssist.Hint="Destination Secondaire (B) - Optionnel"
-                             materialDesign:HintAssist.IsFloating="True"
-                             materialDesign:HintAssist.FloatingScale="0.9"
-                             Background="#454545"
-                             materialDesign:TextFieldAssist.HasClearButton="True"
-                             AllowDrop="True"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,10,0" VerticalAlignment="Center">
-                        <b:Interaction.Triggers>
-                            <b:EventTrigger EventName="PreviewDragOver">
-                                <b:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True"/>
-                            </b:EventTrigger>
-                            <b:EventTrigger EventName="PreviewDrop">
-                                <b:InvokeCommandAction Command="{Binding DropDest2Command}" PassEventArgsToCommand="True"/>
-                            </b:EventTrigger>
-                        </b:Interaction.Triggers>
-                    </TextBox>
-
-                    <Button Grid.Column="2" Command="{Binding PickDest2Command}" Content="OUVRIR" 
-                            Style="{StaticResource MaterialDesignOutlinedButton}" 
-                            Foreground="White" BorderBrush="White"
-                            VerticalAlignment="Center"/>
+                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="DESTINATION SECONDAIRE (B)" Margin="0,0,0,3" Style="{StaticResource LabelStyle}" Opacity="0.5"/>
+                    
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding Destination2Path}" Margin="0,0,5,0" AllowDrop="True">
+                             <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="PreviewDragOver">
+                                    <b:InvokeCommandAction Command="{Binding DragOverCommand}" PassEventArgsToCommand="True"/>
+                                </b:EventTrigger>
+                                <b:EventTrigger EventName="PreviewDrop">
+                                    <b:InvokeCommandAction Command="{Binding DropDest2Command}" PassEventArgsToCommand="True"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </TextBox>
+                        <Button Grid.Column="1" Command="{Binding PickDest2Command}" Content="OUVRIR" Style="{StaticResource ActionButtonStyle}"/>
+                    </Grid>
                 </Grid>
             </StackPanel>
-        </materialDesign:Card>
+        </StackPanel>
 
-        <!-- Spacer -->
-        <Border Grid.Row="2"/>
-
-        <!-- Section 3 : ACTIONS -->
-        <StackPanel Grid.Row="3">
+        <!-- FOOTER ACTIONS -->
+        <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0,0,0,30">
             <Button Command="{Binding StartCopyCommand}" Content="DÉMARRER LA COPIE" 
-                    Height="50" FontSize="18" Margin="0,0,0,20" 
-                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                    Foreground="White"
-                    BorderBrush="White"
-                    BorderThickness="2"/>
+                    Margin="0,0,0,15"
+                    HorizontalAlignment="Center" Width="400"
+                    Style="{StaticResource PrimaryActionStyle}"/> 
             
-            <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="20" IsIndeterminate="False"/>
+            <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="4" Background="#222222" Foreground="{DynamicResource Brush.Accent}" BorderThickness="0" IsIndeterminate="False"/>
             
-            <Grid Margin="0,15,0,0">
+            <Grid Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -159,20 +139,19 @@
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Grid.Column="0" Orientation="Vertical">
-                    <TextBlock Text="{Binding CurrentHashDisplay}" Opacity="0.9" Foreground="White" 
-                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Text="{Binding LogText}" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding CurrentHashDisplay}" Opacity="0.8" TextTrimming="CharacterEllipsis" Style="{StaticResource Style.Text.Mono}"/>
+                    <TextBlock Text="{Binding LogText}" Opacity="0.5" Margin="0,2,0,0" Style="{StaticResource BodyStyle}"/>
                 </StackPanel>
                 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                     <TextBlock Text="ETA: " Opacity="0.9" Foreground="White" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
-                     <TextBlock Text="{Binding TimeRemainingDisplay}" Foreground="White" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                     <TextBlock Text="ETA: " Opacity="0.7" FontWeight="Bold" Style="{StaticResource BodyStyle}" Margin="0,0,5,0"/>
+                     <TextBlock Text="{Binding TimeRemainingDisplay}" FontWeight="Bold" Style="{StaticResource Style.Text.Mono}"/>
                 </StackPanel>
 
-                <TextBlock Grid.Column="2" Text="{Binding CurrentSpeedDisplay}" Foreground="White" 
-                           Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="{Binding CurrentSpeedDisplay}" 
+                           FontWeight="Bold"
+                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Style="{StaticResource Style.Text.Mono}"/>
             </Grid>
         </StackPanel>
     </Grid>

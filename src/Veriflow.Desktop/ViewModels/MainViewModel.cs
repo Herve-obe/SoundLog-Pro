@@ -17,17 +17,17 @@ namespace Veriflow.Desktop.ViewModels
         private readonly PlayerViewModel _playerViewModel = new(); 
         private readonly string _reportsView = "Reports View (Coming Soon)";
 
-        public ICommand NavigatePlayerCommand { get; }
-        public ICommand NavigateOffloadCommand { get; }
-        public ICommand NavigateReportsCommand { get; }
+        public ICommand ShowDashboardCommand { get; }
+        public ICommand ShowOffloadCommand { get; }
+        public ICommand ShowReportsCommand { get; }
 
         public MainViewModel()
         {
-            NavigatePlayerCommand = new RelayCommand(() => CurrentView = _playerViewModel);
-            NavigateOffloadCommand = new RelayCommand(() => CurrentView = _offloadViewModel);
-            NavigateReportsCommand = new RelayCommand(() => CurrentView = _reportsView);
+            ShowDashboardCommand = new RelayCommand(() => CurrentView = _playerViewModel);
+            ShowOffloadCommand = new RelayCommand(() => CurrentView = _offloadViewModel);
+            ShowReportsCommand = new RelayCommand(() => CurrentView = _reportsView);
 
-            // Default to Player view
+            // Default to Player view (MediaBoard)
             CurrentView = _playerViewModel;
         }
     }

@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Veriflow.Desktop.Views"
              xmlns:vm="clr-namespace:Veriflow.Desktop.ViewModels"
              xmlns:conv="clr-namespace:Veriflow.Desktop.Converters"
@@ -31,7 +30,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="border" Background="#333333" CornerRadius="2" BorderBrush="#111111" BorderThickness="1">
-                            <TextBlock Text="M" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="M" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
@@ -54,7 +53,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
                         <Border x:Name="border" Background="#333333" CornerRadius="2" BorderBrush="#111111" BorderThickness="1">
-                            <TextBlock x:Name="txt" Text="S" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="txt" Text="S" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
@@ -67,10 +66,9 @@
             </Setter>
         </Style>
 
-
     </UserControl.Resources>
 
-    <Grid Margin="20" AllowDrop="True" Background="Transparent">
+    <Grid Margin="15" AllowDrop="True" Background="Transparent">
         <i:Interaction.Triggers>
             <i:EventTrigger EventName="Drop">
                 <i:InvokeCommandAction Command="{Binding DropFileCommand}" PassEventArgsToCommand="True" />
@@ -83,7 +81,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- LEFT COLUMN: CONSOLE -->
-        <Grid Grid.Column="0" Margin="0,0,20,0">
+        <Grid Grid.Column="0" Margin="0,0,15,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->
                 <RowDefinition Height="Auto"/> <!-- Transport -->
@@ -92,38 +90,38 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <materialDesign:Card Grid.Row="0" Margin="0,0,0,20" Padding="15">
+            <Border Grid.Row="0" Margin="0,0,0,15" Padding="15" Background="{StaticResource Brush.Panel}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" CornerRadius="0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="DERUSH / CONSOLE" Style="{StaticResource MaterialDesignOverlineTextBlock}"/>
-                        <TextBlock Text="{Binding FileName, TargetNullValue='Aucun fichier chargé'}" Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
+                        <TextBlock Text="DERUSH / CONSOLE" FontSize="10" Opacity="0.7"/>
+                        <TextBlock Text="{Binding FileName, TargetNullValue='Aucun fichier chargé'}" FontSize="16" FontWeight="Bold" Foreground="#DDDDDD" Margin="0,2"/>
                         
                         <!-- Timecode Display -->
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                             <TextBlock Text="{Binding CurrentTimeDisplay}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" Foreground="{DynamicResource PrimaryHueLightBrush}"/>
-                             <TextBlock Text=" / " Style="{StaticResource MaterialDesignHeadline4TextBlock}" Opacity="0.5"/>
-                             <TextBlock Text="{Binding TotalTimeDisplay}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" Opacity="0.5"/>
+                             <TextBlock Text="{Binding CurrentTimeDisplay}" FontSize="24" FontFamily="Consolas" Foreground="{StaticResource Brush.Accent}"/>
+                             <TextBlock Text=" / " FontSize="24" Opacity="0.5"/>
+                             <TextBlock Text="{Binding TotalTimeDisplay}" FontSize="24" FontFamily="Consolas" Opacity="0.5"/>
                         </StackPanel>
                     </StackPanel>
-                    <Button Grid.Column="1" Command="{Binding LoadFileCommand}" Content="IMPORT MÉDIA" Style="{StaticResource MaterialDesignOutlinedButton}" VerticalAlignment="Top" Focusable="False" Foreground="White" BorderBrush="White"/>
+                    <Button Grid.Column="1" Command="{Binding LoadFileCommand}" Content="IMPORT MÉDIA" VerticalAlignment="Top" Focusable="False" Height="25"/>
                 </Grid>
-            </materialDesign:Card>
+            </Border>
 
             <!-- Transport Controls -->
             <Border Grid.Row="1" Background="Transparent" Margin="0,0,0,10" Padding="0" CornerRadius="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="15,0,0,0">
-                    <Button Command="{Binding StopCommand}" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" Margin="0,0,10,0" Background="IndianRed" BorderBrush="IndianRed" ToolTip="Stop" IsEnabled="True" Focusable="False">
-                        <materialDesign:PackIcon Kind="Square" Width="16" Height="16"/>
+                    <Button Command="{Binding StopCommand}" Margin="0,0,10,0" ToolTip="Stop" IsEnabled="True" Focusable="False" Width="30" Height="30">
+                        <TextBlock Text="◼" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
-                    <Button Command="{Binding PlayCommand}" Style="{StaticResource MaterialDesignFloatingActionButton}" Margin="0,0,10,0" Height="50" Width="50" ToolTip="Play" Focusable="False">
-                        <materialDesign:PackIcon Kind="Play" Width="28" Height="28"/>
+                    <Button Command="{Binding PlayCommand}" Margin="0,0,10,0" Height="40" Width="40" ToolTip="Play" Focusable="False">
+                        <TextBlock Text="▶" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
-                    <Button Command="{Binding PauseCommand}" Style="{StaticResource MaterialDesignFloatingActionMiniButton}" Background="Orange" BorderBrush="Orange" ToolTip="Pause" Focusable="False">
-                            <materialDesign:PackIcon Kind="Pause" Width="16" Height="16"/>
+                    <Button Command="{Binding PauseCommand}" ToolTip="Pause" Focusable="False" Width="30" Height="30">
+                        <TextBlock Text="❚❚" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
                 </StackPanel>
             </Border>
@@ -197,7 +195,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:TrackViewModel}">
                                 <Border Background="#2E2E2E" Margin="0,0,0,1" BorderBrush="#111111" BorderThickness="0,0,0,2">
-                                    <Grid Height="85">
+                                    <Grid Height="70"> <!-- Reduced height for density -->
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="260"/>
                                             <ColumnDefinition Width="30"/>
@@ -212,7 +210,7 @@
                                             </Grid.RowDefinitions>
 
                                             <!-- Name -->
-                                            <TextBlock Text="{Binding TrackName}" FontWeight="Bold" Foreground="#ECEFF1" FontSize="12" Margin="5,0,0,5" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding TrackName}" FontWeight="Bold" Foreground="#ECEFF1" FontSize="11" Margin="5,0,0,2" TextTrimming="CharacterEllipsis"/>
 
                                             <!-- Controls Area -->
                                             <Grid Grid.Row="1">
@@ -230,9 +228,9 @@
                                                 <!-- Faders -->
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                     <!-- Volume -->
-                                                    <Grid Margin="0,0,0,5">
+                                                    <Grid Margin="0,0,0,2">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="25"/>
+                                                            <ColumnDefinition Width="20"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="VOL" FontSize="9" Opacity="0.6" VerticalAlignment="Center"/>
@@ -248,7 +246,7 @@
                                                     <!-- Pan -->
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="25"/>
+                                                            <ColumnDefinition Width="20"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="PAN" FontSize="9" Opacity="0.6" VerticalAlignment="Center"/>
@@ -265,9 +263,7 @@
                                         </Grid>
 
                                         <!-- Col 1: VU Meter (REDESIGNED) -->
-                                        <!-- Width: 8px, Bg: #111, Fg: #00FF00, Border: 0 -->
-                                        <!-- Col 1: VU Meter (GEOMETRY SCALE TRANSFORM) -->
-                                        <Border Grid.Column="1" Background="#111111" Width="15" Margin="0,5" VerticalAlignment="Stretch">
+                                        <Border Grid.Column="1" Background="#111111" Width="10" Margin="0,5" VerticalAlignment="Stretch">
                                            <Rectangle Fill="#00FF00" VerticalAlignment="Stretch">
                                                <Rectangle.RenderTransform>
                                                     <ScaleTransform ScaleY="{Binding CurrentLevel}"/>
@@ -300,7 +296,7 @@
                             </i:Interaction.Triggers>
                         
                             <Line Y1="0" Y2="{Binding ActualHeight, ElementName=WaveformOverlay}" 
-                                  Stroke="#FFFFFF" StrokeThickness="2" Opacity="1">
+                                  Stroke="#FFFFFF" StrokeThickness="1" Opacity="1">
                                 <Line.X1>
                                     <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
                                         <Binding Path="PlaybackPercent" />
@@ -321,18 +317,18 @@
         </Grid>
 
         <!-- RIGHT COLUMN: METADATA -->
-        <materialDesign:Card Grid.Column="1" Padding="15" VerticalAlignment="Stretch">
+        <Border Grid.Column="1" Padding="15" VerticalAlignment="Stretch" Background="{StaticResource Brush.Panel}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" CornerRadius="0">
             <ScrollViewer Focusable="False">
                 <StackPanel>
-                    <TextBlock Text="MÉTADONNÉES" Style="{StaticResource MaterialDesignHeadline6TextBlock}" Margin="0,0,0,20"/>
+                    <TextBlock Text="MÉTADONNÉES" Margin="0,0,0,15" FontSize="14" FontWeight="SemiBold"/>
 
                     <Grid Margin="0,5">
                          <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="SCÈNE" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Scene}" TextWrapping="Wrap" FontSize="16" Foreground="White"/>
+                        <TextBlock Text="SCÈNE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Scene}" TextWrapping="Wrap" FontSize="12" Foreground="White"/>
                     </Grid>
                     <Separator Margin="0,5"/>
 
@@ -341,8 +337,8 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="PRISE" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Take}" TextWrapping="Wrap" FontSize="16"/>
+                        <TextBlock Text="PRISE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Take}" TextWrapping="Wrap" FontSize="12"/>
                     </Grid>
                      <Separator Margin="0,5"/>
 
@@ -351,8 +347,8 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="TC DÉPART" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.TimecodeStart}" FontFamily="Consolas" FontSize="14"/>
+                        <TextBlock Text="TC DÉPART" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.TimecodeStart}" FontFamily="Consolas" FontSize="12"/>
                     </Grid>
                      <Separator Margin="0,5"/>
                     
@@ -361,8 +357,8 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="DURÉE" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Duration}" FontFamily="Consolas"/>
+                        <TextBlock Text="DURÉE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Duration}" FontFamily="Consolas" FontSize="12"/>
                     </Grid>
                     <Separator Margin="0,5"/>
 
@@ -371,8 +367,8 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="FORMAT" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Format}"/>
+                        <TextBlock Text="FORMAT" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Format}" FontSize="12"/>
                     </Grid>
                     <Separator Margin="0,5"/>
 
@@ -381,8 +377,8 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="ORIGINE" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Originator}" TextWrapping="Wrap"/>
+                        <TextBlock Text="ORIGINE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Originator}" TextWrapping="Wrap" FontSize="12"/>
                     </Grid>
                     <Separator Margin="0,5"/>
 
@@ -391,8 +387,8 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="DATE" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.CreationDate}" TextWrapping="Wrap"/>
+                        <TextBlock Text="DATE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.CreationDate}" TextWrapping="Wrap" FontSize="12"/>
                     </Grid>
                      <Separator Margin="0,5"/>
 
@@ -401,12 +397,12 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="RUBAN" FontWeight="Bold" Opacity="0.6" Width="80"/>
-                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Tape}" TextWrapping="Wrap"/>
+                        <TextBlock Text="RUBAN" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="11"/>
+                        <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Tape}" TextWrapping="Wrap" FontSize="12"/>
                     </Grid>
 
                 </StackPanel>
             </ScrollViewer>
-        </materialDesign:Card>
+        </Border>
     </Grid>
 </UserControl>

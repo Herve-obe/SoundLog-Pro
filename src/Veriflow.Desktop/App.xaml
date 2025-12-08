@@ -1,7 +1,6 @@
 ﻿<Application x:Class="Veriflow.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Veriflow.Desktop"
              xmlns:vm="clr-namespace:Veriflow.Desktop.ViewModels"
              xmlns:views="clr-namespace:Veriflow.Desktop.Views"
@@ -9,12 +8,11 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
-
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+                <!-- NATIVE THEME ONLY -->
+                <ResourceDictionary Source="/Styles/Theme.Pro.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Global DataTemplates for Views -->
+            <!-- View Models DataTemplates -->
             <DataTemplate DataType="{x:Type vm:OffloadViewModel}">
                 <views:OffloadView />
             </DataTemplate>
