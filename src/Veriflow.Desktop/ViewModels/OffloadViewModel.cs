@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Linq;
+using Veriflow.Desktop.Services;
 
 namespace Veriflow.Desktop.ViewModels
 {
@@ -18,18 +20,33 @@ namespace Veriflow.Desktop.ViewModels
         [NotifyCanExecuteChangedFor(nameof(PickDest1Command))]
         [NotifyCanExecuteChangedFor(nameof(PickDest2Command))]
         [NotifyCanExecuteChangedFor(nameof(StartCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(DropSourceCommand))]
+        [NotifyCanExecuteChangedFor(nameof(DropDest1Command))]
+        [NotifyCanExecuteChangedFor(nameof(DropDest2Command))]
         private bool _isBusy;
 
         [ObservableProperty]
         private double _progressValue;
+        
+        [ObservableProperty]
+        private string _timeRemainingDisplay = "--:--";
 
         [ObservableProperty]
+        private string _currentSpeedDisplay = "0 MB/s";
+
+        [ObservableProperty]
+        private string _currentHashDisplay = "xxHash64: -";
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(StartCopyCommand))]
         private string? _sourcePath;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(StartCopyCommand))]
         private string? _destination1Path;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(StartCopyCommand))]
         private string? _destination2Path;
 
         [ObservableProperty]
@@ -40,10 +57,84 @@ namespace Veriflow.Desktop.ViewModels
         
         [ObservableProperty]
         private int _errorsCount;
+        
+        private readonly SecureCopyService _secureCopyService;
 
         public OffloadViewModel()
         {
+            _secureCopyService = new SecureCopyService();
         }
+
+        #region Drag & Drop Commands
+
+        [RelayCommand]
+        private void DragOver(DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanInteract))]
+        private void DropSource(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
+                {
+                    string path = files[0];
+                    if (Directory.Exists(path))
+                    {
+                        SourcePath = path;
+                    }
+                    else if (File.Exists(path))
+                    {
+                        SourcePath = Path.GetDirectoryName(path);
+                    }
+                }
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanInteract))]
+        private void DropDest1(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
+                {
+                    string path = files[0];
+                    if (Directory.Exists(path))
+                    {
+                        Destination1Path = path;
+                    }
+                    else if (File.Exists(path))
+                    {
+                        Destination1Path = Path.GetDirectoryName(path);
+                    }
+                }
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanInteract))]
+        private void DropDest2(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
+                {
+                    string path = files[0];
+                    if (Directory.Exists(path))
+                    {
+                        Destination2Path = path;
+                    }
+                    else if (File.Exists(path))
+                    {
+                        Destination2Path = Path.GetDirectoryName(path);
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         [RelayCommand(CanExecute = nameof(CanInteract))]
         private void PickSource()
@@ -52,7 +143,6 @@ namespace Veriflow.Desktop.ViewModels
             if (!string.IsNullOrEmpty(path))
             {
                 SourcePath = path;
-                StartCopyCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -63,7 +153,6 @@ namespace Veriflow.Desktop.ViewModels
             if (!string.IsNullOrEmpty(path))
             {
                 Destination1Path = path;
-                StartCopyCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -74,7 +163,6 @@ namespace Veriflow.Desktop.ViewModels
             if (!string.IsNullOrEmpty(path))
             {
                 Destination2Path = path;
-                StartCopyCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -83,32 +171,39 @@ namespace Veriflow.Desktop.ViewModels
         private bool CanCopy() => !IsBusy && !string.IsNullOrEmpty(SourcePath) && (!string.IsNullOrEmpty(Destination1Path) || !string.IsNullOrEmpty(Destination2Path));
 
         [RelayCommand(CanExecute = nameof(CanCopy))]
-        private async Task StartCopy()
+        private async Task StartCopy(CancellationToken ct)
         {
             IsBusy = true;
             ProgressValue = 0;
             LogText = "Initialisation...";
             FilesCopiedCount = 0;
             ErrorsCount = 0;
+            CurrentSpeedDisplay = "0 MB/s";
+            CurrentHashDisplay = "xxHash64: -";
+            TimeRemainingDisplay = "--:--";
+            
             var reportBuilder = new StringBuilder();
             var processingDate = DateTime.Now;
 
             reportBuilder.AppendLine("==========================================");
-            reportBuilder.AppendLine($"RAPPORT DE COPIE VERIFLOW - {processingDate}");
+            reportBuilder.AppendLine($"RAPPORT DE COPIE SECURISEE VERIFLOW - {processingDate}");
             reportBuilder.AppendLine("==========================================");
             reportBuilder.AppendLine($"Source      : {SourcePath}");
             reportBuilder.AppendLine($"Destination 1: {Destination1Path ?? "N/A"}");
             reportBuilder.AppendLine($"Destination 2: {Destination2Path ?? "N/A"}");
             reportBuilder.AppendLine("------------------------------------------");
-            reportBuilder.AppendLine("DÉTAIL DES FICHIERS :");
+            reportBuilder.AppendLine("DÉTAIL DES FICHIERS (Mode Secure/xxHash64) :");
 
             try
             {
                 var sourceDir = new DirectoryInfo(SourcePath!);
                 var files = sourceDir.GetFiles("*", SearchOption.AllDirectories);
                 int totalFiles = files.Length;
-                int processedFiles = 0;
-
+                
+                // Calculate total size for global ETA
+                long totalBytesToCopy = files.Sum(f => f.Length);
+                long totalBytesTransferred = 0;
+                
                 if (totalFiles == 0)
                 {
                     LogText = "Aucun fichier à copier.";
@@ -118,103 +213,121 @@ namespace Veriflow.Desktop.ViewModels
 
                 foreach (var file in files)
                 {
-                    processedFiles++;
-                    LogText = $"Copie de {file.Name}...";
+                    if (ct.IsCancellationRequested) break;
+
+                    LogText = $"Securing {file.Name}...";
                     string status = "[OK]";
+                    string fileHash = "N/A";
                     string errorDetail = "";
+                    long initialBytesTransferred = totalBytesTransferred;
+                    
+                    var progress = new Progress<CopyProgress>(p =>
+                    {
+                        // Update UI Speed
+                        CurrentSpeedDisplay = $"{p.TransferSpeedMbPerSec:F1} MB/s";
+                        
+                        // Update Overall Progress based on bytes
+                        long currentFileBytes = p.BytesTransferred;
+                        long globalBytes = initialBytesTransferred + currentFileBytes;
+                        
+                        // Avoid division by zero
+                        if (totalBytesToCopy > 0)
+                        {
+                            ProgressValue = (double)globalBytes / totalBytesToCopy * 100;
+
+                            // Calculate ETA
+                            double speedBytesPerSec = p.TransferSpeedMbPerSec * 1024 * 1024;
+                            if (speedBytesPerSec > 0)
+                            {
+                                long remainingBytes = totalBytesToCopy - globalBytes;
+                                double secondsRemaining = remainingBytes / speedBytesPerSec;
+                                TimeSpan timeSpan = TimeSpan.FromSeconds(secondsRemaining);
+                                TimeRemainingDisplay = timeSpan.ToString(timeSpan.TotalHours >= 1 ? @"hh\:mm\:ss" : @"mm\:ss");
+                            }
+                        }
+                    });
+                    
+                    CurrentHashDisplay = "Calcul en cours...";
 
                     // Calculate relative path to keep structure
                     string relativePath = Path.GetRelativePath(sourceDir.FullName, file.FullName);
 
                     try 
                     {
+                        CopyResult? result = null;
+
                         // Copy to Dest 1
                         if (!string.IsNullOrEmpty(Destination1Path))
                         {
                             var destFile = Path.Combine(Destination1Path, relativePath);
-                            await CopyFileAsync(file.FullName, destFile);
+                            result = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile, progress, ct);
                         }
 
                         // Copy to Dest 2
                         if (!string.IsNullOrEmpty(Destination2Path))
                         {
-                            var destFile = Path.Combine(Destination2Path, relativePath);
-                            await CopyFileAsync(file.FullName, destFile);
+                            var destFile2 = Path.Combine(Destination2Path, relativePath);
+                            var result2 = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile2, progress, ct);
+                            
+                            if (result != null && result2 != null && result.SourceHash != result2.SourceHash)
+                            {
+                                throw new Exception("Hash mismatch between destinations!"); 
+                            }
+                            result = result2 ?? result;
                         }
                         
-                        FilesCopiedCount++;
+                        if (result != null && result.Success)
+                        {
+                            FilesCopiedCount++;
+                            fileHash = result.SourceHash;
+                            CurrentHashDisplay = $"xxHash64: {fileHash}";
+                        }
+                        else
+                        {
+                            ErrorsCount++;
+                            status = "[ERREUR]";
+                            errorDetail = "Copie échouée ou incomplète";
+                        }
+                        
+                        // Update global bytes manually if success
+                         totalBytesTransferred += file.Length; 
                     }
                     catch (Exception ex)
                     {
+                        ErrorsCount++;
                         status = "[ERREUR]";
                         errorDetail = ex.Message;
-                        ErrorsCount++;
                     }
 
-                    reportBuilder.AppendLine($"{processingDate.ToShortTimeString()} - {relativePath} : {status} {errorDetail}");
-                    ProgressValue = (double)processedFiles / totalFiles * 100;
-                }
-
-                // Finalize Report
-                reportBuilder.AppendLine("------------------------------------------");
-                reportBuilder.AppendLine($"RÉSUMÉ FINAL :");
-                reportBuilder.AppendLine($"Fichiers traités : {totalFiles}");
-                reportBuilder.AppendLine($"Succès           : {FilesCopiedCount}");
-                reportBuilder.AppendLine($"Erreurs          : {ErrorsCount}");
-                reportBuilder.AppendLine("==========================================");
-
-                string reportContent = reportBuilder.ToString();
-                string reportFileName = $"Veriflow_Report_{processingDate:yyyyMMdd_HHmmss}.txt";
-
-                // Save Report to Destinations
-                if (!string.IsNullOrEmpty(Destination1Path))
-                    await File.WriteAllTextAsync(Path.Combine(Destination1Path, reportFileName), reportContent);
-                
-                if (!string.IsNullOrEmpty(Destination2Path))
-                    await File.WriteAllTextAsync(Path.Combine(Destination2Path, reportFileName), reportContent);
-
-                LogText = "Terminé.";
-
-                if (ErrorsCount == 0)
-                {
-                    MessageBox.Show(
-                        $"Succès ! {FilesCopiedCount} fichiers sécurisés.\nUn rapport a été généré dans le dossier de destination.", 
-                        "Copie Terminée", 
-                        MessageBoxButton.OK, 
-                        MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        $"Attention ! {FilesCopiedCount} fichiers copiés, mais {ErrorsCount} erreurs détectées.\nVeuillez consulter le rapport pour plus de détails.", 
-                        "Copie avec Erreurs", 
-                        MessageBoxButton.OK, 
-                        MessageBoxImage.Warning);
+                    // Append to report
+                    reportBuilder.AppendLine($"{processingDate.ToShortTimeString()} - {relativePath} | {status} | {fileHash} | {errorDetail}");
                 }
             }
             catch (Exception ex)
             {
-                LogText = $"Erreur Critique : {ex.Message}";
-                MessageBox.Show($"Une erreur critique est survenue : {ex.Message}", "Erreur Critique", MessageBoxButton.OK, MessageBoxImage.Error);
+                 MessageBox.Show($"Erreur critique : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                 reportBuilder.AppendLine($"ERREUR CRITIQUE: {ex.Message}");
             }
             finally
             {
                 IsBusy = false;
-            }
-        }
-
-        private async Task CopyFileAsync(string source, string destination)
-        {
-            var directory = Path.GetDirectoryName(destination);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory!);
-            }
-
-            using (var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
-            using (var destStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
-            {
-                await sourceStream.CopyToAsync(destStream);
+                
+                // Save Report
+                try 
+                {
+                    string reportFilename = $"Veriflow_Report_{processingDate:yyyyMMdd_HHmmss}.txt";
+                    if (!string.IsNullOrEmpty(Destination1Path))
+                         File.WriteAllText(Path.Combine(Destination1Path, reportFilename), reportBuilder.ToString());
+                    if (!string.IsNullOrEmpty(Destination2Path))
+                         File.WriteAllText(Path.Combine(Destination2Path, reportFilename), reportBuilder.ToString());
+                }
+                catch { /* Ignore report write errors */ }
+                
+                MessageBox.Show(
+                    $"Succès ! {FilesCopiedCount} fichiers sécurisés.\nRapport(s) généré(s) dans le(s) dossier(s) de destination.",
+                    "Secure Offload Terminé",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
         }
 
@@ -226,7 +339,7 @@ namespace Veriflow.Desktop.ViewModels
                 Multiselect = false
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.FolderName))
             {
                 return dialog.FolderName;
             }
