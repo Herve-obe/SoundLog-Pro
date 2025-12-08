@@ -122,18 +122,20 @@ namespace Veriflow.Desktop.Services
 
                 for (int ch = 0; ch < _inputChannels; ch++)
                 {
-                    // Logic:
-                    // If AnySolo is TRUE -> Only play IsSoloed tracks.
-                    // If AnySolo is FALSE -> Play All EXCEPT IsMuted tracks.
+                    // Logic (Priorité Inversée / Safe Mode):
+                    // 1. SI Mute -> Silence (ABSOLU)
+                    // 2. SI AnySolo ET !IsSolo -> Silence
+                    // 3. SINON -> Audible
+                    
+                    bool isAudible = true;
 
-                    bool isAudible = false;
-                    if (anySolo)
+                    if (_channelMutes[ch])
                     {
-                        if (_channelSolos[ch]) isAudible = true;
+                        isAudible = false;
                     }
-                    else
+                    else if (anySolo && !_channelSolos[ch])
                     {
-                        if (!_channelMutes[ch]) isAudible = true;
+                        isAudible = false;
                     }
 
                     if (isAudible)

@@ -9,7 +9,8 @@
         xmlns:views="clr-namespace:Veriflow.Desktop.Views"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Veriflow" Height="768" Width="1024"
+        Title="VERIFLOW" Height="768" Width="1024"
+        WindowState="Maximized" WindowStartupLocation="CenterScreen"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         KeyDown="Window_KeyDown">
