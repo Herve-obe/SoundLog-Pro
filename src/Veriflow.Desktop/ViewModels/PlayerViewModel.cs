@@ -21,6 +21,7 @@ namespace Veriflow.Desktop.ViewModels
         private WaveOutEvent? _outputDevice;
         private AudioFileReader? _audioFile;
         private MultiChannelAudioMixer? _mixer;
+        private VeriflowMeteringProvider? _meteringProvider;
         private readonly DispatcherTimer _playbackTimer;
 
         [ObservableProperty]
@@ -68,6 +69,7 @@ namespace Veriflow.Desktop.ViewModels
         }
 
         private bool _isTimerUpdating;
+        private bool _isPaused;
 
         private void OnTimerTick(object? sender, EventArgs e)
         {
@@ -79,6 +81,31 @@ namespace Veriflow.Desktop.ViewModels
                 PlaybackPosition = _audioFile.CurrentTime.TotalSeconds;
                 if (PlaybackMaximum > 0)
                     PlaybackPercent = PlaybackPosition / PlaybackMaximum;
+                
+                // Update Meters
+                if (_meteringProvider != null)
+                {
+                   var peaks = _meteringProvider.ChannelPeaks;
+                   // Safety check
+                   for(int i=0; i < Tracks.Count && i < peaks.Length; i++)
+                   {
+                       float linear = peaks[i];
+                       if (linear < 0) linear = 0;
+
+                       // Logarithmic Scaling (20 * Log10)
+                       // Floor at -60dB
+                       float db = (linear > 0) ? 20 * (float)Math.Log10(linear) : -60;
+                       if (db < -60) db = -60;
+
+                       // Normalize -60dB...0dB to 0.0...1.0
+                       float normalized = (db + 60) / 60f;
+                       if (normalized < 0) normalized = 0;
+                       if (normalized > 1) normalized = 1;
+
+                       Tracks[i].CurrentLevel = normalized;
+                   }
+                }
+
                 _isTimerUpdating = false;
             }
         }
@@ -139,12 +166,17 @@ namespace Veriflow.Desktop.ViewModels
 
                 _audioFile = new AudioFileReader(path);
                 
-                // 1. Downmix to Stereo (keeps source SampleRate)
-                _mixer = new MultiChannelAudioMixer(_audioFile);
+                // NEW ORDER: File -> METER -> MIXER -> Resampler -> Output
+                
+                // 1. Metering (captures all tracks before mixing)
+                _meteringProvider = new VeriflowMeteringProvider(_audioFile);
+
+                // 2. Mixer (Downmix/Mute/Solo logic)
+                _mixer = new MultiChannelAudioMixer(_meteringProvider); 
 
                 ISampleProvider finalProvider = _mixer;
 
-                // 2. Resample to 48kHz if needed (Universal Compatibility)
+                // 3. Resample to 48kHz if needed (Universal Compatibility)
                 if (finalProvider.WaveFormat.SampleRate != 48000)
                 {
                     try
@@ -153,9 +185,7 @@ namespace Veriflow.Desktop.ViewModels
                     }
                     catch
                     {
-                        // Fallback or ignore if WDL not available (should be in NAudio)
-                        // If WDL fails, we might try MediaFoundationResampler but that requires WaveProvider conversion.
-                        // For this iteration, we assume WdlResamplingSampleProvider is available as part of NAudio.
+                        // Fallback
                     }
                 }
 
@@ -258,9 +288,6 @@ namespace Veriflow.Desktop.ViewModels
                     name = iXmlNames[i];
                 }
                 
-                // Note: iXML track count might not match file channel count (e.g. poly file has blank channels)
-                // We rely on channelCount from the WaveFormat or BWF header.
-                
                 var track = new TrackViewModel(i, name, OnTrackSoloChanged, OnTrackVolumeChanged, OnTrackMuteChanged, OnTrackPanChanged);
                 Tracks.Add(track);
             }
@@ -278,15 +305,11 @@ namespace Veriflow.Desktop.ViewModels
 
         private void OnTrackMuteChanged(int channel, bool isMuted)
         {
-            // User mute toggle. 
-            // In a real console, User Mute + Solo Logic are combined.
-            // Here, we just re-evaluate the mixer state based on everything.
             UpdateMixerState();
         }
 
         private void OnTrackSoloChanged(TrackViewModel track)
         {
-            // Re-evaluate mixer state based on Solos
             UpdateMixerState();
         }
 
@@ -296,7 +319,6 @@ namespace Veriflow.Desktop.ViewModels
 
             foreach (var track in Tracks)
             {
-                // Push states to mixer property
                 _mixer.SetChannelMute(track.ChannelIndex, track.IsMuted);
                 _mixer.SetChannelSolo(track.ChannelIndex, track.IsSoloed);
             }
@@ -335,11 +357,9 @@ namespace Veriflow.Desktop.ViewModels
                         if (read == 0) break;
 
                         // Process this chunk
-                        // We need to find the MAX for each channel in this chunk
                         for (int c = 0; c < totalChannels; c++)
                         {
                             float max = 0;
-                            // Stride is totalChannels
                             for (int i = c; i < read; i += totalChannels)
                             {
                                 float val = Math.Abs(buffer[i]);
@@ -357,8 +377,6 @@ namespace Veriflow.Desktop.ViewModels
                         {
                             var trackPoints = new PointCollection();
                             float[] peaks = maxBuffers[c];
-                            // Height of the visual area per track is 40, Center is 20
-                            // Center is 20
                             
                             for (int x = 0; x < width; x++)
                             {
@@ -380,14 +398,24 @@ namespace Veriflow.Desktop.ViewModels
 
         private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
         {
+            // Redundant safety check to ensure UI matches state
             IsPlaying = false;
             _playbackTimer.Stop();
-            PlaybackPosition = 0;
-            CurrentTimeDisplay = "00:00:00";
-            if (_audioFile != null)
-                _audioFile.Position = 0;
-        }
+            
+            // Only reset if NOT paused (Pause logic is handled in Pause command)
+            // But if we came here from Stop(), _isPaused is false, so we reset.
+            if (!_isPaused)
+            {
+                PlaybackPosition = 0;
+                CurrentTimeDisplay = "00:00:00";
+                if (_audioFile != null) _audioFile.Position = 0;
 
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var t in Tracks) t.CurrentLevel = 0;
+                });
+            }
+        }
 
 
         [RelayCommand(CanExecute = nameof(CanPlay))]
@@ -397,6 +425,7 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _outputDevice.Play();
                 _playbackTimer.Start();
+                _isPaused = false;
                 IsPlaying = true;
             }
         }
@@ -413,6 +442,26 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand(CanExecute = nameof(CanStop))]
         private void Stop()
         {
+            // Aggressive Stop: Reset everything immediately
+            _playbackTimer.Stop();
+            _isPaused = false;
+            IsPlaying = false;
+            PlaybackPosition = 0;
+            PlaybackPercent = 0;
+            CurrentTimeDisplay = "00:00:00";
+
+            if (_audioFile != null)
+            {
+                _audioFile.Position = 0;
+            }
+
+            // Force Meter Reset
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                foreach (var t in Tracks) t.CurrentLevel = 0;
+            });
+
+            // Finally stop the device (will trigger OnPlaybackStopped, but we are already clean)
             if (_outputDevice != null)
             {
                 _outputDevice.Stop();
@@ -424,14 +473,15 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (_outputDevice != null)
             {
+                _playbackTimer.Stop(); // Stop timer FIRST to freeze meters
                 _outputDevice.Pause();
-                _playbackTimer.Stop();
+                _isPaused = true;
                 IsPlaying = false;
             }
         }
 
         private bool CanPlay() => IsAudioLoaded && !IsPlaying;
-        private bool CanStop() => IsAudioLoaded; // Allow stop even if not playing (to reset pos)
+        private bool CanStop() => IsAudioLoaded;
 
         private void CleanUpAudio()
         {
@@ -442,11 +492,11 @@ namespace Veriflow.Desktop.ViewModels
             }
             if (_audioFile != null)
             {
-                _audioFile.Dispose();
+                _audioFile.Dispose(); // Disposes the stream
                 _audioFile = null;
             }
-            // Mixer is light wrapper, no dispose needed usually but good practice to clear ref
             _mixer = null;
+            _meteringProvider = null;
         }
 
         public void Dispose()

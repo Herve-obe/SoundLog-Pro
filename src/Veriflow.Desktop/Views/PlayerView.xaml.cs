@@ -7,6 +7,13 @@ namespace Veriflow.Desktop.Views
         public PlayerView()
         {
             InitializeComponent();
+            this.Loaded += (s, e) => this.Focus();
+        }
+
+        protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+        {
+            base.OnPreviewMouseDown(e);
+            this.Focus();
         }
     }
 }
