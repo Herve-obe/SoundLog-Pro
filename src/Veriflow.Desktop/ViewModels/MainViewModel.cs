@@ -33,8 +33,8 @@ namespace Veriflow.Desktop.ViewModels
             // Default to Media view (as requested order suggests, or Player? User said Media is "before" Player)
             // Let's stick to Player as default for now or switch if requested. 
             // Actually, usually users want the "Home" page. Media might be the new home.
-            // Let's keep Player as default for now to avoid disrupting workflow unless specified.
-            CurrentView = _playerViewModel;
+            // Let's keep Player as default for now to avoid            // Default to Media View as requested
+            CurrentView = _mediaViewModel;
         }
     }
 }

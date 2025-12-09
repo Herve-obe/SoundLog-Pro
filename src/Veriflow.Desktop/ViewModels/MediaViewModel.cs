@@ -13,38 +13,76 @@ namespace Veriflow.Desktop.ViewModels
         private readonly AudioPreviewService _audioService = new();
 
         [ObservableProperty]
-        private ObservableCollection<DriveViewModel> _drives;
+        private ObservableCollection<DriveViewModel> _drives = new();
 
-        [ObservableProperty]
-        private ObservableCollection<MediaItemViewModel> _fileList = new();
-        
         [ObservableProperty]
         private MediaItemViewModel? _selectedMedia;
 
         [ObservableProperty]
         private bool _isPreviewing;
+        
+        [ObservableProperty]
+        private string _currentPath = @"C:\";
+
+        [ObservableProperty]
+        private ObservableCollection<MediaItemViewModel> _fileList = new();
+
+        private System.Timers.Timer _driveWatcher;
 
         public MediaViewModel()
         {
-            // Initialize Drives
-            Drives = new ObservableCollection<DriveViewModel>(
-                DriveInfo.GetDrives()
-                         .Where(d => d.IsReady)
-                         .Select(d => new DriveViewModel(d, LoadDirectory))
-            );
+            // Initial Drive Load
+            RefreshDrives();
+
+            // Setup Drive Polling (Hot-Plug Support)
+            _driveWatcher = new System.Timers.Timer(2000); // Check every 2 seconds
+            _driveWatcher.Elapsed += (s, e) => 
+            {
+                // Dispatch to UI thread if drives changed
+                try 
+                {
+                    var currentDrives = DriveInfo.GetDrives().Where(d => d.IsReady).Select(d => d.Name).OrderBy(n => n).ToList();
+                    var loadedDrives = Drives.Select(d => d.Path).OrderBy(n => n).ToList();
+                    
+                    if (!currentDrives.SequenceEqual(loadedDrives))
+                    {
+                        System.Windows.Application.Current.Dispatcher.Invoke(RefreshDrives);
+                    }
+                }
+                catch {}
+            };
+            _driveWatcher.Start();
+        }
+
+        private void RefreshDrives()
+        {
+            try
+            {
+                var currentDrives = DriveInfo.GetDrives().Where(d => d.IsReady).ToList();
+
+                // Simple Strategy: Rebuild list to avoid complex sync logic for now, or merge.
+                // Rebuilding is safer for clearing disconnected drives.
+                Drives.Clear();
+                foreach (var drive in currentDrives)
+                {
+                    Drives.Add(new DriveViewModel(drive, LoadDirectory));
+                }
+            }
+            catch { }
         }
 
         private void LoadDirectory(string path)
         {
             if (Directory.Exists(path))
             {
+                CurrentPath = path; // Update breadcrumb/path if we had one
                 FileList.Clear();
                 var dirInfo = new DirectoryInfo(path);
 
                 try
                 {
                     // Add supported media files
-                    var extensions = new[] { ".wav", ".mp3", ".m4a", ".mov", ".mp4", ".ts" };
+                    var extensions = new[] { ".wav", ".mp3", ".m4a", ".mov", ".mp4", ".ts", ".mxf", ".avi" };
                     foreach (var file in dirInfo.GetFiles().Where(f => extensions.Contains(f.Extension.ToLower())))
                     {
                         FileList.Add(new MediaItemViewModel(file));
