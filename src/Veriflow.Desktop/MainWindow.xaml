@@ -99,13 +99,27 @@
 
                 <!-- Modules Navigation -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <RadioButton Content="MEDIABOARD" 
-                                 Command="{Binding ShowDashboardCommand}"
+                    
+                    <!-- MEDIA (New, Dashboard Icon) -->
+                    <RadioButton Content="MEDIA" 
+                                 Command="{Binding ShowMediaCommand}"
+                                 GroupName="Nav" 
+                                 Style="{StaticResource NavButtonStyle}">
+                        <RadioButton.Tag>
+                             <Path Data="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3" 
+                                   Fill="White"
+                                   Height="18" Width="18" Stretch="Uniform"/>
+                        </RadioButton.Tag>
+                    </RadioButton>
+
+                    <!-- PLAYER (Was Mediaboard, Play Icon) -->
+                    <RadioButton Content="PLAYER" 
+                                 Command="{Binding ShowPlayerCommand}"
                                  GroupName="Nav" 
                                  IsChecked="True"
                                  Style="{StaticResource NavButtonStyle}">
-                         <RadioButton.Tag>
-                             <Path Data="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3" 
+                        <RadioButton.Tag>
+                             <Path Data="M8,5.14V19.14L19,12.14L8,5.14Z" 
                                    Fill="White"
                                    Height="18" Width="18" Stretch="Uniform"/>
                         </RadioButton.Tag>

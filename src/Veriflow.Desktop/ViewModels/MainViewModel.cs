@@ -15,19 +15,25 @@ namespace Veriflow.Desktop.ViewModels
         // ViewModels
         private readonly OffloadViewModel _offloadViewModel = new();
         private readonly PlayerViewModel _playerViewModel = new(); 
+        private readonly MediaViewModel _mediaViewModel = new();
         private readonly string _reportsView = "Reports View (Coming Soon)";
 
-        public ICommand ShowDashboardCommand { get; }
+        public ICommand ShowPlayerCommand { get; }
+        public ICommand ShowMediaCommand { get; }
         public ICommand ShowOffloadCommand { get; }
         public ICommand ShowReportsCommand { get; }
 
         public MainViewModel()
         {
-            ShowDashboardCommand = new RelayCommand(() => CurrentView = _playerViewModel);
+            ShowPlayerCommand = new RelayCommand(() => CurrentView = _playerViewModel);
+            ShowMediaCommand = new RelayCommand(() => CurrentView = _mediaViewModel);
             ShowOffloadCommand = new RelayCommand(() => CurrentView = _offloadViewModel);
             ShowReportsCommand = new RelayCommand(() => CurrentView = _reportsView);
 
-            // Default to Player view (MediaBoard)
+            // Default to Media view (as requested order suggests, or Player? User said Media is "before" Player)
+            // Let's stick to Player as default for now or switch if requested. 
+            // Actually, usually users want the "Home" page. Media might be the new home.
+            // Let's keep Player as default for now to avoid disrupting workflow unless specified.
             CurrentView = _playerViewModel;
         }
     }
