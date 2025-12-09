@@ -23,7 +23,7 @@
             
             <!-- Fallback for String Placeholders -->
             <DataTemplate DataType="{x:Type sys:String}">
-                <TextBlock Text="{Binding}" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
+                <TextBlock Text="{Binding}" FontSize="{StaticResource Font.Size.Body}" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

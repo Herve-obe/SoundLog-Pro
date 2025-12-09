@@ -23,6 +23,7 @@ namespace Veriflow.Desktop.ViewModels
         [NotifyCanExecuteChangedFor(nameof(DropSourceCommand))]
         [NotifyCanExecuteChangedFor(nameof(DropDest1Command))]
         [NotifyCanExecuteChangedFor(nameof(DropDest2Command))]
+        [NotifyCanExecuteChangedFor(nameof(StartCopyCommand))] // Triggers button state update
         private bool _isBusy;
 
         [ObservableProperty]
@@ -166,14 +167,37 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
-        private bool CanInteract() => !IsBusy;
+        private CancellationTokenSource? _cts;
 
-        private bool CanCopy() => !IsBusy && !string.IsNullOrEmpty(SourcePath) && (!string.IsNullOrEmpty(Destination1Path) || !string.IsNullOrEmpty(Destination2Path));
+        private bool CanInteract() => true; // Always true to allow cancelling
 
-        [RelayCommand(CanExecute = nameof(CanCopy))]
-        private async Task StartCopy(CancellationToken ct)
+        private bool CanCopy() => IsBusy || (!string.IsNullOrEmpty(SourcePath) && (!string.IsNullOrEmpty(Destination1Path) || !string.IsNullOrEmpty(Destination2Path)));
+
+        public IRelayCommand ToggleCopyCommand => StartCopyCommand;
+
+        [RelayCommand]
+        private async Task StartCopy()
         {
+            if (IsBusy)
+            {
+                if (_cts != null)
+                {
+                    _cts.Cancel();
+                    LogText = "Annulation demandée...";
+                }
+                return;
+            }
+
+            if (string.IsNullOrEmpty(SourcePath) || (string.IsNullOrEmpty(Destination1Path) && string.IsNullOrEmpty(Destination2Path)))
+            {
+                 MessageBox.Show("Veuillez sélectionner une source et au moins une destination.", "Configuration manquante", MessageBoxButton.OK, MessageBoxImage.Warning);
+                 return;
+            }
+
             IsBusy = true;
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
             ProgressValue = 0;
             LogText = "Initialisation...";
             FilesCopiedCount = 0;
@@ -213,7 +237,7 @@ namespace Veriflow.Desktop.ViewModels
 
                 foreach (var file in files)
                 {
-                    if (ct.IsCancellationRequested) break;
+                    token.ThrowIfCancellationRequested();
 
                     LogText = $"Securing {file.Name}...";
                     string status = "[OK]";
@@ -260,14 +284,14 @@ namespace Veriflow.Desktop.ViewModels
                         if (!string.IsNullOrEmpty(Destination1Path))
                         {
                             var destFile = Path.Combine(Destination1Path, relativePath);
-                            result = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile, progress, ct);
+                            result = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile, progress, token);
                         }
 
                         // Copy to Dest 2
                         if (!string.IsNullOrEmpty(Destination2Path))
                         {
                             var destFile2 = Path.Combine(Destination2Path, relativePath);
-                            var result2 = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile2, progress, ct);
+                            var result2 = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile2, progress, token);
                             
                             if (result != null && result2 != null && result.SourceHash != result2.SourceHash)
                             {
@@ -292,6 +316,10 @@ namespace Veriflow.Desktop.ViewModels
                         // Update global bytes manually if success
                          totalBytesTransferred += file.Length; 
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch (Exception ex)
                     {
                         ErrorsCount++;
@@ -302,6 +330,19 @@ namespace Veriflow.Desktop.ViewModels
                     // Append to report
                     reportBuilder.AppendLine($"{processingDate.ToShortTimeString()} - {relativePath} | {status} | {fileHash} | {errorDetail}");
                 }
+                
+                MessageBox.Show(
+                    $"Succès ! {FilesCopiedCount} fichiers sécurisés.\nRapport(s) généré(s) dans le(s) dossier(s) de destination.",
+                    "Secure Offload Terminé",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (OperationCanceledException)
+            {
+                LogText = "Copie annulée par l'utilisateur.";
+                TimeRemainingDisplay = "ANNULÉ";
+                reportBuilder.AppendLine("ANNULATION PAR UTILISATEUR");
+                MessageBox.Show("L'opération a été arrêtée par l'utilisateur.", "Arrêt", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -311,6 +352,8 @@ namespace Veriflow.Desktop.ViewModels
             finally
             {
                 IsBusy = false;
+                _cts?.Dispose();
+                _cts = null;
                 
                 // Save Report
                 try 
@@ -322,12 +365,6 @@ namespace Veriflow.Desktop.ViewModels
                          File.WriteAllText(Path.Combine(Destination2Path, reportFilename), reportBuilder.ToString());
                 }
                 catch { /* Ignore report write errors */ }
-                
-                MessageBox.Show(
-                    $"Succès ! {FilesCopiedCount} fichiers sécurisés.\nRapport(s) généré(s) dans le(s) dossier(s) de destination.",
-                    "Secure Offload Terminé",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
             }
         }
 

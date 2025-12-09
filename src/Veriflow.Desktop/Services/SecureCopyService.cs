@@ -40,6 +40,9 @@ namespace Veriflow.Desktop.Services
 
                 while ((read = await sourceStream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
                 {
+                    // HARD CANCEL CHECK
+                    ct.ThrowIfCancellationRequested();
+
                     // Update Hash
                     xxHash.Append(buffer.AsSpan(0, read));
 
@@ -87,6 +90,18 @@ namespace Veriflow.Desktop.Services
                 result.SourceHash = BitConverter.ToString(xxHash.GetCurrentHash()).Replace("-", "").ToLowerInvariant();
                 result.Success = true;
                 result.AverageSpeed = (fileLength / 1024.0 / 1024.0) / (DateTime.UtcNow - startTime).TotalSeconds;
+            }
+            catch (OperationCanceledException)
+            {
+                // Cleanup partial file
+                try 
+                {
+                    if (File.Exists(destPath)) 
+                        File.Delete(destPath);
+                }
+                catch { /* Best effort delete */ }
+                
+                throw; 
             }
             catch (Exception)
             {

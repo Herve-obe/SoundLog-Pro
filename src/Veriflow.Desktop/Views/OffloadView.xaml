@@ -124,10 +124,22 @@
 
         <!-- FOOTER ACTIONS -->
         <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0,0,0,30">
-            <Button Command="{Binding StartCopyCommand}" Content="DÉMARRER LA COPIE" 
+            <Button Command="{Binding ToggleCopyCommand}" 
                     Margin="0,0,0,15"
-                    HorizontalAlignment="Center" Width="400"
-                    Style="{StaticResource PrimaryActionStyle}"/> 
+                    HorizontalAlignment="Center" Width="400">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Content" Value="DÉMARRER LA COPIE"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                <Setter Property="Content" Value="ARRÊTER LA COPIE"/>
+                                <Setter Property="Background" Value="#8B0000"/>
+                                <Setter Property="BorderBrush" Value="#8B0000"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button> 
             
             <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="4" Background="#222222" Foreground="{DynamicResource Brush.Accent}" BorderThickness="0" IsIndeterminate="False"/>
             
@@ -138,20 +150,20 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <StackPanel Grid.Column="0" Orientation="Vertical">
-                    <TextBlock Text="{Binding CurrentHashDisplay}" Opacity="0.8" TextTrimming="CharacterEllipsis" Style="{StaticResource Style.Text.Mono}"/>
-                    <TextBlock Text="{Binding LogText}" Opacity="0.5" Margin="0,2,0,0" Style="{StaticResource BodyStyle}"/>
+                <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentHashDisplay}" TextTrimming="CharacterEllipsis" Style="{StaticResource Style.Text.Mono}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LogText}" Margin="0,2,0,0" Style="{StaticResource BodyStyle}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
                 </StackPanel>
                 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                     <TextBlock Text="ETA: " Opacity="0.7" FontWeight="Bold" Style="{StaticResource BodyStyle}" Margin="0,0,5,0"/>
-                     <TextBlock Text="{Binding TimeRemainingDisplay}" FontWeight="Bold" Style="{StaticResource Style.Text.Mono}"/>
+                     <TextBlock Text="ETA: " FontWeight="Bold" Style="{StaticResource BodyStyle}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                     <TextBlock Text="{Binding TimeRemainingDisplay}" FontWeight="Bold" Style="{StaticResource Style.Text.Mono}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="2" Text="{Binding CurrentSpeedDisplay}" 
                            FontWeight="Bold"
                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Style="{StaticResource Style.Text.Mono}"/>
+                           Style="{StaticResource Style.Text.Mono}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}"/>
             </Grid>
         </StackPanel>
     </Grid>
