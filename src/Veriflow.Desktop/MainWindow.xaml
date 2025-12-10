@@ -103,11 +103,11 @@
                     <!-- MEDIA (New, Dashboard Icon) -->
                     <RadioButton Content="MEDIA" 
                                  Command="{Binding ShowMediaCommand}"
-                                 GroupName="Nav" 
+                                 IsChecked="{Binding IsMediaActive}"
                                  Style="{StaticResource NavButtonStyle}">
                         <RadioButton.Tag>
                              <Path Data="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3" 
-                                   Fill="White"
+                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
                                    Height="18" Width="18" Stretch="Uniform"/>
                         </RadioButton.Tag>
                     </RadioButton>
@@ -115,34 +115,46 @@
                     <!-- PLAYER (Was Mediaboard, Play Icon) -->
                     <RadioButton Content="PLAYER" 
                                  Command="{Binding ShowPlayerCommand}"
-                                 GroupName="Nav" 
-                                 IsChecked="True"
+                                 IsChecked="{Binding IsPlayerActive}"
                                  Style="{StaticResource NavButtonStyle}">
                         <RadioButton.Tag>
                              <Path Data="M8,5.14V19.14L19,12.14L8,5.14Z" 
-                                   Fill="White"
+                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                   Height="18" Width="18" Stretch="Uniform"/>
+                        </RadioButton.Tag>
+                    </RadioButton>
+
+                    <!-- TRANSCODE (New) -->
+                    <RadioButton Content="TRANSCODE" 
+                                 Command="{Binding ShowTranscodeCommand}" 
+                                 IsChecked="{Binding IsTranscodeActive}"
+                                 Style="{StaticResource NavButtonStyle}">
+                         <RadioButton.Tag>
+                             <!-- Icon: Swap/Convert -->
+                             <Path Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"
+                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
                                    Height="18" Width="18" Stretch="Uniform"/>
                         </RadioButton.Tag>
                     </RadioButton>
 
                     <RadioButton Content="SECURE COPY" 
                                  Command="{Binding ShowOffloadCommand}" 
-                                 GroupName="Nav"
+                                 IsChecked="{Binding IsOffloadActive}"
                                  Style="{StaticResource NavButtonStyle}">
                          <RadioButton.Tag>
                              <Path Data="M12,1L3,5V11C3,16.55 6.9,21.74 12,23C17.1,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" 
-                                   Fill="White"
+                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
                                    Height="18" Width="18" Stretch="Uniform"/>
                         </RadioButton.Tag>
                     </RadioButton>
 
                     <RadioButton Content="REPORTS" 
                                  Command="{Binding ShowReportsCommand}" 
-                                 GroupName="Nav"
+                                 IsChecked="{Binding IsReportsActive}"
                                  Style="{StaticResource NavButtonStyle}">
                          <RadioButton.Tag>
                              <Path Data="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z" 
-                                   Fill="White"
+                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
                                    Height="18" Width="18" Stretch="Uniform"/>
                         </RadioButton.Tag>
                     </RadioButton>

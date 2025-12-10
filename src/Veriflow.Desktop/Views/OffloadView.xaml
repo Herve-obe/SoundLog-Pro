@@ -101,7 +101,9 @@
                         </Button>
                     </Grid>
                     
-                    <Button Grid.Column="1" Command="{Binding PickSourceCommand}" Content="OUVRIR" Style="{StaticResource ActionButtonStyle}"/>
+                    <Button Grid.Column="1" Command="{Binding PickSourceCommand}" Content="OUVRIR" 
+                            Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                            Style="{StaticResource ActionButtonStyle}"/>
                 </Grid>
             </Grid>
 
@@ -171,7 +173,9 @@
                             </Button>
                         </Grid>
 
-                        <Button Grid.Column="1" Command="{Binding PickDest1Command}" Content="OUVRIR" Style="{StaticResource ActionButtonStyle}"/>
+                        <Button Grid.Column="1" Command="{Binding PickDest1Command}" Content="OUVRIR" 
+                                Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                                Style="{StaticResource ActionButtonStyle}"/>
                     </Grid>
                 </Grid>
 
@@ -230,7 +234,9 @@
                             </Button>
                         </Grid>
 
-                        <Button Grid.Column="1" Command="{Binding PickDest2Command}" Content="OUVRIR" Style="{StaticResource ActionButtonStyle}"/>
+                        <Button Grid.Column="1" Command="{Binding PickDest2Command}" Content="OUVRIR" 
+                                Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                                Style="{StaticResource ActionButtonStyle}"/>
                     </Grid>
                 </Grid>
             </StackPanel>
@@ -244,7 +250,14 @@
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Setter Property="Content" Value="DÉMARRER LA COPIE"/>
+                        <Setter Property="Background" Value="{StaticResource Brush.Control}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
                         <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
                             <DataTrigger Binding="{Binding IsBusy}" Value="True">
                                 <Setter Property="Content" Value="ARRÊTER LA COPIE"/>
                                 <Setter Property="Background" Value="#8B0000"/>

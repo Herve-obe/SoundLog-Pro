@@ -1,0 +1,118 @@
+<UserControl x:Class="Veriflow.Desktop.Views.TranscodeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Veriflow.Desktop.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1024">
+
+    <Grid Margin="30">
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header -->
+            <RowDefinition Height="*"/>    <!-- Content -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,30">
+            <!-- Icon could be added here similar to other views -->
+             <Path Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"
+                   Fill="{StaticResource Brush.Accent}"
+                   Height="24" Width="24" Stretch="Uniform"
+                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+            <TextBlock Text="TRANSCODE" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <StackPanel MaxWidth="800" HorizontalAlignment="Left">
+                
+                <!-- Source Selection -->
+                <TextBlock Text="SOURCE FILE" Style="{StaticResource LabelStyle}" Margin="0,0,0,5" Opacity="0.5"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding SourceFile}" VerticalContentAlignment="Center" Height="30" IsReadOnly="True" Background="#1A1A1A" Foreground="#EEE" BorderThickness="0"/>
+                    <Button Grid.Column="1" Command="{Binding PickSourceCommand}" Content="CHOOSE FILE" 
+                            Margin="10,0,0,0" Height="30" Width="120"
+                            Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                            Style="{StaticResource ActionButtonStyle}"/>
+                </Grid>
+
+                <!-- Destination Selection -->
+                <TextBlock Text="DESTINATION FOLDER" Style="{StaticResource LabelStyle}" Margin="0,0,0,5" Opacity="0.5"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding DestinationFolder}" VerticalContentAlignment="Center" Height="30" IsReadOnly="True" Background="#1A1A1A" Foreground="#EEE" BorderThickness="0"/>
+                    <Button Grid.Column="1" Command="{Binding PickDestinationCommand}" Content="CHOOSE FOLDER" 
+                            Margin="10,0,0,0" Height="30" Width="120"
+                            Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                            Style="{StaticResource ActionButtonStyle}"/>
+                </Grid>
+
+                <!-- Settings -->
+                 <TextBlock Text="SETTINGS" Style="{StaticResource LabelStyle}" Margin="0,0,0,5" Opacity="0.5"/>
+                 <Border Background="{StaticResource Brush.Panel}" BorderThickness="1" BorderBrush="#333" Padding="20" Margin="0,0,0,20">
+                     <Grid>
+                         <Grid.ColumnDefinitions>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="20"/>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="20"/>
+                             <ColumnDefinition Width="*"/>
+                         </Grid.ColumnDefinitions>
+
+                         <!-- Format -->
+                         <StackPanel Grid.Column="0">
+                             <TextBlock Text="FORMAT" Foreground="#777" FontSize="12" Margin="0,0,0,5"/>
+                             <ComboBox ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedFormat}" Height="30"/>
+                         </StackPanel>
+
+                         <!-- Sample Rate -->
+                         <StackPanel Grid.Column="2">
+                             <TextBlock Text="SAMPLE RATE" Foreground="#777" FontSize="12" Margin="0,0,0,5"/>
+                             <ComboBox ItemsSource="{Binding AvailableSampleRates}" SelectedItem="{Binding SelectedSampleRate}" Height="30"/>
+                         </StackPanel>
+
+                         <!-- Bit Depth -->
+                         <StackPanel Grid.Column="4">
+                             <TextBlock Text="BIT DEPTH" Foreground="#777" FontSize="12" Margin="0,0,0,5"/>
+                             <ComboBox ItemsSource="{Binding AvailableBitDepths}" SelectedItem="{Binding SelectedBitDepth}" Height="30"/>
+                         </StackPanel>
+                     </Grid>
+                 </Border>
+
+                <!-- Progress & Status -->
+                <StackPanel Orientation="Vertical" Margin="0,0,0,20" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+                     <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,5" FontWeight="Bold"/>
+                     <ProgressBar Height="4" IsIndeterminate="True" Foreground="{StaticResource Brush.Accent}" Background="#333" BorderThickness="0"/>
+                </StackPanel>
+
+                <!-- Actions -->
+                <Button Command="{Binding StartTranscodeCommand}" Content="START TRANSCODE"
+                        HorizontalAlignment="Left" Width="200" Height="40"
+                        Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold">
+                     <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                             <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

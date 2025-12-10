@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Veriflow.Desktop.Services;
 using System.Windows.Input;
+using Veriflow.Desktop.Models;
 
 namespace Veriflow.Desktop.ViewModels
 {
@@ -166,6 +167,19 @@ namespace Veriflow.Desktop.ViewModels
             IsPreviewing = false;
             if (SelectedMedia != null) SelectedMedia.IsPlaying = false;
         }
+
+        public event Action<string>? RequestOpenInPlayer;
+
+        [RelayCommand]
+        private void OpenInPlayer()
+        {
+            if (SelectedMedia != null)
+            {
+                // Stop preview if running
+                StopPreview();
+                RequestOpenInPlayer?.Invoke(SelectedMedia.FullName);
+            }
+        }
     }
 
     public partial class MediaItemViewModel : ObservableObject
@@ -179,7 +193,11 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         private bool _isPlaying;
 
-        // Metadata
+        [ObservableProperty]
+        private AudioMetadata _currentMetadata = new();
+        
+        // Keep simple properties for fallback or list display if needed, 
+        // but primarily rely on CurrentMetadata for the detailed view.
         [ObservableProperty] private string _duration = "--:--";
         [ObservableProperty] private string _sampleRate = "";
         [ObservableProperty] private string _channels = "";
@@ -199,25 +217,45 @@ namespace Veriflow.Desktop.ViewModels
             
             try
             {
-                // Only attempt for audio/video files
+                // Only attempt for audio/video/metadata files
                 var ext = File.Extension.ToLower();
-                if (new[] { ".wav", ".mp3", ".m4a", ".aiff", ".wma" }.Contains(ext))
+                if (new[] { ".wav", ".bwf" }.Contains(ext))
                 {
-                    using var reader = new NAudio.Wave.AudioFileReader(File.FullName);
-                    Duration = reader.TotalTime.ToString(@"mm\:ss");
-                    SampleRate = $"{reader.WaveFormat.SampleRate} Hz";
-                    Channels = reader.WaveFormat.Channels == 1 ? "Mono" : "Stereo";
-                    BitDepth = $"{reader.WaveFormat.BitsPerSample} bit";
-                    Format = ext.Substring(1).ToUpper();
+                    // Use BwfMetadataReader for rich metadata
+                    var reader = new BwfMetadataReader();
+                    CurrentMetadata = reader.ReadMetadataFromStream(File.FullName);
+                    
+                    // Populate simple properties from the rich metadata for consistency
+                    Duration = CurrentMetadata.Duration;
+                    Format = CurrentMetadata.Format;
+                    // others...
                     _metadataLoaded = true;
                 }
-                // For Video, NAudio MediaFoundationReader might work but is heavier. 
-                // We keep it simple for now or try-catch it.
+                else if (new[] { ".mp3", ".m4a", ".aiff", ".wma" }.Contains(ext))
+                {
+                    // Fallback for non-BWF
+                    using var audioReader = new NAudio.Wave.AudioFileReader(File.FullName);
+                    Duration = audioReader.TotalTime.ToString(@"mm\:ss");
+                    SampleRate = $"{audioReader.WaveFormat.SampleRate} Hz";
+                    Channels = audioReader.WaveFormat.Channels == 1 ? "Mono" : "Stereo";
+                    BitDepth = $"{audioReader.WaveFormat.BitsPerSample} bit";
+                    Format = ext.Substring(1).ToUpper();
+                    
+                    // Create a dummy persistent metadata object so UI binds don't fail
+                    CurrentMetadata = new AudioMetadata 
+                    { 
+                        Filename = File.Name,
+                        Duration = Duration,
+                        Format = Format 
+                    };
+                    _metadataLoaded = true;
+                }
             }
             catch (Exception)
             {
-                // Metadata load failed (not a valid audio file or locked)
+                // Metadata load failed
                 Format = "Unknown";
+                CurrentMetadata = new AudioMetadata { Filename = File.Name };
             }
         }
     }

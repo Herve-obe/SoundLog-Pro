@@ -16,6 +16,9 @@
             <DataTemplate DataType="{x:Type vm:OffloadViewModel}">
                 <views:OffloadView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:TranscodeViewModel}">
+                <views:TranscodeView />
+            </DataTemplate>
 
             <DataTemplate DataType="{x:Type vm:PlayerViewModel}">
                 <views:PlayerView />
@@ -27,7 +30,7 @@
             
             <!-- Fallback for String Placeholders -->
             <DataTemplate DataType="{x:Type sys:String}">
-                <TextBlock Text="{Binding}" FontSize="{StaticResource Font.Size.Body}" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
+                <TextBlock Text="{Binding}" FontSize="{StaticResource Font.Size.Body}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

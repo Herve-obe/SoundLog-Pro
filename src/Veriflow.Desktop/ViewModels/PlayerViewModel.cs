@@ -69,7 +69,13 @@ namespace Veriflow.Desktop.ViewModels
         }
 
         private bool _isTimerUpdating;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
         private bool _isPaused;
+
+        [ObservableProperty]
+        private bool _isStopPressed;
 
         private void OnTimerTick(object? sender, EventArgs e)
         {
@@ -83,25 +89,19 @@ namespace Veriflow.Desktop.ViewModels
                     PlaybackPercent = PlaybackPosition / PlaybackMaximum;
                 
                 // Update Meters
+                // ... (code omitted for brevity, logic remains same)
                 if (_meteringProvider != null)
                 {
                    var peaks = _meteringProvider.ChannelPeaks;
-                   // Safety check
                    for(int i=0; i < Tracks.Count && i < peaks.Length; i++)
                    {
                        float linear = peaks[i];
                        if (linear < 0) linear = 0;
-
-                       // Logarithmic Scaling (20 * Log10)
-                       // Floor at -60dB
                        float db = (linear > 0) ? 20 * (float)Math.Log10(linear) : -60;
                        if (db < -60) db = -60;
-
-                       // Normalize -60dB...0dB to 0.0...1.0
                        float normalized = (db + 60) / 60f;
                        if (normalized < 0) normalized = 0;
                        if (normalized > 1) normalized = 1;
-
                        Tracks[i].CurrentLevel = normalized;
                    }
                 }
@@ -123,7 +123,6 @@ namespace Veriflow.Desktop.ViewModels
                 }
             }
         }
-
 
         [RelayCommand]
         private void DropFile(DragEventArgs e)
@@ -403,8 +402,8 @@ namespace Veriflow.Desktop.ViewModels
             _playbackTimer.Stop();
             
             // Only reset if NOT paused (Pause logic is handled in Pause command)
-            // But if we came here from Stop(), _isPaused is false, so we reset.
-            if (!_isPaused)
+            // But if we came here from Stop(), IsPaused is false, so we reset.
+            if (!IsPaused)
             {
                 PlaybackPosition = 0;
                 CurrentTimeDisplay = "00:00:00";
@@ -425,8 +424,9 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _outputDevice.Play();
                 _playbackTimer.Start();
-                _isPaused = false;
+                IsPaused = false;
                 IsPlaying = true;
+                IsStopPressed = false;
             }
         }
 
@@ -440,11 +440,14 @@ namespace Veriflow.Desktop.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanStop))]
-        private void Stop()
+        private async Task Stop()
         {
+            // Visual Feedback
+            IsStopPressed = true;
+
             // Aggressive Stop: Reset everything immediately
             _playbackTimer.Stop();
-            _isPaused = false;
+            IsPaused = false;
             IsPlaying = false;
             PlaybackPosition = 0;
             PlaybackPercent = 0;
@@ -466,6 +469,10 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _outputDevice.Stop();
             }
+
+            // Reset Visual Feedback after delay
+            await Task.Delay(200);
+            IsStopPressed = false;
         }
 
         [RelayCommand]
@@ -475,7 +482,7 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _playbackTimer.Stop(); // Stop timer FIRST to freeze meters
                 _outputDevice.Pause();
-                _isPaused = true;
+                IsPaused = true;
                 IsPlaying = false;
             }
         }

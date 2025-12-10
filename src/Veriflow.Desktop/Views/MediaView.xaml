@@ -79,6 +79,7 @@
                 <TextBlock Text="MÉDIAS" Style="{StaticResource HeaderStyle}"/>
 
                 <ListBox Grid.Row="1" ItemsSource="{Binding FileList}" 
+                         SelectedItem="{Binding SelectedMedia}"
                          Background="Transparent" BorderThickness="0" 
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -143,70 +144,136 @@
         </Border>
 
         <!-- COL 3: METADATA -->
-        <Border Grid.Column="2" BorderBrush="#333333" BorderThickness="1,0,0,0" Background="#1E1E1E">
+        <Border Grid.Column="2" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1,0,0,0" Background="{StaticResource Brush.Panel}" Padding="15" DataContext="{Binding SelectedMedia}">
             <Grid>
                  <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="MÉTADONNÉES" Style="{StaticResource HeaderStyle}"/>
                 
-                <!-- Metadata Display -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <!-- File Info -->
-                        <TextBlock Text="GENERAL" Style="{StaticResource HeaderStyle}" FontSize="12" Margin="0,0,0,5"/>
-                        <TextBlock Text="{Binding SelectedMedia.Name}" Foreground="White" FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,0,5"/>
-                        <TextBlock Text="{Binding SelectedMedia.FullName}" Foreground="#666666" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,15"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False">
+                    <StackPanel>
+                        <TextBlock Text="MÉTADONNÉES" Margin="0,0,0,15" FontSize="{StaticResource Font.Size.SubHeader}" FontWeight="SemiBold"/>
 
-                        <Grid Margin="0,0,0,15">
+                        <!-- LINK TO PLAYER BUTTON -->
+                        <Button Command="{Binding DataContext.OpenInPlayerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                Content="OUVRIR DANS LE PLAYER"
+                                Height="30" Margin="0,0,0,20"
+                                Background="{StaticResource Brush.Accent}" Foreground="White" FontWeight="Bold"> 
+                        <!-- Note: Binding to self (non-null) via converter? 
+                             The DataContext here is 'SelectedMedia'. If it is null, this whole Border might need to be hidden or handled.
+                             However, Button visibility: The BooleanToVisibilityConverter usually takes a bool. 
+                             If we want to show/hide based on null, we need a NullToVisibilityConverter. 
+                             OR: The border DataContext is SelectedMedia. If SelectedMedia is null, this binding fails? 
+                             Actually, if SelectedMedia is null, the binding to DataContext might be null.
+                             
+                             Better approach: The Border itself should probably be hidden if nothing is selected.
+                             Let's check the Border definition.
+                             Border Grid.Column="2" ... DataContext="{Binding SelectedMedia}"
+                             
+                             If I just put the button there, it will try to resolve.
+                             Let's make it simpler: The user wants the button to APPEAR.
+                             If SelectedMedia is null, this Border is still visible (just with empty bindings).
+                             
+                             I will use a Style trigger on the Button to hide it if DataContext is null? 
+                             Or simpler: Bind Visibility to a property 'IsSelected' on MediaItemViewModel? No.
+                             
+                             Let's use the fact that if we are here, we might have a selection.
+                             But to be safe and robust:
+                             I'll add a Style DataTrigger to the Button. 
+                             Binding "{Binding}" (the MediaItemViewModel). If null, Hide.
+                        -->
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        </Button>
+    
+                        <Grid Margin="0,5">
+                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="SCÈNE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Scene}" TextWrapping="Wrap" FontSize="{StaticResource Font.Size.Body}" Foreground="White"/>
+                        </Grid>
+                        <Separator Margin="0,5"/>
+    
+                        <Grid Margin="0,5">
+                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="PRISE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Take}" TextWrapping="Wrap" FontSize="{StaticResource Font.Size.Body}"/>
+                        </Grid>
+                         <Separator Margin="0,5"/>
+    
+                        <Grid Margin="0,5">
+                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="TC DÉPART" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.TimecodeStart}" FontFamily="Consolas" FontSize="{StaticResource Font.Size.Body}"/>
+                        </Grid>
+                         <Separator Margin="0,5"/>
+                        
+                        <Grid Margin="0,5">
+                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="DURÉE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Duration}" FontFamily="Consolas" FontSize="{StaticResource Font.Size.Body}"/>
+                        </Grid>
+                        <Separator Margin="0,5"/>
+    
+                        <Grid Margin="0,5">
+                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="FORMAT" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Format}" FontSize="{StaticResource Font.Size.Body}"/>
+                        </Grid>
+                        <Separator Margin="0,5"/>
+    
+                        <Grid Margin="0,5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Taille:" Foreground="#888888" Margin="0,0,10,0"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.Length, StringFormat='{}{0:N0} octets'}" Foreground="#CCCCCC"/>
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Date:" Foreground="#888888" Margin="0,5,10,0"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.CreationTime}" Foreground="#CCCCCC" Margin="0,5,0,0"/>
+                            <TextBlock Text="ORIGINE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Originator}" TextWrapping="Wrap" FontSize="{StaticResource Font.Size.Body}"/>
                         </Grid>
-
-                        <!-- Audio/Video Info -->
-                        <TextBlock Text="MEDIA INFO" Style="{StaticResource HeaderStyle}" FontSize="12" Margin="0,0,0,5"/>
-                        
-                        <Grid>
+                        <Separator Margin="0,5"/>
+    
+                        <Grid Margin="0,5">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Durée:" Foreground="#888888" Margin="0,0,0,5"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.Duration}" Foreground="White" FontWeight="SemiBold" Margin="0,0,0,5"/>
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Format:" Foreground="#888888" Margin="0,0,0,5"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.Format}" Foreground="#CCCCCC" Margin="0,0,0,5"/>
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Canaux:" Foreground="#888888" Margin="0,0,0,5"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.Channels}" Foreground="#CCCCCC" Margin="0,0,0,5"/>
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Fréq.:" Foreground="#888888" Margin="0,0,0,5"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedMedia.SampleRate}" Foreground="#CCCCCC" Margin="0,0,0,5"/>
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Mise en bits:" Foreground="#888888" Margin="0,0,0,5"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedMedia.BitDepth}" Foreground="#CCCCCC" Margin="0,0,0,5"/>
+                            <TextBlock Text="DATE" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.CreationDate}" TextWrapping="Wrap" FontSize="{StaticResource Font.Size.Body}"/>
                         </Grid>
+                         <Separator Margin="0,5"/>
+    
+                        <Grid Margin="0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="RUBAN" FontWeight="Bold" Opacity="0.6" Width="80" FontSize="{StaticResource Font.Size.Small}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.Tape}" TextWrapping="Wrap" FontSize="{StaticResource Font.Size.Body}"/>
+                        </Grid>
+    
                     </StackPanel>
                 </ScrollViewer>
             </Grid>

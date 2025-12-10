@@ -207,13 +207,13 @@ namespace Veriflow.Desktop.ViewModels
             var scannedFiles = new List<FileInfo>();
             if (Directory.Exists(SourcePath))
             {
-                ScanDirectoryRecursive(new DirectoryInfo(SourcePath!), scannedFiles, 0, 3, ct);
+                ScanDirectoryRecursive(new DirectoryInfo(SourcePath!), scannedFiles, 0, 5, ct); 
             }
 
             if (scannedFiles.Count == 0)
             {
                 UpdateUI(() => {
-                    LogText = "Aucun fichier trouvé (limite profondeur: 3).";
+                    LogText = "Aucun fichier trouvé (limite profondeur: 5).";
                     IsBusy = false;
                 });
                 return;
@@ -223,33 +223,48 @@ namespace Veriflow.Desktop.ViewModels
             long totalBytesTransferred = 0;
             var sourceDir = new DirectoryInfo(SourcePath!);
 
-            UpdateUI(() => LogText = $"{scannedFiles.Count} fichiers à copier ({totalBytesToCopy / 1024 / 1024} MB)");
+            int destCount = 0;
+            if (!string.IsNullOrEmpty(Destination1Path)) destCount++;
+            if (!string.IsNullOrEmpty(Destination2Path)) destCount++;
 
-            Console.WriteLine($"--- 2. COPY THREAD STARTED: Found {scannedFiles.Count} files ---");
+            UpdateUI(() => LogText = $"{scannedFiles.Count} fichiers à copier vers {destCount} destination(s) ({totalBytesToCopy / 1024 / 1024:F1} MB)");
+
+            var sessionResults1 = new List<CopyResult>();
+            var sessionResults2 = new List<CopyResult>();
 
             foreach (var file in scannedFiles)
             {
                 ct.ThrowIfCancellationRequested(); 
 
-                UpdateUI(() => LogText = $"Securing {file.Name}...");
-                
-                long initialBytesTransferred = totalBytesTransferred;
                 string relativePath = Path.GetRelativePath(sourceDir.FullName, file.FullName);
+                long initialBytesTransferred = totalBytesTransferred;
 
-                // Throttle UI updates to prevent flooding (max 20 per second)
-                var lastUpdate = DateTime.MinValue;
+                // PREPARE DESTINATIONS
+                var destPaths = new List<string>();
+                var mapIndexToSession = new Dictionary<int, List<CopyResult>>();
+
+                if (!string.IsNullOrEmpty(Destination1Path)) 
+                {
+                    destPaths.Add(Path.Combine(Destination1Path, relativePath));
+                    mapIndexToSession[destPaths.Count - 1] = sessionResults1;
+                }
+                
+                if (!string.IsNullOrEmpty(Destination2Path))
+                {
+                    destPaths.Add(Path.Combine(Destination2Path, relativePath));
+                    mapIndexToSession[destPaths.Count - 1] = sessionResults2;
+                }
+
+                // UI Update for START of file
+                UpdateUI(() => 
+                {
+                    LogText = $"Securing: {file.Name}";
+                    CurrentHashDisplay = "Calcul Hash & Copie...";
+                });
 
                 var progress = new Progress<CopyProgress>(p =>
                 {
-                    // FIX 2: Crash on Progress Update (Null Check)
                     if (Application.Current == null) return;
-
-                    var now = DateTime.UtcNow;
-                    // Always update if complete (100%), otherwise throttle to 50ms
-                    if ((now - lastUpdate).TotalMilliseconds < 50 && p.Percentage < 100) return;
-                    lastUpdate = now;
-
-                    // FIX 3: Use InvokeAsync to prevent background thread from locking if UI is busy
                     Application.Current.Dispatcher.InvokeAsync(() => 
                     {
                         CurrentSpeedDisplay = $"{p.TransferSpeedMbPerSec:F1} MB/s";
@@ -271,47 +286,72 @@ namespace Veriflow.Desktop.ViewModels
                     });
                 });
 
-                var destPaths = new List<string>();
-                if (!string.IsNullOrEmpty(Destination1Path)) destPaths.Add(Path.Combine(Destination1Path, relativePath));
-                if (!string.IsNullOrEmpty(Destination2Path)) destPaths.Add(Path.Combine(Destination2Path, relativePath));
-
-                // Pre-Create Directories
-                foreach (var destFile in destPaths)
+                // EXECUTE MULTI-DEST COPY
+                // The service handles ALL writes sequentially reading the source ONCE.
+                try
                 {
-                     var parentDir = Path.GetDirectoryName(destFile);
-                     if (!string.IsNullOrEmpty(parentDir) && !Directory.Exists(parentDir))
-                     {
-                         Directory.CreateDirectory(parentDir);
-                         if (!_createdDirectories.Contains(parentDir)) _createdDirectories.Add(parentDir);
-                     }
-                }
-
-                CopyResult? result = null;
-
-                foreach (var destFile in destPaths)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    var copyRes = await _secureCopyService.CopyFileSecureAsync(file.FullName, destFile, progress, ct);
-                    if (copyRes.Success) 
+                    var fileResults = await _secureCopyService.CopyFileMultiDestSecureAsync(file.FullName, destPaths, progress, ct);
+                    
+                    // Dispatch Results
+                    bool allSuccess = true;
+                    for (int i = 0; i < fileResults.Count; i++)
                     {
-                        _copiedFiles.Add(destFile);
-                        if (result == null) result = copyRes;
+                        var res = fileResults[i];
+                        if (mapIndexToSession.ContainsKey(i))
+                        {
+                            mapIndexToSession[i].Add(res);
+                            if (res.Success) _copiedFiles.Add(res.DestPath);
+                            else allSuccess = false;
+                        }
                     }
-                }
 
-                UpdateUI(() =>
+                    UpdateUI(() =>
+                    {
+                        // Simplified status update
+                        if (allSuccess)
+                        {
+                            FilesCopiedCount++;
+                            var shortHash = fileResults.Count > 0 ? fileResults[0].SourceHash.Substring(0, 8) : "-";
+                            CurrentHashDisplay = $"Verif OK ({shortHash})";
+                        }
+                        else
+                        {
+                            ErrorsCount++;
+                            CurrentHashDisplay = "ERREUR COPIE/VERIF";
+                        }
+                    });
+                }
+                catch (Exception ex)
                 {
-                    if (result != null && result.Success) FilesCopiedCount++;
-                    else ErrorsCount++;
-                });
+                    UpdateUI(() => 
+                    {
+                        LogText = $"Erreur Critique: {ex.Message}";
+                        ErrorsCount++;
+                    });
+                }
 
                 totalBytesTransferred += file.Length;
             }
             
+            // --- GENERATE REPORTS ---
+            UpdateUI(() => LogText = "Génération des rapports...");
+            
+            if (!string.IsNullOrEmpty(Destination1Path) && sessionResults1.Any())
+            {
+                await _secureCopyService.GenerateOffloadReportAsync(Destination1Path, sessionResults1);
+            }
+            if (!string.IsNullOrEmpty(Destination2Path) && sessionResults2.Any())
+            {
+                await _secureCopyService.GenerateOffloadReportAsync(Destination2Path, sessionResults2);
+            }
+
             UpdateUI(() => 
             {
                 IsBusy = false;
-                MessageBox.Show($"Terminé ! {FilesCopiedCount} fichiers copiés.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                ProgressValue = 100;
+                TimeRemainingDisplay = "00:00";
+                LogText = "Terminé.";
+                MessageBox.Show($"Offload terminé !\n\nFichiers copiés : {FilesCopiedCount}\nErreurs : {ErrorsCount}\n\nRapports générés.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
             });
         }
 
