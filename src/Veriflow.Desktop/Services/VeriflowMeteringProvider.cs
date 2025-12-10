@@ -1,25 +1,33 @@
-using NAudio.Wave;
+using CSCore;
 using System;
 
 namespace Veriflow.Desktop.Services
 {
     /// <summary>
-    /// A Pass-Through SampleProvider that analyzes audio levels (peaks) for metering.
+    /// A Pass-Through SampleSource that analyzes audio levels (peaks) for metering.
     /// </summary>
-    public class VeriflowMeteringProvider : ISampleProvider
+    public class VeriflowMeteringProvider : ISampleSource
     {
-        private readonly ISampleProvider _source;
+        private readonly ISampleSource _source;
         private readonly float[] _maxSamples;
 
-
         public WaveFormat WaveFormat => _source.WaveFormat;
+        
+        // ISampleSource properties
+        public bool CanSeek => _source.CanSeek;
+        public long Position 
+        { 
+            get => _source.Position; 
+            set => _source.Position = value; 
+        }
+        public long Length => _source.Length;
 
         /// <summary>
         /// Current peak values for each channel (0.0 to 1.0).
         /// </summary>
         public float[] ChannelPeaks { get; private set; }
 
-        public VeriflowMeteringProvider(ISampleProvider source)
+        public VeriflowMeteringProvider(ISampleSource source)
         {
             _source = source;
             int channels = source.WaveFormat.Channels;
@@ -34,11 +42,6 @@ namespace Veriflow.Desktop.Services
             // Analyze peaks
             int channels = WaveFormat.Channels;
 
-            // Reset current peaks for this block? 
-            // In a real scenario, we might want to hold peaks for the UI refresh rate (e.g. 20-50ms).
-            // However, since Read is called frequently, let's accumulate max and let the consumer read/reset it or just exposure "Instantaneous Peak" of the last buffer.
-            // A better approach for smooth UI is to capture the max of this buffer.
-            
             // Clear local max buffer
             Array.Clear(_maxSamples, 0, _maxSamples.Length);
 
@@ -58,10 +61,19 @@ namespace Veriflow.Desktop.Services
             }
 
             // Update public property
-            // We copy valid peaks. 
             Array.Copy(_maxSamples, ChannelPeaks, channels);
 
             return samplesRead;
+        }
+        
+        public void Dispose()
+        {
+            // Do not dispose source here usually, or yes? 
+            // Aggregators usually don't own source life unless specified.
+            // But usually chains dispose down.
+            // Safe to not dispose _source if handled by player, but let's follow pattern.
+            // If we assume ownership, we dispose.
+            (_source as IDisposable)?.Dispose(); 
         }
     }
 }

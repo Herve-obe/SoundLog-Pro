@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CSCore;
+using CSCore.Codecs;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -348,25 +350,26 @@ namespace Veriflow.Desktop.ViewModels
                     // others...
                     _metadataLoaded = true;
                 }
-                else if (new[] { ".mp3", ".m4a", ".aiff", ".wma" }.Contains(ext))
+                else if (new[] { ".mp3", ".m4a", ".aiff", ".wma", ".wav", ".flac" }.Contains(ext))
                 {
-                    // Fallback for non-BWF
-                    using var audioReader = new NAudio.Wave.AudioFileReader(File.FullName);
-                    Duration = audioReader.TotalTime.ToString(@"mm\:ss");
-                    SampleRate = $"{audioReader.WaveFormat.SampleRate} Hz";
-                    Channels = audioReader.WaveFormat.Channels == 1 ? "Mono" : "Stereo";
-                    BitDepth = $"{audioReader.WaveFormat.BitsPerSample} bit";
-                    Format = ext.Substring(1).ToUpper();
-                    
-                    // Create a dummy persistent metadata object so UI binds don't fail
-                    CurrentMetadata = new AudioMetadata 
-                    { 
-                        Filename = File.Name,
-                        Duration = Duration,
-                        Format = Format 
-                    };
+                    // Fallback for non-BWF or general formats
+                    try 
+                    {
+                        using var source = CSCore.Codecs.CodecFactory.Instance.GetCodec(File.FullName);
+                        Duration = source.GetLength().ToString(@"mm\:ss");
+                        SampleRate = $"{source.WaveFormat.SampleRate} Hz";
+                        Channels = source.WaveFormat.Channels == 1 ? "Mono" : "Stereo";
+                        BitDepth = $"{source.WaveFormat.BitsPerSample} bit";
+                        Format = ext.Substring(1).ToUpper();
+                    }
+                    catch
+                    {
+                        // Ignore codecs we can't open
+                    }            
                     _metadataLoaded = true;
                 }
+                    
+
             }
             catch (Exception)
             {

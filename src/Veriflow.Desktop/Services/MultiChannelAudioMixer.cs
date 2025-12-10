@@ -1,16 +1,16 @@
-using NAudio.Wave;
+using CSCore;
 using System;
 using System.Linq;
 
 namespace Veriflow.Desktop.Services
 {
     /// <summary>
-    /// Custom ISampleProvider that downmixes multi-channel input to Stereo output
+    /// Custom ISampleSource that downmixes multi-channel input to Stereo output
     /// and allows individual volume/mute control + Panning.
     /// </summary>
-    public class MultiChannelAudioMixer : ISampleProvider
+    public class MultiChannelAudioMixer : ISampleSource
     {
-        private readonly ISampleProvider _source;
+        private readonly ISampleSource _source;
         private readonly float[] _channelVolumes;
         private readonly bool[] _channelMutes;
         private readonly bool[] _channelSolos;
@@ -20,14 +20,25 @@ namespace Veriflow.Desktop.Services
 
         // Force Stereo Output (IEEE Float)
         public WaveFormat WaveFormat { get; }
+        
+        // Metadata / Navigation
+        public bool CanSeek => _source.CanSeek;
+        
+        public long Position
+        {
+            get => ConvertInputToOutput(_source.Position);
+            set => _source.Position = ConvertOutputToInput(value);
+        }
 
-        public MultiChannelAudioMixer(ISampleProvider source)
+        public long Length => ConvertInputToOutput(_source.Length);
+
+        public MultiChannelAudioMixer(ISampleSource source)
         {
             _source = source;
             _inputChannels = source.WaveFormat.Channels;
             
             // Output is always Stereo, same SampleRate
-            WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(_source.WaveFormat.SampleRate, 2);
+            WaveFormat = new WaveFormat(_source.WaveFormat.SampleRate, 32, 2, AudioEncoding.IeeeFloat);
 
             _channelVolumes = new float[_inputChannels];
             _channelMutes = new bool[_inputChannels];
@@ -35,7 +46,6 @@ namespace Veriflow.Desktop.Services
             _channelPans = new float[_inputChannels];
             
             // Buffer to hold raw input samples before downmix
-            // Initial size, will grow if needed
             _sourceBuffer = new float[_inputChannels * 1024]; 
 
             // Default: All channels active, full volume, Center pan
@@ -47,12 +57,25 @@ namespace Veriflow.Desktop.Services
                 _channelPans[i] = 0.0f; // Center
             }
         }
+        
+        private long ConvertInputToOutput(long bytes)
+        {
+            if (_source.WaveFormat.BlockAlign == 0) return 0;
+            long frames = bytes / _source.WaveFormat.BlockAlign;
+            return frames * WaveFormat.BlockAlign;
+        }
+
+        private long ConvertOutputToInput(long bytes)
+        {
+             if (WaveFormat.BlockAlign == 0) return 0;
+             long frames = bytes / WaveFormat.BlockAlign;
+             return frames * _source.WaveFormat.BlockAlign;
+        }
 
         public void SetChannelPan(int channel, float pan)
         {
             if (channel >= 0 && channel < _inputChannels)
             {
-                // Clamp between -1 and 1
                 if (pan < -1.0f) pan = -1.0f;
                 if (pan > 1.0f) pan = 1.0f;
                 _channelPans[channel] = pan;
@@ -85,8 +108,7 @@ namespace Veriflow.Desktop.Services
 
         public int Read(float[] buffer, int offset, int count)
         {
-            // 'count' is the number of samples requested for the OUTPUT (Stereo).
-            // So number of output frames = count / 2.
+            // 'count' is samples
             int outputFrames = count / 2;
             int samplesToReadFromSource = outputFrames * _inputChannels;
 
@@ -96,11 +118,9 @@ namespace Veriflow.Desktop.Services
                 _sourceBuffer = new float[samplesToReadFromSource];
             }
 
-            // Read raw multi-channel data
             int sourceSamplesRead = _source.Read(_sourceBuffer, 0, samplesToReadFromSource);
             int framesRead = sourceSamplesRead / _inputChannels;
 
-            // Check if ANY track is SOLOED
             bool anySolo = false;
             for (int i = 0; i < _inputChannels; i++)
             {
@@ -111,7 +131,6 @@ namespace Veriflow.Desktop.Services
                 }
             }
 
-            // Process each frame
             int outIndex = offset;
             
             for (int frame = 0; frame < framesRead; frame++)
@@ -122,11 +141,6 @@ namespace Veriflow.Desktop.Services
 
                 for (int ch = 0; ch < _inputChannels; ch++)
                 {
-                    // Logic (Priorité Inversée / Safe Mode):
-                    // 1. SI Mute -> Silence (ABSOLU)
-                    // 2. SI AnySolo ET !IsSolo -> Silence
-                    // 3. SINON -> Audible
-                    
                     bool isAudible = true;
 
                     if (_channelMutes[ch])
@@ -142,17 +156,11 @@ namespace Veriflow.Desktop.Services
                     {
                         float sample = _sourceBuffer[inputOffset + ch];
                         float vol = _channelVolumes[ch];
-                        float pan = _channelPans[ch]; // -1.0 to 1.0
-
-                        // Pan Calculation (Linear Panning)
-                        // Center (0) -> Left: 0.5, Right: 0.5
-                        // Left (-1) -> Left: 1.0, Right: 0.0
-                        // Right (1) -> Left: 0.0, Right: 1.0
+                        float pan = _channelPans[ch]; 
                         
                         float gainLeft = (1.0f - pan) / 2.0f;
                         float gainRight = (1.0f + pan) / 2.0f;
 
-                        // Apply
                         float processed = sample * vol;
                         
                         sumLeft += processed * gainLeft;
@@ -165,6 +173,11 @@ namespace Veriflow.Desktop.Services
             }
 
             return framesRead * 2;
+        }
+        
+        public void Dispose()
+        {
+             (_source as IDisposable)?.Dispose();
         }
     }
 }

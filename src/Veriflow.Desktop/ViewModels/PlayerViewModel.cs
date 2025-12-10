@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+using CSCore;
+using CSCore.Codecs;
+using CSCore.SoundOut;
+using CSCore.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,9 +20,8 @@ namespace Veriflow.Desktop.ViewModels
 {
     public partial class PlayerViewModel : ObservableObject, IDisposable
     {
-        private WaveOutEvent? _outputDevice;
-        // _inputStream is defined below or here
-        // private AudioFileReader? _audioFile; // REMOVED
+        private ISoundOut? _outputDevice;
+        private IWaveSource? _inputStream;
         private MultiChannelAudioMixer? _mixer;
         private VeriflowMeteringProvider? _meteringProvider;
         private readonly DispatcherTimer _playbackTimer;
@@ -83,10 +84,10 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (_inputStream != null)
             {
-                CurrentTimeDisplay = _inputStream.CurrentTime.ToString(@"hh\:mm\:ss");
+                CurrentTimeDisplay = _inputStream.GetPosition().ToString(@"hh\:mm\:ss");
                 
                 _isTimerUpdating = true;
-                PlaybackPosition = _inputStream.CurrentTime.TotalSeconds;
+                PlaybackPosition = _inputStream.GetPosition().TotalSeconds;
                 if (PlaybackMaximum > 0)
                     PlaybackPercent = PlaybackPosition / PlaybackMaximum;
                 
@@ -119,7 +120,7 @@ namespace Veriflow.Desktop.ViewModels
                 // User is scrubbing
                 if (value >= 0 && value <= _playbackMaximum)
                 {
-                    _inputStream.CurrentTime = TimeSpan.FromSeconds(value);
+                    _inputStream.SetPosition(TimeSpan.FromSeconds(value));
                     if (PlaybackMaximum > 0)
                         PlaybackPercent = value / PlaybackMaximum;
                 }
@@ -168,7 +169,7 @@ namespace Veriflow.Desktop.ViewModels
         {
             var openFileDialog = new OpenFileDialog
             {
-                Filter = "Audio Files (*.wav;*.bwf)|*.wav;*.bwf|All Files (*.*)|*.*"
+                Filter = "Audio Files (*.wav;*.bwf;*.flac;*.mp3;*.aiff)|*.wav;*.bwf;*.flac;*.mp3;*.aiff|All Files (*.*)|*.*"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -177,8 +178,6 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
-        private WaveStream? _inputStream; // Abstraction for AudioFileReader or MediaFoundationReader
-
         public async Task LoadAudio(string path)
         {
             try
@@ -186,69 +185,36 @@ namespace Veriflow.Desktop.ViewModels
                 await Stop();
                 CleanUpAudio();
 
-                // Try AudioFileReader first (NAudio native)
                 try
                 {
-                    _inputStream = new AudioFileReader(path);
+                    _inputStream = CodecFactory.Instance.GetCodec(path);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // Fallback to MediaFoundationReader (Windows Codecs) for complex formats (e.g. 24-bit/32-bit float WAVs from ffmpeg)
-                    try
-                    {
-                        _inputStream = new MediaFoundationReader(path);
-                    }
-                    catch
-                    {
-                        // If both fail, rethrow original
-                        throw;
-                    }
+                    // Fallback or error
+                     MessageBox.Show($"Error loading audio codec: {ex.Message}");
+                     return;
                 }
 
-                ISampleProvider finalProvider;
-
-                if (_inputStream is AudioFileReader afr)
-                {
-                    finalProvider = afr;
-                }
-                else
-                {
-                    finalProvider = _inputStream.ToSampleProvider();
-                }
+                // Chain: Source -> Metering -> Mixer -> Output
+                var sampleSource = _inputStream.ToSampleSource();
                 
-                // NEW ORDER: File -> METER -> MIXER -> Resampler -> Output
-                
-                // 1. Metering (captures all tracks before mixing)
-                _meteringProvider = new VeriflowMeteringProvider(finalProvider);
-
-                // 2. Mixer (Downmix/Mute/Solo logic)
+                _meteringProvider = new VeriflowMeteringProvider(sampleSource);
                 _mixer = new MultiChannelAudioMixer(_meteringProvider); 
+                
+                // Wasapi Shared Mode handles resampling usually
+                var finalSource = _mixer.ToWaveSource();
 
-                ISampleProvider outProvider = _mixer;
-
-                // 3. Resample to 48kHz if needed (Universal Compatibility)
-                if (outProvider.WaveFormat.SampleRate != 48000)
-                {
-                    try
-                    {
-                         outProvider = new WdlResamplingSampleProvider(outProvider, 48000);
-                    }
-                    catch
-                    {
-                        // Fallback
-                    }
-                }
-
-                _outputDevice = new WaveOutEvent();
-                _outputDevice.Init(outProvider);
-                _outputDevice.PlaybackStopped += OnPlaybackStopped;
+                _outputDevice = new WasapiOut();
+                _outputDevice.Initialize(finalSource);
+                _outputDevice.Stopped += OnPlaybackStopped;
 
                 FilePath = path;
                 FileName = System.IO.Path.GetFileName(path);
                 IsAudioLoaded = true;
 
-                TotalTimeDisplay = _inputStream.TotalTime.ToString(@"hh\:mm\:ss");
-                PlaybackMaximum = _inputStream.TotalTime.TotalSeconds;
+                TotalTimeDisplay = _inputStream.GetLength().ToString(@"hh\:mm\:ss");
+                PlaybackMaximum = _inputStream.GetLength().TotalSeconds;
 
                 // Metadata Extraction (BWF)
                 try
@@ -276,7 +242,7 @@ namespace Veriflow.Desktop.ViewModels
             RulerTicks.Clear();
             if (_inputStream == null) return;
 
-            var totalSeconds = _inputStream.TotalTime.TotalSeconds;
+            var totalSeconds = _inputStream.GetLength().TotalSeconds;
             if (totalSeconds <= 0) return;
 
             // Absolute Start (SamplesSinceMidnight / Rate)
@@ -315,13 +281,13 @@ namespace Veriflow.Desktop.ViewModels
                 if (width > 0)
                 {
                     double percent = position.X / width;
-                    double seekTime = percent * _inputStream.TotalTime.TotalSeconds;
+                    double seekTime = percent * _inputStream.GetLength().TotalSeconds;
                     
                     // Clamp
                     if (seekTime < 0) seekTime = 0;
-                    if (seekTime > _inputStream.TotalTime.TotalSeconds) seekTime = _inputStream.TotalTime.TotalSeconds;
+                    if (seekTime > _inputStream.GetLength().TotalSeconds) seekTime = _inputStream.GetLength().TotalSeconds;
 
-                    _inputStream.CurrentTime = TimeSpan.FromSeconds(seekTime);
+                    _inputStream.SetPosition(TimeSpan.FromSeconds(seekTime));
                     PlaybackPosition = seekTime;
                 }
             }
@@ -389,13 +355,16 @@ namespace Veriflow.Desktop.ViewModels
                 {
                     try
                     {
-                        using var reader = new AudioFileReader(path);
-                        int totalChannels = reader.WaveFormat.Channels;
+                        using var codec = CodecFactory.Instance.GetCodec(path);
+                        var source = codec.ToSampleSource();
+                        int totalChannels = source.WaveFormat.Channels;
                         
                         // Resolution: 500 points wide per track
                         int width = 500;
-                        long totalSamples = reader.Length / (reader.WaveFormat.BitsPerSample / 8); 
-                        long samplesPerChannel = totalSamples / totalChannels;
+                        
+                        // IAudioSource.Length is Bytes. SampleSource is 32-bit float (4 bytes).
+                        long totalSamplesAllChannels = source.Length / 4;
+                        long samplesPerChannel = totalSamplesAllChannels / totalChannels;
                         long samplesPerPoint = samplesPerChannel / width;
 
                         if (samplesPerPoint < 1) samplesPerPoint = 1;
@@ -404,12 +373,13 @@ namespace Veriflow.Desktop.ViewModels
                         var maxBuffers = new float[totalChannels][]; // Stores peaks
                         for(int c=0; c<totalChannels; c++) maxBuffers[c] = new float[width];
 
+                        // Buffer: Read enough samples for 1 pixel column
                         float[] buffer = new float[samplesPerPoint * totalChannels];
                         int pointIndex = 0;
 
                         while (pointIndex < width)
                         {
-                            int read = reader.Read(buffer, 0, buffer.Length);
+                            int read = source.Read(buffer, 0, buffer.Length);
                             if (read == 0) break;
 
                             // Process this chunk

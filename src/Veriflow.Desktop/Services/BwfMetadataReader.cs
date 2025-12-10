@@ -1,6 +1,6 @@
-using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
 using Veriflow.Desktop.Models;
@@ -9,11 +9,6 @@ namespace Veriflow.Desktop.Services
 {
     public class BwfMetadataReader
     {
-        // Removed broken legacy methods. Use ReadMetadataFromStream.
-        
-        // Revised approach: Open Stream manually to parse chunks.
-        // NAudio's WaveFileReader populates ExtraChunks with positions.
-        
         public AudioMetadata ReadMetadataFromStream(string filePath)
         {
             var metadata = new AudioMetadata
@@ -23,22 +18,80 @@ namespace Veriflow.Desktop.Services
 
             try
             {
-                using var reader = new WaveFileReader(filePath);
-                metadata.Format = $"{reader.WaveFormat.SampleRate}Hz / {reader.WaveFormat.BitsPerSample}bit";
-                metadata.Duration = reader.TotalTime.ToString(@"hh\:mm\:ss");
-                metadata.ChannelCount = reader.WaveFormat.Channels;
-
-                foreach (var chunk in reader.ExtraChunks)
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var br = new BinaryReader(fs))
                 {
-                    if (chunk.IdentifierAsString.ToLower() == "bext")
+                    // RIFF Header
+                    if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "RIFF") return metadata;
+                    br.ReadInt32(); // File Size
+                    if (Encoding.ASCII.GetString(br.ReadBytes(4)) != "WAVE") return metadata;
+
+                    int sampleRate = 0;
+                    int bytesPerSec = 0;
+                    int channels = 0;
+                    int bitsPerSample = 0;
+                    long dataSize = 0;
+
+                    // Chunk Loop
+                    while (fs.Position < fs.Length - 8) // Ensure header exists
                     {
-                        var data = GetChunkData(filePath, chunk.StreamPosition, chunk.Length);
-                        ParseBextBytes(data, metadata, reader.WaveFormat.SampleRate);
-                    }
-                    else if (chunk.IdentifierAsString.ToLower() == "ixml")
-                    {
-                        var data = GetChunkData(filePath, chunk.StreamPosition, chunk.Length);
-                        ParseIXmlBytes(data, metadata);
+                        var chunkIdBytes = br.ReadBytes(4);
+                        if (chunkIdBytes.Length < 4) break;
+                        string chunkId = Encoding.ASCII.GetString(chunkIdBytes);
+                        
+                        int chunkSize = br.ReadInt32();
+                        if (chunkSize < 0) break; // Invalid
+
+                        long chunkStart = fs.Position;
+
+                        // Parse Chunks
+                        if (chunkId.Trim().ToLower() == "fmt") // "fmt "
+                        {
+                            // Basic WAV format
+                            short audioFormat = br.ReadInt16(); // 1 = PCM, 3 = Float, 65534 = Ext
+                            channels = br.ReadInt16();
+                            sampleRate = br.ReadInt32();
+                            bytesPerSec = br.ReadInt32();
+                            short blockAlign = br.ReadInt16();
+                            bitsPerSample = br.ReadInt16();
+                            
+                            metadata.Format = $"{sampleRate}Hz / {bitsPerSample}bit";
+                            metadata.ChannelCount = channels;
+                        }
+                        else if (chunkId.Trim().ToLower() == "data")
+                        {
+                            dataSize = chunkSize;
+                            // Estimate duration if we have format
+                            if (bytesPerSec > 0)
+                            {
+                                double seconds = (double)dataSize / bytesPerSec;
+                                metadata.Duration = TimeSpan.FromSeconds(seconds).ToString(@"hh\:mm\:ss");
+                            }
+                        }
+                        else if (chunkId.ToLower() == "bext")
+                        {
+                            var data = br.ReadBytes(chunkSize);
+                            ParseBextBytes(data, metadata, sampleRate);
+                        }
+                        else if (chunkId.ToLower() == "ixml")
+                        {
+                            var data = br.ReadBytes(chunkSize);
+                            ParseIXmlBytes(data, metadata);
+                        }
+                        else
+                        {
+                            // Skip unknown
+                            // fs.Seek(chunkSize, SeekOrigin.Current) might be unsafe if buffer read already advances? 
+                            // No, ReadBytes advances.
+                            // But we only ReadBytes for bext/ixml.
+                            // For others, we assume we haven't read content yet.
+                        }
+
+                        // Align to 2 bytes
+                        if (chunkSize % 2 != 0) chunkSize++;
+
+                        // Seek to next chunk exactly
+                        fs.Position = chunkStart + chunkSize;
                     }
                 }
             }
@@ -46,36 +99,11 @@ namespace Veriflow.Desktop.Services
             return metadata;
         }
 
-        private byte[] GetChunkData(string path, long position, int length)
-        {
-            using var fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
-            fs.Position = position;
-            byte[] buffer = new byte[length];
-            fs.Read(buffer, 0, length);
-            return buffer;
-        }
-
         private void ParseBextBytes(byte[] data, AudioMetadata metadata, int sampleRate)
         {
-            // BEXT Structure (EBU Tech 3285)
-            // Description: 256 bytes (ASCII)
-            // Originator: 32 bytes
-            // OriginatorRef: 32 bytes
-            // OriginationDate: 10 bytes (YYYY-MM-DD)
-            // OriginationTime: 8 bytes (HH:MM:SS)
-            // TimeReferenceLow: 4 bytes (uint) -> Samples since midnight
-            // TimeReferenceHigh: 4 bytes (uint)
-            // Version: 2 bytes
-            // UMID: 64 bytes
-            // ...
-            
             if (data.Length < 256 + 32 + 32 + 10 + 8 + 8) return;
 
-            metadata.Scene = GetString(data, 0, 256).Trim(); // Often Description holds Scene/Take in notes, but iXML is better. 
-            // NOTE: Description is generic.
-            
-            // Standard approach: Description often used for notes.
-            // Originator often holds Recorder Name.
+            metadata.Scene = GetString(data, 0, 256).Trim(); 
             metadata.Originator = GetString(data, 256, 32).Trim();
             metadata.CreationDate = GetString(data, 256 + 32 + 32, 10) + " " + GetString(data, 256 + 32 + 32 + 10, 8);
 
@@ -97,7 +125,6 @@ namespace Veriflow.Desktop.Services
                 var doc = new XmlDocument();
                 doc.LoadXml(xmlString);
 
-                // Project/Tape extraction
                 var projectNode = doc.SelectSingleNode("//PROJECT");
                 var tapeNode = doc.SelectSingleNode("//TAPE");
                 var sceneNode = doc.SelectSingleNode("//SCENE");
@@ -107,12 +134,10 @@ namespace Veriflow.Desktop.Services
                 if (takeNode != null) metadata.Take = takeNode.InnerText;
                 if (tapeNode != null) metadata.Tape = tapeNode.InnerText;
 
-                // Track Names
                 var trackNodes = doc.SelectNodes("//TRACK_LIST/TRACK");
                 if (trackNodes != null)
                 {
                     metadata.TrackNames.Clear();
-                    // Sort by channel index just in case
                     var tracks = new SortedDictionary<int, string>();
                     
                     foreach (XmlNode node in trackNodes)
@@ -127,7 +152,6 @@ namespace Veriflow.Desktop.Services
                          }
                     }
 
-                    // Metadata might have gaps, but let's just populate list
                     foreach(var kvp in tracks)
                     {
                         metadata.TrackNames.Add(kvp.Value);

@@ -1,3 +1,5 @@
+using CSCore;
+using CSCore.Codecs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -165,11 +167,11 @@ namespace Veriflow.Desktop.ViewModels
                 // Try to read metadata
                 try
                 {
-                    using (var reader = new NAudio.Wave.AudioFileReader(path))
+                    using (var source = CSCore.Codecs.CodecFactory.Instance.GetCodec(path))
                     {
-                        var time = reader.TotalTime;
+                        var time = source.GetLength();
                         item.DurationString = time.ToString(@"mm\:ss");
-                        item.AudioInfo = $"{reader.WaveFormat.SampleRate}Hz | {reader.WaveFormat.BitsPerSample}-bit";
+                        item.AudioInfo = $"{source.WaveFormat.SampleRate}Hz | {source.WaveFormat.BitsPerSample}-bit";
                     }
                 }
                 catch

@@ -1,5 +1,7 @@
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+using CSCore;
+using CSCore.Codecs;
+using CSCore.SoundOut;
+using CSCore.Streams;
 using System;
 using System.IO;
 
@@ -7,9 +9,8 @@ namespace Veriflow.Desktop.Services
 {
     public class AudioPreviewService : IDisposable
     {
-        private IWavePlayer? _outputDevice;
-        private AudioFileReader? _audioFile;
-
+        private ISoundOut? _outputDevice;
+        private IWaveSource? _audioSource;
 
         public void Play(string filePath)
         {
@@ -19,28 +20,32 @@ namespace Veriflow.Desktop.Services
             {
                 if (!File.Exists(filePath)) return;
 
-                _audioFile = new AudioFileReader(filePath);
-                
-                ISampleProvider sampleProvider = _audioFile;
+                // 1. Get Source (Supports WAV, FLAC, RF64, MP3 via MediaFoundation/Codecs)
+                _audioSource = CodecFactory.Instance.GetCodec(filePath);
 
-                // Auto Downmix to Mono for Preview (Listen on both speakers)
-                if (_audioFile.WaveFormat.Channels > 1)
+                // 2. Mono Downmix Logic (Preview on both speakers)
+                if (_audioSource.WaveFormat.Channels > 1)
                 {
-                    // Mix all channels to mono 
-                    // (Simple average helps avoiding clipping but reduces volume, 
-                    // but for preview it's safer to just take L+R/2 or similar)
-                    var updated = new StereoToMonoSampleProvider(_audioFile) { LeftVolume = 1.0f, RightVolume = 1.0f };
-                    sampleProvider = updated;
+                    // Convert to SampleSource to manipulate data
+                    var sampleSource = _audioSource.ToSampleSource();
+                    
+                    // Wrap in our custom Mono Mixer
+                    var monoSource = new MonoSampleDownmixer(sampleSource);
+                    
+                    // Convert back to WaveSource for SoundOut (keeping sample rate, but Mono)
+                    // Actually, SoundOut handles Mono fine (plays on both usually) or we replicate to Stereo.
+                    // For "Preview on both speakers" from a Mono source, Wasapi typically maps Mono to L+R.
+                    // So simply making it 1 Channel is enough.
+                    _audioSource = monoSource.ToWaveSource();
                 }
 
-                _outputDevice = new WaveOutEvent();
-                _outputDevice.Init(sampleProvider);
+                // 3. Init Output (WasapiOut for Pro/Low Latency)
+                _outputDevice = new WasapiOut();
+                _outputDevice.Initialize(_audioSource);
                 _outputDevice.Play();
-
             }
             catch (Exception ex)
             {
-                // In a real app, log this
                 System.Diagnostics.Debug.WriteLine($"Error playing preview: {ex.Message}");
                 Stop();
             }
@@ -55,16 +60,69 @@ namespace Veriflow.Desktop.Services
                 _outputDevice = null;
             }
 
-            if (_audioFile != null)
+            if (_audioSource != null)
             {
-                _audioFile.Dispose();
-                _audioFile = null;
+                _audioSource.Dispose();
+                _audioSource = null;
             }
         }
 
         public void Dispose()
         {
             Stop();
+        }
+
+        // Simple Downmixer: Takes [L, R, ...] and outputs [Avg]
+        private class MonoSampleDownmixer : ISampleSource
+        {
+            private readonly ISampleSource _source;
+            public WaveFormat WaveFormat { get; }
+
+            public bool CanSeek => _source.CanSeek;
+            public long Position
+            {
+                get => _source.Position / _source.WaveFormat.Channels;
+                set => _source.Position = value * _source.WaveFormat.Channels;
+            }
+            public long Length => _source.Length / _source.WaveFormat.Channels;
+
+            public MonoSampleDownmixer(ISampleSource source)
+            {
+                _source = source;
+                if (source.WaveFormat.Channels == 1)
+                    throw new ArgumentException("Source is already Mono");
+
+                // Output is Mono, IEEE Float (32-bit)
+                WaveFormat = new WaveFormat(source.WaveFormat.SampleRate, 32, 1, AudioEncoding.IeeeFloat);
+            }
+
+            public int Read(float[] buffer, int offset, int count)
+            {
+                int inputChannels = _source.WaveFormat.Channels;
+                int sourceSamplesToRead = count * inputChannels;
+                float[] sourceBuffer = new float[sourceSamplesToRead];
+
+                int read = _source.Read(sourceBuffer, 0, sourceSamplesToRead);
+
+                int outputSamples = read / inputChannels;
+
+                for (int i = 0; i < outputSamples; i++)
+                {
+                    float sum = 0;
+                    for (int ch = 0; ch < inputChannels; ch++)
+                    {
+                        sum += sourceBuffer[i * inputChannels + ch];
+                    }
+                    buffer[offset + i] = sum / inputChannels;
+                }
+
+                return outputSamples;
+            }
+
+            public void Dispose()
+            {
+                (_source as IDisposable)?.Dispose();
+            }
         }
     }
 }
