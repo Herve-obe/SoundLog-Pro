@@ -35,19 +35,29 @@ namespace Veriflow.Desktop.ViewModels
             RefreshDrives();
 
             // Setup Drive Polling (Hot-Plug Support)
-            _driveWatcher = new System.Timers.Timer(2000); // Check every 2 seconds
+            _driveWatcher = new System.Timers.Timer(3000); // Check every 3 seconds to be less aggressive
             _driveWatcher.Elapsed += (s, e) => 
             {
                 // Dispatch to UI thread if drives changed
                 try 
                 {
+                    // Note: This check is also potentially dangerous if a drive hangs, but we keep it simple for now.
+                    // We catch everything just in case.
                     var currentDrives = DriveInfo.GetDrives().Where(d => d.IsReady).Select(d => d.Name).OrderBy(n => n).ToList();
-                    var loadedDrives = Drives.Select(d => d.Path).OrderBy(n => n).ToList();
                     
-                    if (!currentDrives.SequenceEqual(loadedDrives))
+                    // Accessing Drives here needs thread safety consideration if not on UI thread, 
+                    // but for a simple property read it's usually okay. Better to dispatch the check if we were strict.
+                    // However, to keep it simple and safe, we will just ALWAYS redispatch the verification or just rely on manual refresh if this is problematic.
+                    // Let's do a safe dispatch to check.
+                    
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => 
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(RefreshDrives);
-                    }
+                         var loadedDrives = Drives.Select(d => d.Path).OrderBy(n => n).ToList();
+                         if (!currentDrives.SequenceEqual(loadedDrives))
+                         {
+                             RefreshDrives();
+                         }
+                    });
                 }
                 catch {}
             };
@@ -56,19 +66,51 @@ namespace Veriflow.Desktop.ViewModels
 
         private void RefreshDrives()
         {
+            // We do NOT clear purely blindly to avoid flashing, but for safety against errors, 
+            // let's rebuild a temporary list first.
+            var safeDriveList = new List<DriveViewModel>();
+
             try
             {
-                var currentDrives = DriveInfo.GetDrives().Where(d => d.IsReady).ToList();
-
-                // Simple Strategy: Rebuild list to avoid complex sync logic for now, or merge.
-                // Rebuilding is safer for clearing disconnected drives.
-                Drives.Clear();
-                foreach (var drive in currentDrives)
+                var drives = DriveInfo.GetDrives();
+                foreach (var drive in drives)
                 {
-                    Drives.Add(new DriveViewModel(drive, LoadDirectory));
+                    try 
+                    {
+                        if (drive.IsReady)
+                        {
+                            safeDriveList.Add(new DriveViewModel(drive, LoadDirectory));
+                        }
+                    }
+                    catch 
+                    { 
+                        // Skip individual failing drives (e.g. unformatted partitions, network drives disconnected)
+                    }
                 }
             }
-            catch { }
+            catch 
+            {
+               // This would catch a critical failure in GetDrives() itself
+            }
+
+            // Now update the ObservableCollection on the UI thread
+            if (System.Windows.Application.Current.Dispatcher.CheckAccess())
+            {
+                UpdateDrivesCollection(safeDriveList);
+            }
+            else
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() => UpdateDrivesCollection(safeDriveList));
+            }
+        }
+
+        private void UpdateDrivesCollection(List<DriveViewModel> newDrives)
+        {
+            Drives.Clear();
+            foreach (var d in newDrives)
+            {
+                Drives.Add(d);
+            }
         }
 
         private void LoadDirectory(string path)
@@ -145,7 +187,23 @@ namespace Veriflow.Desktop.ViewModels
 
         public DriveViewModel(DriveInfo drive, Action<string> onSelect)
         {
-            Name = $"{drive.VolumeLabel} ({drive.Name})";
+            // SAFE LABEL ACCESS
+            string label = "";
+            try 
+            { 
+                label = drive.VolumeLabel; 
+            } 
+            catch { } // Ignore failure to get label
+
+            if (string.IsNullOrWhiteSpace(label))
+            {
+                Name = drive.Name; // Just "C:\"
+            }
+            else
+            {
+                Name = $"{label} ({drive.Name})";
+            }
+
             Path = drive.Name;
             _onSelect = onSelect;
             
@@ -161,6 +219,7 @@ namespace Veriflow.Desktop.ViewModels
             {
                 foreach (var dir in new DirectoryInfo(Path).GetDirectories())
                 {
+                    // Basic hidden check
                     if ((dir.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                     {
                          Folders.Add(new FolderViewModel(dir.Name, dir.FullName, _onSelect));

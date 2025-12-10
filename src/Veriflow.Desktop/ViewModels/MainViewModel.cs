@@ -26,7 +26,11 @@ namespace Veriflow.Desktop.ViewModels
         public MainViewModel()
         {
             ShowPlayerCommand = new RelayCommand(() => CurrentView = _playerViewModel);
-            ShowMediaCommand = new RelayCommand(() => CurrentView = _mediaViewModel);
+            ShowMediaCommand = new RelayCommand(() => 
+            {
+                Console.WriteLine(">>> DEBUG NAV: Attempting to set CurrentPage to MediaViewModel <<<");
+                CurrentView = _mediaViewModel;
+            });
             ShowOffloadCommand = new RelayCommand(() => CurrentView = _offloadViewModel);
             ShowReportsCommand = new RelayCommand(() => CurrentView = _reportsView);
 

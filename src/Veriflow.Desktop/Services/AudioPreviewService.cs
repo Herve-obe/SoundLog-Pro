@@ -9,7 +9,7 @@ namespace Veriflow.Desktop.Services
     {
         private IWavePlayer? _outputDevice;
         private AudioFileReader? _audioFile;
-        private bool _isPlaying;
+
 
         public void Play(string filePath)
         {
@@ -32,7 +32,7 @@ namespace Veriflow.Desktop.Services
                 _outputDevice = new WaveOutEvent();
                 _outputDevice.Init(sampleProvider);
                 _outputDevice.Play();
-                _isPlaying = true;
+
             }
             catch (Exception ex)
             {
@@ -56,7 +56,6 @@ namespace Veriflow.Desktop.Services
                 _audioFile.Dispose();
                 _audioFile = null;
             }
-            _isPlaying = false;
         }
 
         public void Dispose()
