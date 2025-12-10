@@ -9,7 +9,7 @@
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         TextElement.FontFamily="Segoe UI"
-        Background="{DynamicResource Brush.Background}">
+        Background="{Binding ApplicationBackground}">
 
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -79,7 +79,8 @@
 
                 <!-- Tools: A/V Switch -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="20,0,0,0">
-                    <RadioButton Content="AUDIO" GroupName="AV" IsChecked="True" Style="{StaticResource SegmentedToggleStyle}">
+                    <RadioButton Content="AUDIO" GroupName="AV" IsChecked="True" Style="{StaticResource SegmentedToggleStyle}"
+                                 Command="{Binding SwitchToAudioCommand}">
                         <RadioButton.Tag>
                             <!-- Waveform Icon -->
                             <Path Data="M5,9V15H7V9H5M9,17H11V7H9V17M13,22H15V2H13V22M17,17H19V7H17V17M21,14H23V10H21V14Z" 
@@ -87,7 +88,8 @@
                                   Height="14" Width="14" Stretch="Uniform"/>
                         </RadioButton.Tag>
                     </RadioButton>
-                    <RadioButton Content="VIDEO" GroupName="AV" Style="{StaticResource SegmentedToggleStyle}" Margin="1,0,0,0">
+                    <RadioButton Content="VIDEO" GroupName="AV" Style="{StaticResource SegmentedToggleStyle}" Margin="1,0,0,0"
+                                 Command="{Binding SwitchToVideoCommand}">
                          <RadioButton.Tag>
                             <!-- Clapboard Icon -->
                             <Path Data="M18,4L20,8H17L15,4H13L15,8H12L10,4H8L10,8H5L3,4H1V18A2,2 0 0,0 3,20H21A2,2 0 0,0 23,18V4H18Z" 

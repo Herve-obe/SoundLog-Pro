@@ -16,6 +16,9 @@ public partial class App : Application
 
         try
         {
+            // Initialize Video Engine (LibVLC) - Single instance
+            Services.VideoEngineService.Instance.Initialize();
+
             var mainWindow = new MainWindow();
             mainWindow.Show();
         }

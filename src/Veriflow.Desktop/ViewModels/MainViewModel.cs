@@ -12,6 +12,9 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         private object? _currentView;
 
+        [ObservableProperty]
+        private string _applicationBackground = "#121212";
+
         // ViewModels
         private readonly OffloadViewModel _offloadViewModel = new();
         private readonly PlayerViewModel _playerViewModel = new(); 
@@ -26,6 +29,8 @@ namespace Veriflow.Desktop.ViewModels
         public ICommand ShowSyncCommand { get; }
         public ICommand ShowOffloadCommand { get; }
         public ICommand ShowReportsCommand { get; }
+        public ICommand SwitchToAudioCommand { get; }
+        public ICommand SwitchToVideoCommand { get; }
 
         public MainViewModel()
         {
@@ -39,6 +44,9 @@ namespace Veriflow.Desktop.ViewModels
             ShowSyncCommand = new RelayCommand(() => CurrentView = _syncViewModel);
             ShowOffloadCommand = new RelayCommand(() => CurrentView = _offloadViewModel);
             ShowReportsCommand = new RelayCommand(() => CurrentView = _reportsView);
+
+            SwitchToAudioCommand = new RelayCommand(SwitchToAudio);
+            SwitchToVideoCommand = new RelayCommand(SwitchToVideo);
 
             // Default to Media view (as requested order suggests, or Player? User said Media is "before" Player)
             // Let's stick to Player as default for now or switch if requested. 
@@ -124,6 +132,16 @@ namespace Veriflow.Desktop.ViewModels
         {
             get => object.Equals(CurrentView, _reportsView);
             set { if (value) CurrentView = _reportsView; }
+        }
+
+        private void SwitchToAudio()
+        {
+            ApplicationBackground = "#121212";
+        }
+
+        private void SwitchToVideo()
+        {
+            ApplicationBackground = "#2D2D2D";
         }
     }
 }
