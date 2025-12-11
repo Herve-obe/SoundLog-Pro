@@ -214,12 +214,7 @@ namespace Veriflow.Desktop.ViewModels
                 TotalTimeDisplay = _inputStream.GetLength().ToString(@"hh\:mm\:ss");
                 PlaybackMaximum = _inputStream.GetLength().TotalSeconds;
 
-                try
-                {
-                    var metaReader = new BwfMetadataReader();
-                    CurrentMetadata = metaReader.ReadMetadataFromStream(path);
-                }
-                catch { /* Ignore metadata errors */ }
+                await LoadMetadataWithFFprobe(path);
 
                 InitializeTracks(CurrentMetadata.ChannelCount > 0 ? CurrentMetadata.ChannelCount : _inputStream.WaveFormat.Channels);
                 GenerateWaveforms(path);
@@ -526,6 +521,20 @@ namespace Veriflow.Desktop.ViewModels
             if (CanSendFileToTranscode())
             {
                 RequestTranscode?.Invoke(new[] { FilePath });
+            }
+        }
+        private async Task LoadMetadataWithFFprobe(string path)
+        {
+            try
+            {
+                var metaProvider = new FFprobeMetadataProvider();
+                CurrentMetadata = await metaProvider.GetMetadataAsync(path);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Metadata Error: {ex.Message}");
+                // Fallback or leave empty
+                CurrentMetadata = new AudioMetadata { Filename = System.IO.Path.GetFileName(path) };
             }
         }
     }

@@ -7,6 +7,7 @@ namespace Veriflow.Desktop.Views
         public AudioPlayerView()
         {
             InitializeComponent();
+            Loaded += (s, e) => Focus();
         }
     }
 }
