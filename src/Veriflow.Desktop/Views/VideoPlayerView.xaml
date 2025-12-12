@@ -144,7 +144,7 @@
                                 <!-- Blue RepeatButton Template for Filled Track -->
                                 <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
                                     <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                    <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+                                    <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
                                     <Setter Property="Focusable" Value="False"/>
                                     <Setter Property="IsTabStop" Value="False"/>
                                     <Setter Property="Template">
@@ -229,7 +229,7 @@
                     <StackPanel Orientation="Horizontal">
                         <!-- Video Icon -->
                         <Path Data="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z"
-                              Fill="{StaticResource Brush.Accent}"
+                              Fill="{DynamicResource Brush.Accent}"
                               Height="20" Width="20" Stretch="Uniform"
                               VerticalAlignment="Center" Margin="0,0,10,0"/>
                               
@@ -239,7 +239,7 @@
                     <TextBlock Text="{Binding FileName, TargetNullValue='No file loaded'}" FontSize="{StaticResource Font.Size.Header}" FontWeight="Bold" Foreground="#DDDDDD" Margin="0,2"/>
                     
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <TextBlock Text="{Binding CurrentTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Foreground="{StaticResource Brush.Accent}"/>
+                            <TextBlock Text="{Binding CurrentTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Foreground="{DynamicResource Brush.Accent}"/>
                             <TextBlock Text=" / " FontSize="{StaticResource Font.Size.Large}" Opacity="0.5"/>
                             <TextBlock Text="{Binding TotalTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Opacity="0.5"/>
                     </StackPanel>

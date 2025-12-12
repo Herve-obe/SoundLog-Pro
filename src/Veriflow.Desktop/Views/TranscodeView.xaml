@@ -212,7 +212,7 @@
             <!-- HEADER -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                  <Path Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"
-                       Fill="{StaticResource Brush.Accent}"
+                       Fill="{DynamicResource Brush.Accent}"
                        Height="20" Width="20" Stretch="Uniform"
                        VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBlock Text="TRANSCODE" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
@@ -359,31 +359,31 @@
                                     <DataTrigger Binding="{Binding}" Value="--- STANDARD (EXCHANGE) ---">
                                         <Setter Property="IsEnabled" Value="False"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
                                         <Setter Property="FontSize" Value="13"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding}" Value="--- BROADCAST &amp; LIVE ---">
                                         <Setter Property="IsEnabled" Value="False"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
                                         <Setter Property="FontSize" Value="13"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding}" Value="--- POST-PRODUCTION ---">
                                         <Setter Property="IsEnabled" Value="False"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
                                         <Setter Property="FontSize" Value="13"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding}" Value="--- MODERN WEB ---">
                                         <Setter Property="IsEnabled" Value="False"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
                                         <Setter Property="FontSize" Value="13"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding}" Value="--- LEGACY &amp; ARCHIVE ---">
                                         <Setter Property="IsEnabled" Value="False"/>
                                         <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
                                         <Setter Property="FontSize" Value="13"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -526,8 +526,8 @@
 
                  <StackPanel Margin="0,20,0,0">
                      <!-- Progress Bar -->
-                     <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,10" FontWeight="Bold"/>
-                     <ProgressBar Value="{Binding TotalProgressValue}" Height="10" Background="#222" BorderThickness="0" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,20">
+                     <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,0,10" FontWeight="Bold"/>
+                     <ProgressBar Value="{Binding TotalProgressValue}" Height="10" Background="#222" BorderThickness="0" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,0,20">
                          <ProgressBar.Style>
                              <Style TargetType="ProgressBar">
                                  <Style.Triggers>

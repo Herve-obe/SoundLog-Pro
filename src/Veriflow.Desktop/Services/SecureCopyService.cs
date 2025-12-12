@@ -65,125 +65,142 @@ namespace Veriflow.Desktop.Services
 
             try
             {
-                sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true); // Sequential scan hint?
-                
-                // Open Dest Streams
-                foreach (var idx in activeDestinations)
+                try
                 {
-                    try
-                    {
-                        destStreams[idx] = new FileStream(destPaths[idx], FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        results[idx].Note = $"Write Open Failed: {ex.Message}";
-                        results[idx].Success = false;
-                        destStreams.Remove(idx); // Key check handled by iteration logic
-                    }
-                }
-
-                // If no dests managed to open, abort
-                if (destStreams.Count == 0) throw new Exception("No destination streams could be opened.");
-
-                int read;
-                while ((read = await sourceStream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    // 1. Hash Source
-                    xxHashSource.Append(buffer.AsSpan(0, read));
-
-                    // 2. Write to ALL active streams parallel-ish
-                    var writeTasks = destStreams.Select(async kvp => 
+                    sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true); // Sequential scan hint?
+                    
+                    // Open Dest Streams
+                    foreach (var idx in activeDestinations)
                     {
                         try
                         {
-                            await kvp.Value.WriteAsync(buffer, 0, read, ct);
+                            destStreams[idx] = new FileStream(destPaths[idx], FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, true);
                         }
                         catch (Exception ex)
                         {
-                            // If write fails, mark invalid and track to remove later? 
-                            // Cannot modify dictionary while iterating.
-                            // We catch here, but we need to mark this stream as dead.
-                             return (kvp.Key, ex);
-                        }
-                        return (kvp.Key, (Exception?)null); // Success
-                    });
-
-                    var outcomes = await Task.WhenAll(writeTasks);
-
-                    // Handle Write Failures mid-stream
-                    foreach (var (key, error) in outcomes)
-                    {
-                        if (error != null)
-                        {
-                            // Cleanup failed stream
-                             if (destStreams.ContainsKey(key))
-                             {
-                                 try { destStreams[key].Dispose(); } catch { }
-                                 destStreams.Remove(key);
-                                 results[key].Note = $"Write Failed: {error.Message}";
-                                 results[key].Success = false;
-                             }
+                            results[idx].Note = $"Write Open Failed: {ex.Message}";
+                            results[idx].Success = false;
+                            destStreams.Remove(idx); // Key check handled by iteration logic
                         }
                     }
 
-                    if (destStreams.Count == 0) break; // All died
+                    // If no dests managed to open, abort
+                    if (destStreams.Count == 0) throw new Exception("No destination streams could be opened.");
 
-                    totalRead += read;
-                    ReportProgress(progress, totalRead, fileLength, startTime, "Copying");
+                    int read;
+                    while ((read = await sourceStream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
+                    {
+                        ct.ThrowIfCancellationRequested();
+
+                        // 1. Hash Source
+                        xxHashSource.Append(buffer.AsSpan(0, read));
+
+                        // 2. Write to ALL active streams parallel-ish
+                        var writeTasks = destStreams.Select(async kvp => 
+                        {
+                            try
+                            {
+                                await kvp.Value.WriteAsync(buffer, 0, read, ct);
+                            }
+                            catch (Exception ex)
+                            {
+                                // If write fails, mark invalid and track to remove later? 
+                                // Cannot modify dictionary while iterating.
+                                // We catch here, but we need to mark this stream as dead.
+                                 return (kvp.Key, ex);
+                            }
+                            return (kvp.Key, (Exception?)null); // Success
+                        });
+
+                        var outcomes = await Task.WhenAll(writeTasks);
+
+                        // Handle Write Failures mid-stream
+                        foreach (var (key, error) in outcomes)
+                        {
+                            if (error != null)
+                            {
+                                // Cleanup failed stream
+                                 if (destStreams.ContainsKey(key))
+                                 {
+                                     try { destStreams[key].Dispose(); } catch { }
+                                     destStreams.Remove(key);
+                                     results[key].Note = $"Write Failed: {error.Message}";
+                                     results[key].Success = false;
+                                 }
+                            }
+                        }
+
+                        if (destStreams.Count == 0) break; // All died
+
+                        totalRead += read;
+                        ReportProgress(progress, totalRead, fileLength, startTime, "Copying");
+                    }
+                    
+                    var finalSourceHash = BitConverter.ToString(xxHashSource.GetCurrentHash()).Replace("-", "").ToLowerInvariant();
+                    foreach(var r in results) r.SourceHash = finalSourceHash;
+
                 }
-                
-                var finalSourceHash = BitConverter.ToString(xxHashSource.GetCurrentHash()).Replace("-", "").ToLowerInvariant();
-                foreach(var r in results) r.SourceHash = finalSourceHash;
+                finally
+                {
+                    sourceStream?.Dispose();
+                    foreach (var s in destStreams.Values) try { s.Dispose(); } catch { }
+                }
 
+                // --- PHASE 2: VERIFY (Parallel Read-Back) ---
+                // Only verify successfully written dests
+                var verifyTasks = activeDestinations
+                    .Where(i => destStreams.ContainsKey(i)) // Only those that survived the write loop
+                    .Select(async i => 
+                    {
+                        try
+                        {
+                            var hash = await Task.Run(async () => await CalculateFileHashAsync(destPaths[i], ct));
+                            results[i].DestHash = hash;
+                            
+                            if (results[i].SourceHash == hash)
+                            {
+                                results[i].Success = true;
+                                results[i].Note = "Verified (xxHash64)";
+                            }
+                            else
+                            {
+                                results[i].Success = false;
+                                results[i].Note = "CHECKSUM MISMATCH";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            results[i].Success = false;
+                            results[i].Note = $"Verify Failed: {ex.Message}";
+                            if (ex is OperationCanceledException) throw; // Rethrow to trigger outer cleanup
+                        }
+                        // Calc speed based on total time (Copy + Verify) or just Copy? Use Copy time usually.
+                        results[i].AverageSpeed = (fileLength / 1024.0 / 1024.0) / (DateTime.UtcNow - startTime).TotalSeconds;
+                    });
+
+                await Task.WhenAll(verifyTasks);
+                return results;
+
+            }
+            catch (OperationCanceledException)
+            {
+                // CRITICAL: Cleanup files created in this session if execution is cancelled.
+                foreach (var idx in activeDestinations)
+                {
+                    try 
+                    { 
+                        if (File.Exists(destPaths[idx])) File.Delete(destPaths[idx]); 
+                    } 
+                    catch { }
+                }
+                throw;
             }
             catch (Exception ex)
             {
-                foreach(var idx in activeDestinations) 
+                 foreach(var idx in activeDestinations) 
                     if (results[idx].Note == "") results[idx].Note = $"Copy Error: {ex.Message}";
-                if (ex is OperationCanceledException) throw;
+                 return results; // Return failures
             }
-            finally
-            {
-                sourceStream?.Dispose();
-                foreach (var s in destStreams.Values) try { s.Dispose(); } catch { }
-            }
-
-            // --- PHASE 2: VERIFY (Parallel Read-Back) ---
-            // Only verify successfully written dests
-            var verifyTasks = activeDestinations
-                .Where(i => destStreams.ContainsKey(i)) // Only those that survived the write loop
-                .Select(async i => 
-                {
-                    try
-                    {
-                        var hash = await Task.Run(async () => await CalculateFileHashAsync(destPaths[i], ct));
-                        results[i].DestHash = hash;
-                        
-                        if (results[i].SourceHash == hash)
-                        {
-                            results[i].Success = true;
-                            results[i].Note = "Verified (xxHash64)";
-                        }
-                        else
-                        {
-                            results[i].Success = false;
-                            results[i].Note = "CHECKSUM MISMATCH";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        results[i].Success = false;
-                        results[i].Note = $"Verify Failed: {ex.Message}";
-                    }
-                    // Calc speed based on total time (Copy + Verify) or just Copy? Use Copy time usually.
-                    results[i].AverageSpeed = (fileLength / 1024.0 / 1024.0) / (DateTime.UtcNow - startTime).TotalSeconds;
-                });
-
-            await Task.WhenAll(verifyTasks);
-
-            return results;
         }
 
         private async Task<string> CalculateFileHashAsync(string path, CancellationToken ct)

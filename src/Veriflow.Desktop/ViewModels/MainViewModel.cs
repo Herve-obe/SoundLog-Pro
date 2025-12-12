@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Veriflow.Desktop.ViewModels
 {
@@ -20,7 +22,7 @@ namespace Veriflow.Desktop.ViewModels
         private string _applicationBackground = "#121212";
 
         [ObservableProperty]
-        private AppMode _currentAppMode = AppMode.Audio;
+        private AppMode _currentAppMode = AppMode.Video;
 
         [ObservableProperty]
         private PageType _currentPageType = PageType.Media;
@@ -58,7 +60,7 @@ namespace Veriflow.Desktop.ViewModels
             SwitchToVideoCommand = new RelayCommand(() => SetMode(AppMode.Video));
 
             // Default
-            UpdateCurrentView();
+            SetMode(AppMode.Video);
 
             // Navigation Wiring
             _mediaViewModel.RequestOpenInPlayer += async (path) =>
@@ -127,6 +129,30 @@ namespace Veriflow.Desktop.ViewModels
             try
             {
                 CurrentAppMode = mode;
+
+                // Dynamic Branding (Audio = Red, Video = Blue)
+                string accentHex, hoverHex, pressedHex;
+
+                if (mode == AppMode.Audio)
+                {
+                    accentHex = "#E64B3D";
+                    hoverHex = "#FF6E60";
+                    pressedHex = "#C03025";
+                }
+                else
+                {
+                    accentHex = "#1A4CB1";
+                    hoverHex = "#3565C8";
+                    pressedHex = "#123680";
+                }
+
+                if (Application.Current != null)
+                {
+                    Application.Current.Resources["Brush.Accent"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(accentHex));
+                    Application.Current.Resources["Brush.Accent.Hover"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hoverHex));
+                    Application.Current.Resources["Brush.Accent.Pressed"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(pressedHex));
+                }
+
                 _mediaViewModel.SetAppMode(mode);
                 UpdateCurrentView();
             }

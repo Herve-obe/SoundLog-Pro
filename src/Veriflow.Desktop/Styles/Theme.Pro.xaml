@@ -108,7 +108,7 @@
                             <Setter TargetName="border" Property="BorderBrush" Value="#666666"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Brush.Accent}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush.Accent}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -161,7 +161,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Foreground" Value="White"/>
@@ -226,8 +226,8 @@
                     <ControlTemplate.Triggers>
                         <!-- Enabled = Blue -->
                         <Trigger Property="IsEnabled" Value="True">
-                             <Setter TargetName="border" Property="Background" Value="{StaticResource Brush.Accent}"/>
-                             <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Brush.Accent}"/>
+                             <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush.Accent}"/>
                              <Setter Property="Foreground" Value="White"/>
                         </Trigger>
                         <!-- Disabled = Gray -->
@@ -242,10 +242,11 @@
                                 <Condition Property="IsEnabled" Value="True"/>
                                 <Condition Property="IsMouseOver" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="border" Property="Background" Value="#3565C8"/> <!-- Lighter Blue -->
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource Brush.Control.Hover}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="#555555"/>
                         </MultiTrigger>
                          <Trigger Property="IsPressed" Value="True">
-                             <Setter TargetName="border" Property="Background" Value="#123680"/> <!-- Darker Blue -->
+                             <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.Accent.Pressed}"/> <!-- Darker Blue -->
                          </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

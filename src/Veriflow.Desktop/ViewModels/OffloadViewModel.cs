@@ -132,8 +132,19 @@ namespace Veriflow.Desktop.ViewModels
             }
             catch (OperationCanceledException)
             {
-                Console.WriteLine("--- 4. CANCELLATION CAUGHT: Starting Rollback ---");
-                await PerformRollback();
+                Console.WriteLine("--- 4. CANCELLATION CAUGHT: User Aborted ---");
+                UpdateUI(() =>
+                {
+                    IsCancelling = false;
+                    IsBusy = false;
+                    ProgressValue = 0;
+                    LogText = "Cancelled.";
+                    TimeRemainingDisplay = "--:--";
+                    CurrentHashDisplay = "xxHash64: -";
+                    CurrentSpeedDisplay = "0 MB/s";
+                    
+                    MessageBox.Show("SECURE COPY annulée par l'utilisateur.\nAttention, suite à l'annulation du processus de copie, certains fichiers copiés sont peut-être partiels ou corrompus.", "Annulation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                });
             }
             catch (Exception ex)
             {
@@ -245,13 +256,15 @@ namespace Veriflow.Desktop.ViewModels
 
                 if (!string.IsNullOrEmpty(Destination1Path)) 
                 {
-                    destPaths.Add(Path.Combine(Destination1Path, relativePath));
+                    string fullDestPath = Path.Combine(Destination1Path, relativePath);
+                    destPaths.Add(fullDestPath);
                     mapIndexToSession[destPaths.Count - 1] = sessionResults1;
                 }
                 
                 if (!string.IsNullOrEmpty(Destination2Path))
                 {
-                    destPaths.Add(Path.Combine(Destination2Path, relativePath));
+                    string fullDestPath = Path.Combine(Destination2Path, relativePath);
+                    destPaths.Add(fullDestPath);
                     mapIndexToSession[destPaths.Count - 1] = sessionResults2;
                 }
 
@@ -355,50 +368,7 @@ namespace Veriflow.Desktop.ViewModels
             });
         }
 
-        private async Task PerformRollback()
-        {
-            Console.WriteLine("--- 5. ROLLBACK INITIATED: Deleting files... ---");
 
-            UpdateUI(() =>
-            {
-                LogText = "❌ Cancelling... Cleaning up files...";
-                TimeRemainingDisplay = "ROLLBACK";
-                CurrentSpeedDisplay = "";
-                CurrentHashDisplay = "Cleaning Up...";
-            });
-            
-            await Task.Run(() =>
-            {
-                foreach (var file in _copiedFiles)
-                {
-                    try { if (File.Exists(file)) File.Delete(file); } catch { }
-                }
-
-                for (int i = _createdDirectories.Count - 1; i >= 0; i--)
-                {
-                    var dir = _createdDirectories[i];
-                    try
-                    {
-                        if (Directory.Exists(dir) && !Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir);
-                    }
-                    catch { }
-                }
-            });
-
-            UpdateUI(() =>
-            {
-                IsCancelling = false;
-                IsBusy = false;
-                
-                ProgressValue = 0;
-                LogText = "Ready.";
-                TimeRemainingDisplay = "--:--";
-                CurrentHashDisplay = "xxHash64: -";
-                CurrentSpeedDisplay = "0 MB/s";
-                
-                MessageBox.Show("Copy cancelled. All copied files have been cleaned up.", "Cancellation Confirmed", MessageBoxButton.OK, MessageBoxImage.Information);
-            });
-        }
 
         private void ScanDirectoryRecursive(DirectoryInfo dir, List<FileInfo> fileList, int currentDepth, int maxDepth, CancellationToken ct)
         {
@@ -474,5 +444,7 @@ namespace Veriflow.Desktop.ViewModels
             };
             return (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.FolderName)) ? dialog.FolderName : null;
         }
+
+
     }
 }

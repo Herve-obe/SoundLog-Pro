@@ -20,7 +20,7 @@
         <!-- HEADER -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
              <Path Data="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.11,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.64L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.89,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z"
-                   Fill="{StaticResource Brush.Accent}"
+                   Fill="{DynamicResource Brush.Accent}"
                    Height="20" Width="20" Stretch="Uniform"
                    VerticalAlignment="Center" Margin="0,0,10,0"/>
             <TextBlock Text="SYNC" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
@@ -58,65 +58,19 @@
                     </Grid.ColumnDefinitions>
                     
                     <!-- Import Button: Square, Blue, No Icon -->
-                    <Button Grid.Column="0" Command="{Binding ImportVideoCommand}" Width="120" Height="26" Background="#1A4CB1" BorderThickness="1" BorderBrush="#1A4CB1">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
-                                    <TextBlock Text="IMPORT VIDEO" Foreground="White" FontSize="{StaticResource Font.Size.Body}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#3565C8"/>
-                                        <Setter Property="BorderBrush" Value="#3565C8"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <!-- Import Button: Square, Blue, No Icon -->
+                    <Button Grid.Column="0" Command="{Binding ImportVideoCommand}" Content="IMPORT VIDEO" Width="120" Style="{StaticResource BlueActionButtonStyle}"/>
                     
                     <!-- Clear List Button: Square, Logic Fixed -->
-                    <Button Grid.Column="2" Command="{Binding ClearVideoPoolCommand}" Content="CLEAR LIST" Width="120" Height="26" BorderThickness="1" BorderBrush="#555555">
+                    <!-- Clear List Button: Square, Logic Fixed -->
+                    <Button Grid.Column="2" Command="{Binding ClearVideoPoolCommand}" Content="CLEAR LIST" Width="120">
                         <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="#333333"/>
-                                <Setter Property="Foreground" Value="#888888"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}">
                                 <Style.Triggers>
                                     <!-- Default: Count=0 -> Disabled (Gray) -->
                                     <DataTrigger Binding="{Binding VideoPool.Count}" Value="0">
                                         <Setter Property="IsEnabled" Value="False"/>
                                     </DataTrigger>
-                                    
-                                    <!-- State: Disabled -->
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Background" Value="#222222"/>
-                                        <Setter Property="Foreground" Value="#555555"/>
-                                        <Setter Property="BorderBrush" Value="#333333"/>
-                                    </Trigger>
-                                    
-                                    <!-- State: Enabled (Active) -> Blue -->
-                                    <Trigger Property="IsEnabled" Value="True">
-                                        <Setter Property="Background" Value="#1A4CB1"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="BorderBrush" Value="#1A4CB1"/>
-                                    </Trigger>
-                                    
-                                    <!-- State: Hover (when Enabled) -->
-                                    <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="IsEnabled" Value="True"/>
-                                            <Condition Property="IsMouseOver" Value="True"/>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Background" Value="#3565C8"/>
-                                    </MultiTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
@@ -245,61 +199,18 @@
                     </Grid.ColumnDefinitions>
 
                      <!-- Import Button: Square, Blue, No Icon -->
-                    <Button Grid.Column="0" Command="{Binding ImportAudioCommand}" Width="120" Height="26" Background="#1A4CB1" BorderThickness="1" BorderBrush="#1A4CB1">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
-                                    <TextBlock Text="IMPORT AUDIO" Foreground="White" FontSize="{StaticResource Font.Size.Body}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                 <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#3565C8"/>
-                                        <Setter Property="BorderBrush" Value="#3565C8"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <!-- Import Button: Square, Blue, No Icon -->
+                    <Button Grid.Column="0" Command="{Binding ImportAudioCommand}" Content="IMPORT AUDIO" Width="120" Style="{StaticResource BlueActionButtonStyle}"/>
                     
                     <!-- Clear List Button: Square, Logic Fixed -->
-                    <Button Grid.Column="2" Command="{Binding ClearAudioPoolCommand}" Content="CLEAR LIST" Width="120" Height="26" BorderThickness="1" BorderBrush="#555555">
+                    <!-- Clear List Button: Square, Logic Fixed -->
+                    <Button Grid.Column="2" Command="{Binding ClearAudioPoolCommand}" Content="CLEAR LIST" Width="120">
                          <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="#333333"/>
-                                <Setter Property="Foreground" Value="#888888"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding AudioPool.Count}" Value="0">
                                         <Setter Property="IsEnabled" Value="False"/>
                                     </DataTrigger>
-                                    
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Background" Value="#222222"/>
-                                        <Setter Property="Foreground" Value="#555555"/>
-                                        <Setter Property="BorderBrush" Value="#333333"/>
-                                    </Trigger>
-                                    
-                                    <Trigger Property="IsEnabled" Value="True">
-                                        <Setter Property="Background" Value="#1A4CB1"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="BorderBrush" Value="#1A4CB1"/>
-                                    </Trigger>
-                                    
-                                     <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="IsEnabled" Value="True"/>
-                                            <Condition Property="IsMouseOver" Value="True"/>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Background" Value="#3565C8"/>
-                                    </MultiTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
@@ -560,7 +471,7 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="OFFSET" Binding="{Binding OffsetDisplay}" Width="110" Foreground="{StaticResource Brush.Accent}" FontFamily="Consolas" HeaderStyle="{StaticResource CenteredHeaderStyle}">
+                        <DataGridTextColumn Header="OFFSET" Binding="{Binding OffsetDisplay}" Width="110" Foreground="{DynamicResource Brush.Accent}" FontFamily="Consolas" HeaderStyle="{StaticResource CenteredHeaderStyle}">
                              <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -648,20 +559,9 @@
                      </Grid>
                 </Grid>
 
-                <Button Grid.Column="2" Command="{Binding ClearAllCommand}" Content="CLEAR ALL" Width="120" Height="26" VerticalAlignment="Bottom" Margin="0,0,0,1"  BorderThickness="1" BorderBrush="#555555">
+                <Button Grid.Column="2" Command="{Binding ClearAllCommand}" Content="CLEAR ALL" Width="120" VerticalAlignment="Bottom" Margin="0,0,0,1">
                      <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="#333333"/>
-                                <Setter Property="Foreground" Value="#888888"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                            <Style TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}">
                                 <Style.Triggers>
                                     <!-- Logic: Disable only if ALL lists are empty -->
                                     <MultiDataTrigger>
@@ -672,24 +572,6 @@
                                         </MultiDataTrigger.Conditions>
                                         <Setter Property="IsEnabled" Value="False"/>
                                     </MultiDataTrigger>
-                                    
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Background" Value="#222222"/>
-                                        <Setter Property="Foreground" Value="#555555"/>
-                                        <Setter Property="BorderBrush" Value="#333333"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="True">
-                                        <Setter Property="Background" Value="#1A4CB1"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="BorderBrush" Value="#1A4CB1"/>
-                                    </Trigger>
-                                     <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="IsEnabled" Value="True"/>
-                                            <Condition Property="IsMouseOver" Value="True"/>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="Background" Value="#3565C8"/>
-                                    </MultiTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
@@ -703,9 +585,9 @@
         <Grid Grid.RowSpan="3" Background="#AA000000" Visibility="{Binding IsBusy, Converter={x:Static local:Converters.BooleanToVisibilityConverter}}">
              <Border Background="#252525" CornerRadius="10" Padding="30" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="400">
                  <StackPanel>
-                     <TextBlock Text="PROCESSING" Foreground="{StaticResource Brush.Accent}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                     <TextBlock Text="PROCESSING" Foreground="{DynamicResource Brush.Accent}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
                      
-                     <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="10" Background="#333333" Foreground="{StaticResource Brush.Accent}" BorderThickness="0"/>
+                     <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="10" Background="#333333" Foreground="{DynamicResource Brush.Accent}" BorderThickness="0"/>
                      <TextBlock Text="{Binding BusyMessage}" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,15,0,0"/>
                  </StackPanel>
              </Border>

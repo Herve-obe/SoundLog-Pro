@@ -151,7 +151,7 @@
                                 <!-- Blue RepeatButton Template for Filled Track -->
                                 <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
                                     <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                    <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+                                    <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
                                     <Setter Property="Focusable" Value="False"/>
                                     <Setter Property="IsTabStop" Value="False"/>
                                     <Setter Property="Template">
@@ -211,7 +211,7 @@
                                 <!-- Blue RepeatButton Template for Filled Track -->
                                 <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
                                     <Setter Property="OverridesDefaultStyle" Value="True"/>
-                                    <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+                                    <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
                                     <Setter Property="Focusable" Value="False"/>
                                     <Setter Property="IsTabStop" Value="False"/>
                                     <Setter Property="Template">
@@ -302,7 +302,7 @@
                     <StackPanel Orientation="Horizontal">
                         <!-- Headphones Icon -->
                         <Path Data="M12,1C7,1 3,5 3,10V17A3,3 0 0,0 6,20H9V12H5V10A7,7 0 0,1 12,3A7,7 0 0,1 19,10V12H15V20H18A3,3 0 0,0 21,17V10C21,5 17,1 12,1Z"
-                              Fill="{StaticResource Brush.Accent}"
+                              Fill="{DynamicResource Brush.Accent}"
                               Height="20" Width="20" Stretch="Uniform"
                               VerticalAlignment="Center" Margin="0,0,10,0"/>
                               
@@ -314,7 +314,7 @@
                     
                     <!-- Timecode Display -->
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <TextBlock Text="{Binding CurrentTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Foreground="{StaticResource Brush.Accent}"/>
+                            <TextBlock Text="{Binding CurrentTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Foreground="{DynamicResource Brush.Accent}"/>
                             <TextBlock Text=" / " FontSize="{StaticResource Font.Size.Large}" Opacity="0.5"/>
                             <TextBlock Text="{Binding TotalTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Opacity="0.5"/>
                     </StackPanel>
