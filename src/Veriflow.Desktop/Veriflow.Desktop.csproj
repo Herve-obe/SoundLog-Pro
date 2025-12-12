@@ -31,7 +31,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <NoWarn>NU1701</NoWarn>
-    <ApplicationIcon>Assets\Logo.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\veriflow.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>

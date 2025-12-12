@@ -16,39 +16,52 @@ namespace Veriflow.Desktop.ViewModels
 {
     public partial class VideoPlayerViewModel : ObservableObject, IDisposable
     {
-        private LibVLC? _libVLC;
         private MediaPlayer? _mediaPlayer;
 
-        // New Master Stereo Control
+        // Unified Volume Control
         [ObservableProperty]
-        private float _leftVolume = 1.0f;
+        private float _volume = 1.0f;
+
+        private float _previousVolume = 1.0f;
+        private double _fps = 25.0; // Default Frame Rate
+        private long _lastMediaTime;
+        private System.Diagnostics.Stopwatch _stopwatch = new();
+        private TimeSpan _startHeaderOffset = TimeSpan.Zero;
 
         [ObservableProperty]
-        private float _rightVolume = 1.0f;
+        private bool _isMuted;
 
-        [ObservableProperty]
-        private bool _isLeftMuted;
-
-        [ObservableProperty]
-        private bool _isRightMuted;
-
-        partial void OnLeftVolumeChanged(float value) => UpdateVolume();
-        partial void OnRightVolumeChanged(float value) => UpdateVolume();
-        partial void OnIsLeftMutedChanged(bool value) => UpdateVolume();
-        partial void OnIsRightMutedChanged(bool value) => UpdateVolume();
+        partial void OnVolumeChanged(float value) => UpdateVolume();
+        partial void OnIsMutedChanged(bool value) => UpdateVolume();
 
         private void UpdateVolume()
         {
             if (_mediaPlayer != null)
             {
-                 // Native Direct Audio doesn't support easy L/R independent volume without filters.
-                 // We will map the Right Volume slider to Master Volume for now, 
-                 // or take the max of both to ensure audible output.
-                 var vol = Math.Max(LeftVolume, RightVolume);
-                 if (IsLeftMuted && IsRightMuted) vol = 0;
-                 
-                 _mediaPlayer.Volume = (int)(vol * 100);
-                 _mediaPlayer.Mute = (IsLeftMuted && IsRightMuted);
+                 // If muted, force 0. But ViewModel property might be non-zero if user slides it while muted? 
+                 // Usually sliding un-mutes. Let's keep it simple: matches Volume property.
+                 // The Mute logic in LibVLC is separate from Volume, but user requested fader moves to 0.
+                 _mediaPlayer.Volume = (int)(Volume * 100);
+                 _mediaPlayer.Mute = IsMuted;
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleMute()
+        {
+            if (IsMuted)
+            {
+                // UNMUTE
+                IsMuted = false;
+                if (_previousVolume <= 0) _previousVolume = 0.5f; // Safety
+                Volume = _previousVolume;
+            }
+            else
+            {
+                // MUTE
+                _previousVolume = Volume;
+                IsMuted = true;
+                Volume = 0;
             }
         }
 
@@ -80,10 +93,10 @@ namespace Veriflow.Desktop.ViewModels
         private bool _isPaused;
 
         [ObservableProperty]
-        private string _currentTimeDisplay = "00:00:00";
+        private string _currentTimeDisplay = "00:00:00:00";
 
         [ObservableProperty]
-        private string _totalTimeDisplay = "00:00:00";
+        private string _totalTimeDisplay = "00:00:00:00";
 
         [ObservableProperty]
         private double _playbackPercent;
@@ -102,29 +115,21 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (!DesignMode.IsDesignMode)
             {
-                LibVLCSharp.Shared.Core.Initialize();
-                _libVLC = new LibVLC();
-                _mediaPlayer = new MediaPlayer(_libVLC);
-                Player = _mediaPlayer; 
-                
-                _mediaPlayer.LengthChanged += OnLengthChanged;
-                _mediaPlayer.EndReached += OnEndReached;
-                _mediaPlayer.EncounteredError += OnError;
+                // USE SHARED ENGINE
+                var libVLC = VideoEngineService.Instance.LibVLC;
+                if (libVLC != null)
+                {
+                    _mediaPlayer = new MediaPlayer(libVLC);
+                    Player = _mediaPlayer;
+
+                    _mediaPlayer.LengthChanged += OnLengthChanged;
+                    _mediaPlayer.EndReached += OnEndReached;
+                    _mediaPlayer.EncounteredError += OnError;
+                }
             }
 
-            _uiTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+            _uiTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(10) }; // 100fps update for maximum fluidity
             _uiTimer.Tick += OnUiTick;
-        }
-
-        private void InitializeAudioEngine(int channels)
-        {
-            // Direct Audio Mode: Just set volume
-            UpdateVolume();
-        }
-
-        private void StopAudioEngine()
-        {
-            // No custom engine to stop
         }
 
         private void OnUiTick(object? sender, EventArgs e)
@@ -132,22 +137,54 @@ namespace Veriflow.Desktop.ViewModels
             if (_mediaPlayer != null && _mediaPlayer.IsPlaying && !_isUserSeeking)
             {
                 var time = _mediaPlayer.Time;
+                
+                // Interpolation Logic
+                if (time != _lastMediaTime)
+                {
+                    _lastMediaTime = time;
+                    _stopwatch.Restart();
+                }
+
+                // Interpolated time = valid media time + elapsed since last update
+                var interpolatedTime = TimeSpan.FromMilliseconds(_lastMediaTime + _stopwatch.ElapsedMilliseconds);
+                
+                // Clamp to Length
+                if (interpolatedTime.TotalMilliseconds > _mediaPlayer.Length)
+                    interpolatedTime = TimeSpan.FromMilliseconds(_mediaPlayer.Length);
+
                 var length = _mediaPlayer.Length;
 
                 if (length > 0)
                 {
-                    PlaybackPercent = (double)time / length;
+                    PlaybackPercent = interpolatedTime.TotalMilliseconds / length;
                 }
                 
-                CurrentTimeDisplay = TimeSpan.FromMilliseconds(time).ToString(@"hh\:mm\:ss");
+                CurrentTimeDisplay = FormatTimecode(interpolatedTime);
             }
+        }
+
+        private string FormatTimecode(TimeSpan time)
+        {
+            // Add Start Offset (Time Reference)
+            var absoluteTime = time + _startHeaderOffset;
+
+            // Format: hh:mm:ss:ii (frames)
+            double totalSeconds = absoluteTime.TotalSeconds;
+            int h = (int)absoluteTime.TotalHours; // Support hours > 24 if needed? Usually TC wraps or just goes up.
+            int m = absoluteTime.Minutes;
+            int s = absoluteTime.Seconds;
+            int frames = (int)Math.Round((totalSeconds - (int)totalSeconds) * _fps);
+            
+            if (frames >= _fps) frames = 0; // Safety wrap
+
+            return $"{h:D2}:{m:D2}:{s:D2}:{frames:D2}";
         }
 
         private void OnLengthChanged(object? sender, MediaPlayerLengthChangedEventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                TotalTimeDisplay = TimeSpan.FromMilliseconds(e.Length).ToString(@"hh\:mm\:ss");
+                TotalTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(e.Length));
             });
         }
 
@@ -159,13 +196,10 @@ namespace Veriflow.Desktop.ViewModels
                 IsPaused = false;
                 _uiTimer.Stop();
                 PlaybackPercent = 0;
-                CurrentTimeDisplay = "00:00:00";
+                CurrentTimeDisplay = "00:00:00:00";
                 
                 // Reset player for replay
                 _mediaPlayer?.Stop(); 
-                
-                // Also ensure StopPressed logic if handled here?
-                // The Stop command handles explicit stop. EndReached is automatic.
             });
         }
 
@@ -188,24 +222,30 @@ namespace Veriflow.Desktop.ViewModels
                 FilePath = path;
                 FileName = System.IO.Path.GetFileName(path);
 
-                if (_libVLC != null && _mediaPlayer != null)
+                var libVLC = VideoEngineService.Instance.LibVLC;
+
+                if (libVLC != null && _mediaPlayer != null)
                 {
-                    var media = new Media(_libVLC, path, FromType.FromPath);
+                    var media = new Media(libVLC, path, FromType.FromPath);
                     await media.Parse(MediaParseOptions.ParseLocal);
                     _mediaPlayer.Media = media;
                     
-                    // Pre-load metadata via FFprobe
-                    await LoadMetadataWithFFprobe(path);
-                    
-                    // Init Audio Engine based on metadata channels
-                    UpdateAudioTrackState();
-                    
+                    // OPTIMIZATION: Set Loaded TRUE immediately so UI shows player
                     IsVideoLoaded = true;
+
                     // Trigger initial duration update if possible
                     if (media.Duration > 0)
                     {
-                         TotalTimeDisplay = TimeSpan.FromMilliseconds(media.Duration).ToString(@"hh\:mm\:ss");
+                         TotalTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(media.Duration));
                     }
+
+                    // Load heavy metadata in background
+                    // The UI is already active
+                    await LoadMetadataWithFFprobe(path);
+                    
+                    // Initial Volume Set (Force update)
+                    _mediaPlayer.Volume = (int)(Volume * 100);
+                    _mediaPlayer.Mute = IsMuted;
                 }
             }
             catch (Exception ex)
@@ -219,28 +259,54 @@ namespace Veriflow.Desktop.ViewModels
         {
              var provider = new FFprobeMetadataProvider();
              CurrentVideoMetadata = await provider.GetVideoMetadataAsync(path);
-        }
+             
+             // Parse FPS
+             if (!string.IsNullOrEmpty(CurrentVideoMetadata.FrameRate))
+             {
+                 try
+                 {
+                     // Extract number from string like "24 fps" or "23.98 fps" or "25,00 fps"
+                     string normalizedFn = CurrentVideoMetadata.FrameRate.Replace(',', '.');
+                     string fpsString = new string(normalizedFn.Where(c => char.IsDigit(c) || c == '.').ToArray());
+                     
+                     if (double.TryParse(fpsString, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedFps))
+                     {
+                         if (parsedFps > 0) _fps = parsedFps;
+                     }
+                 }
+                 catch { /* Ignore parse error, keep default */ }
+             }
 
-        private void UpdateAudioTrackState()
-        {
-            int channelCount = 2; // Default Stereo
-            // Parse "X Channels" or "2"
-            if (!string.IsNullOrWhiteSpace(CurrentVideoMetadata.AudioChannels))
-            {
-                var parts = CurrentVideoMetadata.AudioChannels.Split(' ');
-                if (parts.Length > 0 && int.TryParse(parts[0], out int c))
-                {
-                    channelCount = c;
-                }
-                else if (parts.Length > 0 && parts[0].Contains(".")) // e.g. 5.1
-                {
-                    if(parts[0] == "5.1") channelCount = 6;
-                    if(parts[0] == "7.1") channelCount = 8;
-                }
-            }
-
-            // Init Engine
-            InitializeAudioEngine(channelCount);
+             // Parse Start Timecode Offset
+             _startHeaderOffset = TimeSpan.Zero;
+             if (!string.IsNullOrEmpty(CurrentVideoMetadata.StartTimecode))
+             {
+                 try
+                 {
+                     // Expected format: HH:mm:ss:ff or HH:mm:ss
+                     var parts = CurrentVideoMetadata.StartTimecode.Split(':');
+                     if (parts.Length >= 3)
+                     {
+                         int h = int.Parse(parts[0]);
+                         int m = int.Parse(parts[1]);
+                         int s = int.Parse(parts[2]);
+                         // Ignore frames for offset base, or converting frames to ms? 
+                         // Usually TimeReference is seconds. But here we have string TC.
+                         // Let's rely on TimeSpan parsing if possible or manual.
+                         // Simplified: just Hours/Min/Sec for base offset. Frames might be trickier without knowing exact drop-frame logic?
+                         // Let's try to keep it simple: Start TC is usually a fixed offset.
+                         // If parts[3] exists (frames), convert to MS.
+                         double ms = 0;
+                         if (parts.Length == 4)
+                         {
+                             int f = int.Parse(parts[3]);
+                             ms = (f / _fps) * 1000;
+                         }
+                         _startHeaderOffset = new TimeSpan(0, h, m, s, (int)ms);
+                     }
+                 }
+                 catch { /* invalid TC string */ }
+             }
         }
 
         [RelayCommand(CanExecute = nameof(CanPlay))]
@@ -249,7 +315,10 @@ namespace Veriflow.Desktop.ViewModels
             if (_mediaPlayer != null)
             {
                 _mediaPlayer.Play();
+                _mediaPlayer.Mute = IsMuted;
+                _mediaPlayer.Volume = (int)(Volume * 100);
                 _uiTimer.Start();
+                _stopwatch.Restart(); 
                 IsPlaying = true;
                 IsPaused = false;
             }
@@ -261,7 +330,9 @@ namespace Veriflow.Desktop.ViewModels
             if (_mediaPlayer != null && _mediaPlayer.IsPlaying)
             {
                 _mediaPlayer.Pause();
+                _mediaPlayer.Pause();
                 _uiTimer.Stop();
+                _stopwatch.Stop();
                 IsPaused = true;
                 IsPlaying = false;
             }
@@ -288,10 +359,12 @@ namespace Veriflow.Desktop.ViewModels
             }
             
             _uiTimer.Stop();
+            _stopwatch.Reset();
             IsPlaying = false;
             IsPaused = false;
             PlaybackPercent = 0;
-            CurrentTimeDisplay = "00:00:00";
+            PlaybackPercent = 0;
+            CurrentTimeDisplay = "00:00:00:00";
             
             await Task.Delay(200);
             IsStopPressed = false;
@@ -305,7 +378,7 @@ namespace Veriflow.Desktop.ViewModels
                 var time = _mediaPlayer.Time - 5000;
                 if (time < 0) time = 0;
                 _mediaPlayer.Time = time;
-                CurrentTimeDisplay = TimeSpan.FromMilliseconds(time).ToString(@"hh\:mm\:ss");
+                CurrentTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(time));
             }
         }
 
@@ -317,7 +390,7 @@ namespace Veriflow.Desktop.ViewModels
                 var time = _mediaPlayer.Time + 5000;
                 if (time > _mediaPlayer.Length) time = _mediaPlayer.Length;
                 _mediaPlayer.Time = time;
-                CurrentTimeDisplay = TimeSpan.FromMilliseconds(time).ToString(@"hh\:mm\:ss");
+                CurrentTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(time));
             }
         }
 
@@ -332,7 +405,7 @@ namespace Veriflow.Desktop.ViewModels
                     if (Math.Abs(_mediaPlayer.Time - seekTime) > 500) // Debounce slightly
                     {
                          _mediaPlayer.Time = seekTime;
-                         CurrentTimeDisplay = TimeSpan.FromMilliseconds(seekTime).ToString(@"hh\:mm\:ss");
+                         CurrentTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(seekTime));
                     }
                 }
             }
@@ -394,12 +467,10 @@ namespace Veriflow.Desktop.ViewModels
              IsVideoLoaded = false;
              FileName = "";
              FilePath = "";
-             CurrentTimeDisplay = "00:00:00";
-             TotalTimeDisplay = "00:00:00";
+             CurrentTimeDisplay = FormatTimecode(TimeSpan.Zero);
+             TotalTimeDisplay = FormatTimecode(TimeSpan.Zero);
              PlaybackPercent = 0;
              CurrentVideoMetadata = new VideoMetadata(); // Clear metadata
-             
-             StopAudioEngine();
         }
 
         private bool CanSendFileToTranscode() => IsVideoLoaded && !string.IsNullOrEmpty(FilePath);
@@ -415,10 +486,9 @@ namespace Veriflow.Desktop.ViewModels
 
         public void Dispose()
         {
-            StopAudioEngine();
             _uiTimer.Stop();
             _mediaPlayer?.Dispose();
-            _libVLC?.Dispose();
+            // _libVLC should NOT be disposed here as it is shared
         }
     }
 
@@ -433,3 +503,4 @@ namespace Veriflow.Desktop.ViewModels
         }
     }
 }
+

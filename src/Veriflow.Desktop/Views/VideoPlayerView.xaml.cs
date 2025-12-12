@@ -49,5 +49,78 @@ namespace Veriflow.Desktop.Views
                 }
             }
         }
+
+        // --- SLIDER LOGIC ---
+
+        private void Slider_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is Slider slider)
+            {
+                // Scrubber Logic: Pause Timer
+                if (slider.Tag?.ToString() == "Scrubber" && DataContext is VideoPlayerViewModel vm)
+                {
+                    vm.BeginSeek();
+                }
+
+                // Force Capture
+                bool captured = slider.CaptureMouse();
+                if (captured)
+                {
+                    UpdateSliderValue(slider, e);
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void Slider_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is Slider slider && slider.IsMouseCaptured)
+            {
+                if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+                {
+                    UpdateSliderValue(slider, e);
+                }
+                else
+                {
+                    slider.ReleaseMouseCapture();
+                    // Recover EndSeek if lost capture
+                     if (slider.Tag?.ToString() == "Scrubber" && DataContext is VideoPlayerViewModel vm)
+                    {
+                        vm.EndSeek();
+                    }
+                }
+            }
+        }
+
+        private void Slider_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is Slider slider)
+            {
+                slider.ReleaseMouseCapture();
+
+                if (slider.Tag?.ToString() == "Scrubber" && DataContext is VideoPlayerViewModel vm)
+                {
+                    vm.EndSeek();
+                }
+
+                e.Handled = true;
+            }
+        }
+
+        private void UpdateSliderValue(Slider slider, System.Windows.Input.MouseEventArgs e)
+        {
+            var point = e.GetPosition(slider);
+            var width = slider.ActualWidth;
+            if (width > 0)
+            {
+                double percent = point.X / width;
+                if (percent < 0) percent = 0;
+                if (percent > 1) percent = 1;
+
+                double range = slider.Maximum - slider.Minimum;
+                double value = slider.Minimum + (range * percent);
+                slider.Value = value;
+            }
+        }
     }
 }

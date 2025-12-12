@@ -25,6 +25,9 @@ namespace Veriflow.Desktop.ViewModels
         private MultiChannelAudioMixer? _mixer;
         private VeriflowMeteringProvider? _meteringProvider;
         private readonly DispatcherTimer _playbackTimer;
+        private double _fps = 25.0; // Default Frame Rate
+        private System.Diagnostics.Stopwatch _stopwatch = new();
+        private TimeSpan _lastMediaTime;
 
         [ObservableProperty]
         private string _filePath = "No file loaded";
@@ -44,10 +47,10 @@ namespace Veriflow.Desktop.ViewModels
         private bool _isPlaying;
 
         [ObservableProperty]
-        private string _currentTimeDisplay = "00:00:00";
+        private string _currentTimeDisplay = "00:00:00:00";
 
         [ObservableProperty]
-        private string _totalTimeDisplay = "00:00:00";
+        private string _totalTimeDisplay = "00:00:00:00";
 
         [ObservableProperty]
         private double _playbackPosition;
@@ -67,7 +70,7 @@ namespace Veriflow.Desktop.ViewModels
         {
             _playbackTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(50)
+                Interval = TimeSpan.FromMilliseconds(10)
             };
             _playbackTimer.Tick += OnTimerTick;
         }
@@ -85,10 +88,23 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (_inputStream != null)
             {
-                CurrentTimeDisplay = _inputStream.GetPosition().ToString(@"hh\:mm\:ss");
+                var time = _inputStream.GetPosition();
+                
+                 // Interpolation Logic
+                if (time != _lastMediaTime)
+                {
+                    _lastMediaTime = time;
+                    _stopwatch.Restart();
+                }
+                
+                // Interpolated time
+                var interpolatedTime = _lastMediaTime + _stopwatch.Elapsed;
+                if (interpolatedTime > _inputStream.GetLength()) interpolatedTime = _inputStream.GetLength();
+                
+                CurrentTimeDisplay = FormatTimecode(interpolatedTime);
                 
                 _isTimerUpdating = true;
-                PlaybackPosition = _inputStream.GetPosition().TotalSeconds;
+                PlaybackPosition = interpolatedTime.TotalSeconds;
                 if (PlaybackMaximum > 0)
                     PlaybackPercent = PlaybackPosition / PlaybackMaximum;
                 
@@ -111,6 +127,24 @@ namespace Veriflow.Desktop.ViewModels
 
                 _isTimerUpdating = false;
             }
+        }
+
+        private string FormatTimecode(TimeSpan time)
+        {
+            // Add Start Offset (Time Reference) from Metadata (BWF)
+            double offsetSeconds = CurrentMetadata?.TimeReferenceSeconds ?? 0;
+            var absoluteTime = time.Add(TimeSpan.FromSeconds(offsetSeconds));
+
+            // Format: hh:mm:ss:ii (frames)
+            double totalSeconds = absoluteTime.TotalSeconds;
+            int h = (int)absoluteTime.TotalHours;
+            int m = absoluteTime.Minutes;
+            int s = absoluteTime.Seconds;
+            int frames = (int)Math.Round((totalSeconds - (int)totalSeconds) * _fps);
+            
+            if (frames >= _fps) frames = 0; // Safety wrap
+
+            return $"{h:D2}:{m:D2}:{s:D2}:{frames:D2}";
         }
 
         partial void OnPlaybackPositionChanged(double value)
@@ -156,8 +190,8 @@ namespace Veriflow.Desktop.ViewModels
             FilePath = "No file loaded";
             FileName = "";
             IsAudioLoaded = false;
-            CurrentTimeDisplay = "00:00:00";
-            TotalTimeDisplay = "00:00:00";
+            CurrentTimeDisplay = "00:00:00:00";
+            TotalTimeDisplay = "00:00:00:00";
             PlaybackPosition = 0;
             PlaybackPercent = 0;
             
@@ -214,10 +248,29 @@ namespace Veriflow.Desktop.ViewModels
                 FileName = System.IO.Path.GetFileName(path);
                 IsAudioLoaded = true;
 
-                TotalTimeDisplay = _inputStream.GetLength().ToString(@"hh\:mm\:ss");
+                TotalTimeDisplay = FormatTimecode(_inputStream.GetLength());
                 PlaybackMaximum = _inputStream.GetLength().TotalSeconds;
 
                 await LoadMetadataWithFFprobe(path);
+
+                // Try to parse frame rate from metadata if available
+                if (!string.IsNullOrEmpty(CurrentMetadata.FrameRate))
+                {
+                    // FrameRate format in AudioMetadata might be "25 ND" or "23.98"
+                    string normalizedFn = CurrentMetadata.FrameRate.Replace(',', '.');
+                    string fpsString = new string(normalizedFn.Where(c => char.IsDigit(c) || c == '.').ToArray());
+                    
+                    if (double.TryParse(fpsString, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedFps))
+                    {
+                        // Sanity Check: If FPS > 120, it's likely a Sample Rate (e.g. 48000) or invalid. Ignore it.
+                        if (parsedFps > 0 && parsedFps < 120) 
+                        {
+                            _fps = parsedFps;
+                        }
+                        // Refresh Total Display with new (or default) FPS
+                        TotalTimeDisplay = FormatTimecode(_inputStream.GetLength());
+                    }
+                }
 
                 InitializeTracks(CurrentMetadata.ChannelCount > 0 ? CurrentMetadata.ChannelCount : _inputStream.WaveFormat.Channels);
                 
@@ -423,7 +476,7 @@ namespace Veriflow.Desktop.ViewModels
             if (!IsPaused)
             {
                 PlaybackPosition = 0;
-                CurrentTimeDisplay = "00:00:00";
+                CurrentTimeDisplay = "00:00:00:00";
                 if (_inputStream != null) _inputStream.Position = 0;
 
                 Application.Current.Dispatcher.Invoke(() =>
@@ -441,6 +494,7 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _outputDevice.Play();
                 _playbackTimer.Start();
+                _stopwatch.Restart();
                 IsPaused = false;
                 IsPlaying = true;
                 IsStopPressed = false;
@@ -462,11 +516,12 @@ namespace Veriflow.Desktop.ViewModels
             IsStopPressed = true;
 
             _playbackTimer.Stop();
+            _stopwatch.Reset();
             IsPaused = false;
             IsPlaying = false;
             PlaybackPosition = 0;
             PlaybackPercent = 0;
-            CurrentTimeDisplay = "00:00:00";
+            CurrentTimeDisplay = "00:00:00:00";
 
             if (_inputStream != null)
             {
@@ -493,6 +548,7 @@ namespace Veriflow.Desktop.ViewModels
             if (_outputDevice != null)
             {
                 _playbackTimer.Stop(); 
+                _stopwatch.Stop();
                 _outputDevice.Pause();
                 IsPaused = true;
                 IsPlaying = false;

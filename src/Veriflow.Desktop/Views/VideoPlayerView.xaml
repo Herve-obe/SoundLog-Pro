@@ -130,6 +130,81 @@
             </Setter>
         </Style>
 
+        <!-- Round Filled Slider Style (For Volume - Blue Fill) -->
+        <Style x:Key="RoundFilledSliderStyle" TargetType="Slider">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#DDDDDD"/>
+            <Setter Property="IsSelectionRangeEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Grid.Resources>
+                                <!-- Blue RepeatButton Template for Filled Track -->
+                                <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
+                                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                    <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="IsTabStop" Value="False"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Grid Background="Transparent">
+                                                    <Rectangle Fill="{TemplateBinding Background}" Height="2" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <Style x:Key="TransparentRepeatButtonStyle" TargetType="RepeatButton">
+                                     <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                     <Setter Property="Background" Value="Transparent"/>
+                                     <Setter Property="Focusable" Value="False"/>
+                                     <Setter Property="IsTabStop" Value="False"/>
+                                     <Setter Property="Template">
+                                         <Setter.Value>
+                                             <ControlTemplate TargetType="RepeatButton">
+                                                 <Rectangle Fill="{TemplateBinding Background}" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}"/>
+                                             </ControlTemplate>
+                                         </Setter.Value>
+                                     </Setter>
+                                 </Style>
+                            </Grid.Resources>
+                            
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="26"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Track Layer -->
+                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="#444444" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
+                            
+                            <!-- Thumb -->
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource BlueTrackRepeatButtonStyle}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource TransparentRepeatButtonStyle}"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="#111111" StrokeThickness="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid Background="{StaticResource Brush.Background}">
@@ -176,9 +251,8 @@
                     Visibility="{Binding IsVideoLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/> <!-- Transport -->
+                        <ColumnDefinition Width="Auto"/> <!-- Transport + Volume -->
                         <ColumnDefinition Width="*"/>    <!-- Spacer -->
-                        <ColumnDefinition Width="Auto"/> <!-- Stereo Controls -->
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="15,0,0,0" VerticalAlignment="Center">
@@ -194,31 +268,54 @@
                         </Button>
                         
                         <!-- PAUSE -->
-                        <Button Command="{Binding PauseCommand}" Tag="{Binding IsPaused}" ToolTip="Pause" Style="{StaticResource Style.Transport.Pause}">
+                        <Button Command="{Binding PauseCommand}" Tag="{Binding IsPaused}" ToolTip="Pause" Style="{StaticResource Style.Transport.Pause}" Margin="0,0,20,0">
                             <Path Data="M14,19H18V5H14M6,19H10V5H6V19Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Height="14" Width="14" Stretch="Uniform"/>
                         </Button>
-                        
-                    </StackPanel>
 
-                    <!-- Stereo Output Controls -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,0">
-                         <!-- Left Channel -->
-                         <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
-                             <TextBlock Text="L" VerticalAlignment="Center" Foreground="{StaticResource Brush.Accent}" FontWeight="Bold" Margin="0,0,5,0" FontSize="10"/>
-                             <!-- Mute -->
-                             <ToggleButton IsChecked="{Binding IsLeftMuted}" Style="{StaticResource DawMuteButtonStyle}" ToolTip="Mute Left" Margin="0,0,5,0"/>
-                             <!-- Volume -->
-                             <Slider Value="{Binding LeftVolume}" Minimum="0" Maximum="1" Width="80" VerticalAlignment="Center" ToolTip="Left Volume" Focusable="False"/>
-                         </StackPanel>
+                        <!-- Volume Control -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                             <!-- Mute Button -->
+                             <Button Command="{Binding ToggleMuteCommand}" 
+                                     ToolTip="Mute / Unmute" 
+                                     Cursor="Hand"
+                                     Focusable="False"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Margin="0,0,10,0">
+                                 <Button.Template>
+                                     <ControlTemplate TargetType="Button">
+                                         <Grid>
+                                             <Path x:Name="Icon" 
+                                                   Data="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" 
+                                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" 
+                                                   Height="16" Width="16" Stretch="Uniform"/>
+                                         </Grid>
+                                         <ControlTemplate.Triggers>
+                                             <Trigger Property="IsMouseOver" Value="True">
+                                                 <Setter Property="Foreground" Value="White"/>
+                                             </Trigger>
+                                             <Trigger Property="IsMouseOver" Value="False">
+                                                 <Setter Property="Foreground" Value="#888888"/>
+                                             </Trigger>
+                                             <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                                                  <!-- Barred Speaker Icon -->
+                                                  <Setter TargetName="Icon" Property="Data" Value="M3.63,3.63L19.33,19.33L18.06,20.6L16.28,18.82C15.57,19.23 14.8,19.57 14,19.82V17.75C14.44,17.58 14.86,17.37 15.25,17.12L12,13.88V20L7,15H3V9H6.88L3.63,5.75L3.63,3.63M12,4L16.03,8.03L14,6V4H12M19,12C19,12.89 18.82,13.73 18.5,14.5L20,16C20.63,14.78 21,13.43 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.66 16.09,9.45 15.4,8.44L14,7.03V12.17L16.44,14.61C16.48,14.41 16.5,14.21 16.5,12Z"/>
+                                                  <Setter Property="Foreground" Value="#FF5252"/> <!-- Red when muted -->
+                                             </DataTrigger>
+                                         </ControlTemplate.Triggers>
+                                     </ControlTemplate>
+                                 </Button.Template>
+                             </Button>
+                             
+                             <!-- Volume Slider -->
+                             <Slider Value="{Binding Volume}" Maximum="1" Minimum="0" Width="100" 
+                                     LargeChange="0.1" SmallChange="0.01" 
+                                     Focusable="False" ToolTip="Volume" Style="{StaticResource RoundFilledSliderStyle}"
+                                     PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                                     PreviewMouseMove="Slider_PreviewMouseMove"
+                                     PreviewMouseLeftButtonUp="Slider_PreviewMouseLeftButtonUp"/>
+                        </StackPanel>
 
-                         <!-- Right Channel -->
-                         <StackPanel Orientation="Horizontal">
-                             <TextBlock Text="R" VerticalAlignment="Center" Foreground="{StaticResource Brush.Accent}" FontWeight="Bold" Margin="0,0,5,0" FontSize="10"/>
-                             <!-- Mute -->
-                             <ToggleButton IsChecked="{Binding IsRightMuted}" Style="{StaticResource DawMuteButtonStyle}" ToolTip="Mute Right" Margin="0,0,5,0"/>
-                             <!-- Volume -->
-                             <Slider Value="{Binding RightVolume}" Minimum="0" Maximum="1" Width="80" VerticalAlignment="Center" ToolTip="Right Volume" Focusable="False"/>
-                         </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -232,8 +329,15 @@
             <!-- Scrubber (Moved Bottom) -->
             <Grid Grid.Row="3" VerticalAlignment="Center"
                   Visibility="{Binding IsVideoLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Slider Value="{Binding PlaybackPercent}" Maximum="1.0" LargeChange="0.1" Focusable="False" VerticalAlignment="Center" IsMoveToPointEnabled="True">
+                <Slider Value="{Binding PlaybackPercent}" Maximum="1.0" LargeChange="0.1" 
+                        Focusable="False" VerticalAlignment="Center" 
+                        Style="{StaticResource RoundFilledSliderStyle}"
+                        Tag="Scrubber"
+                        PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                        PreviewMouseMove="Slider_PreviewMouseMove"
+                        PreviewMouseLeftButtonUp="Slider_PreviewMouseLeftButtonUp">
                    <i:Interaction.Triggers>
+                        <!-- Keep Behaviours for Begin/End Seek logic (Backup) -->
                         <i:EventTrigger EventName="PreviewMouseDown">
                             <i:CallMethodAction TargetObject="{Binding}" MethodName="BeginSeek"/>
                         </i:EventTrigger>
