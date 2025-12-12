@@ -421,7 +421,7 @@
                 <DataGrid Grid.Row="1" ItemsSource="{Binding Matches}" AutoGenerateColumns="False" 
                           Background="#1A1A1A" RowBackground="Transparent" 
                           BorderThickness="1" BorderBrush="#333333"
-                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#333333"
+                          GridLinesVisibility="None" HorizontalGridLinesBrush="#333333"
                           HeadersVisibility="Column" ColumnHeaderHeight="30"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
@@ -496,6 +496,19 @@
                             <Setter Property="HorizontalContentAlignment" Value="Center"/>
                         </Style>
 
+                         <!-- Empty Header Style for Delete Column (No Arrows) -->
+                         <Style x:Key="NoSortHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                             <Setter Property="Template">
+                                 <Setter.Value>
+                                     <ControlTemplate TargetType="DataGridColumnHeader">
+                                         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                         </Border>
+                                     </ControlTemplate>
+                                 </Setter.Value>
+                             </Setter>
+                         </Style>
+
                          <Style TargetType="DataGridCell">
                              <Setter Property="BorderThickness" Value="0"/>
                              <Setter Property="Padding" Value="10,8"/>
@@ -564,7 +577,7 @@
                         </DataGridTextColumn>
 
                         <!-- Delete Action (Hover Only) -->
-                        <DataGridTemplateColumn Width="40">
+                        <DataGridTemplateColumn Width="40" CanUserSort="False" HeaderStyle="{StaticResource NoSortHeaderStyle}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Command="{Binding DataContext.RemoveMatchItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
