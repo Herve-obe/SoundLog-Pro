@@ -127,13 +127,19 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- Icon Area -->
+                                <!-- Icon/Thumbnail Area -->
                                 <Grid Grid.Row="0">
-                                    <!-- Base File Icon -->
+                                    <!-- 1. Generic File Icon (Placeholder) -->
+                                    <!-- Always visible, sits behind Image -->
                                     <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V13H13V18H15M11,18V13H9V18H11M7,18V13H5V18H7" 
                                           Fill="#555555" Stretch="Uniform" Margin="20"/>
 
-                                    <!-- Hover/Playing Overlay -->
+                                    <!-- 2. Video Thumbnail (Async Loaded) -->
+                                    <!-- Sits on top. Transparent if Source is null. Covers Path if Source is set. -->
+                                    <Image Source="{Binding ThumbnailPath}" Stretch="UniformToFill" Margin="10" 
+                                           RenderOptions.BitmapScalingMode="LowQuality"/>
+
+                                    <!-- 3. Hover/Playing Overlay -->
                                     <Grid x:Name="Overlay" Background="#AA000000" Visibility="Hidden">
                                          <Button Command="{Binding DataContext.PreviewFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                                  CommandParameter="{Binding}"

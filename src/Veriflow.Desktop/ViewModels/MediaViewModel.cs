@@ -472,11 +472,44 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty] private string _bitDepth = "";
         [ObservableProperty] private string _format = "";
         
+        [ObservableProperty] private string? _thumbnailPath; // Null by default, indicating no thumbnail yet
+
         private bool _metadataLoaded;
 
         public MediaItemViewModel(FileInfo file)
         {
             File = file;
+
+            // Trigger thumbnail generation immediately for videos
+            string ext = File.Extension.ToLower();
+            if (new[] { ".mov", ".mp4", ".mxf", ".ts", ".avi", ".mkv" }.Contains(ext))
+            {
+                TriggerThumbnailLoad();
+            }
+        }
+
+        private void TriggerThumbnailLoad()
+        {
+             _ = Task.Run(async () => 
+            {
+                try
+                {
+                    var thumbService = new ThumbnailService(); // Cheap allocation
+                    string? thumb = await thumbService.GetThumbnailAsync(File.FullName);
+                    if (thumb != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[MediaVM] Generated: {thumb}");
+                        System.Windows.Application.Current.Dispatcher.Invoke(() => 
+                        {
+                            ThumbnailPath = thumb;
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MediaVM] Background Error: {ex}");
+                }
+            });
         }
 
         public async void LoadMetadata()
@@ -495,9 +528,9 @@ namespace Veriflow.Desktop.ViewModels
                     if (CurrentVideoMetadata != null)
                     {
                         Duration = CurrentVideoMetadata.Duration;
-                        Format = CurrentVideoMetadata.Resolution; // Reuse 'Format' for generic display logic
-                        // We could map other properties if needed for the common list view
+                        Format = CurrentVideoMetadata.Resolution; 
                     }
+                    // Thumbnail generation is now handled in Constructor
                 }
                 else
                 {
