@@ -3,12 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:Veriflow.Desktop.ViewModels"
+             xmlns:util="clr-namespace:Veriflow.Desktop.Utilities"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <!-- Removed BindingProxy to ensure stability -->
+    
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- HEADER -->
@@ -20,11 +26,676 @@
             <TextBlock Text="SYNC" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Path Data="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z" 
-                  Fill="#555555" Height="64" Width="64" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-            <TextBlock Text="Sync audio/video via TC coming soon" 
-                       FontSize="20" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Center"/>
-        </StackPanel>
+        <!-- MAIN CONTENT -->
+        <!-- MAIN CONTENT -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="2.5*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- VIDEO POOL -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- HEADER: Unified Grey -->
+                <TextBlock Text="VIDEO POOL" Foreground="#CCCCCC" FontWeight="Bold" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+                
+                <!-- Actions Grid -->
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Import Button: Square, Blue, No Icon -->
+                    <Button Grid.Column="0" Command="{Binding ImportVideoCommand}" Width="120" Height="26" Background="#1A4CB1" BorderThickness="1" BorderBrush="#1A4CB1">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
+                                    <TextBlock Text="IMPORT VIDEO" Foreground="White" FontSize="{StaticResource Font.Size.Body}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#3565C8"/>
+                                        <Setter Property="BorderBrush" Value="#3565C8"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Clear List Button: Square, Logic Fixed -->
+                    <Button Grid.Column="2" Command="{Binding ClearVideoPoolCommand}" Content="CLEAR LIST" Width="120" Height="26" BorderThickness="1" BorderBrush="#555555">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#333333"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <!-- Default: Count=0 -> Disabled (Gray) -->
+                                    <DataTrigger Binding="{Binding VideoPool.Count}" Value="0">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                    
+                                    <!-- State: Disabled -->
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Background" Value="#222222"/>
+                                        <Setter Property="Foreground" Value="#555555"/>
+                                        <Setter Property="BorderBrush" Value="#333333"/>
+                                    </Trigger>
+                                    
+                                    <!-- State: Enabled (Active) -> Blue -->
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Background" Value="#1A4CB1"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#1A4CB1"/>
+                                    </Trigger>
+                                    
+                                    <!-- State: Hover (when Enabled) -->
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="True"/>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" Value="#3565C8"/>
+                                    </MultiTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Drop Zone & List -->
+                <Border Grid.Row="2" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1" CornerRadius="4" AllowDrop="True">
+                     <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Drop">
+                            <i:InvokeCommandAction Command="{Binding DropVideoCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    
+                    <Grid>
+                        <!-- Empty State Hint -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                    Visibility="{Binding VideoPool.Count, Converter={x:Static local:Converters.ZeroToVisibleConverter}}">
+                             <!-- Folder/Plus Icon -->
+                             <Path Data="M9,16V10H5L12,3L19,10H15V16H9M16,20V18H4V20H16Z" 
+                                   Fill="#333333" Height="32" Width="32" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                             <TextBlock Text="Drop Video Files" Foreground="#555555" HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <ListBox ItemsSource="{Binding VideoPool}" Background="Transparent" BorderThickness="0" 
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="5">
+                             <ListBox.Resources>
+                                 <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource MinimalistScrollBar}"/>
+                             </ListBox.Resources>
+                             <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="2"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderThickness="0" CornerRadius="2" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#2A2A2A"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#333333"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Filename}" Foreground="#DDDDDD" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding StartTimecode}" Foreground="#888888" FontSize="10" FontFamily="Consolas" Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding Duration}" Foreground="#666666" FontSize="10"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Delete Button (Hover Only) -->
+                                        <!-- Using RelativeSource AncestorType=UserControl to safely bind to ViewModel -->
+                                        <Button Grid.Column="1" Command="{Binding DataContext.RemoveVideoItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}"
+                                                Width="20" Height="20" Background="Transparent" BorderThickness="0" Margin="5,0,0,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="Transparent">
+                                                                     <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                                                                           Fill="#666666" Height="10" Width="10" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                         <Setter Property="Cursor" Value="Hand"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- AUDIO POOL -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- HEADER: Unified Grey -->
+                <TextBlock Text="AUDIO POOL" Foreground="#CCCCCC" FontWeight="Bold" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+
+                <!-- Actions Grid -->
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                     <!-- Import Button: Square, Blue, No Icon -->
+                    <Button Grid.Column="0" Command="{Binding ImportAudioCommand}" Width="120" Height="26" Background="#1A4CB1" BorderThickness="1" BorderBrush="#1A4CB1">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
+                                    <TextBlock Text="IMPORT AUDIO" Foreground="White" FontSize="{StaticResource Font.Size.Body}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                 <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#3565C8"/>
+                                        <Setter Property="BorderBrush" Value="#3565C8"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <!-- Clear List Button: Square, Logic Fixed -->
+                    <Button Grid.Column="2" Command="{Binding ClearAudioPoolCommand}" Content="CLEAR LIST" Width="120" Height="26" BorderThickness="1" BorderBrush="#555555">
+                         <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#333333"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding AudioPool.Count}" Value="0">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                    
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Background" Value="#222222"/>
+                                        <Setter Property="Foreground" Value="#555555"/>
+                                        <Setter Property="BorderBrush" Value="#333333"/>
+                                    </Trigger>
+                                    
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Background" Value="#1A4CB1"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#1A4CB1"/>
+                                    </Trigger>
+                                    
+                                     <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="True"/>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" Value="#3565C8"/>
+                                    </MultiTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+                
+                <Border Grid.Row="2" Background="#1A1A1A" BorderBrush="#333333" BorderThickness="1" CornerRadius="4" AllowDrop="True">
+                     <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Drop">
+                            <i:InvokeCommandAction Command="{Binding DropAudioCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    
+                     <Grid>
+                        <!-- Empty State Hint -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                    Visibility="{Binding AudioPool.Count, Converter={x:Static local:Converters.ZeroToVisibleConverter}}">
+                             <Path Data="M9,16V10H5L12,3L19,10H15V16H9M16,20V18H4V20H16Z" 
+                                   Fill="#333333" Height="32" Width="32" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                             <TextBlock Text="Drop Audio Files" Foreground="#555555" HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <ListBox ItemsSource="{Binding AudioPool}" Background="Transparent" BorderThickness="0" 
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="5">
+                             <ListBox.Resources>
+                                 <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource MinimalistScrollBar}"/>
+                             </ListBox.Resources>
+                             <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Padding" Value="2"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderThickness="0" CornerRadius="2" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#2A2A2A"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#333333"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                             <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Filename}" Foreground="#DDDDDD" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding StartTimecode}" Foreground="#888888" FontSize="10" FontFamily="Consolas" Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding Duration}" Foreground="#666666" FontSize="10"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
+                                        <!-- Delete Button (Hover Only) -->
+                                        <!-- Using RelativeSource AncestorType=UserControl to safely bind to ViewModel -->
+                                        <Button Grid.Column="1" Command="{Binding DataContext.RemoveAudioItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}"
+                                                Width="20" Height="20" Background="Transparent" BorderThickness="0" Margin="5,0,0,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="Transparent">
+                                                                     <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                                                                           Fill="#666666" Height="10" Width="10" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                         <Setter Property="Cursor" Value="Hand"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </Grid>
+            
+            <!-- MATCHES -->
+            <Grid Grid.Column="4">
+                <Grid.RowDefinitions>
+                     <RowDefinition Height="Auto"/>
+                     <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- HEADER: Unified Grey -->
+                <TextBlock Text="MATCHED PAIRS" Foreground="#CCCCCC" FontWeight="Bold" Margin="0,0,0,10" VerticalAlignment="Top"/>
+                
+                <!-- Pushing List down to align with others approximately (Header + Button hole) 
+                     Actually, Matches takes full height. -->
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Matches}" AutoGenerateColumns="False" 
+                          Background="#1A1A1A" RowBackground="Transparent" 
+                          BorderThickness="1" BorderBrush="#333333"
+                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#333333"
+                          HeadersVisibility="Column" ColumnHeaderHeight="30"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
+                          SelectionMode="Single" SelectionUnit="FullRow"
+                          CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True">
+                     <DataGrid.Resources>
+                        <!-- Apply Minimalist ScrollBar locally to this DataGrid -->
+                        <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource MinimalistScrollBar}"/>
+
+                        <!-- FORCE SELECTION COLORS -->
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#505050"/> <!-- Lighter Gray for Selection -->
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#505050"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
+
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#222222"/>
+                            <Setter Property="Foreground" Value="#888888"/>
+                            <Setter Property="Padding" Value="10,0"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#444444"/>
+                            <Setter Property="Height" Value="30"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridColumnHeader">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Content -->
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                                
+                                                <!-- Sort Indicators (Always present, visibility toggled) -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                    <!-- Up Arrow -->
+                                                    <Path x:Name="SortUp" Data="M 0 4 L 3.5 0 L 7 4 Z" Fill="#444444" Margin="0,0,0,2" Visibility="Visible"/>
+                                                    <!-- Down Arrow -->
+                                                    <Path x:Name="SortDown" Data="M 0 0 L 3.5 4 L 7 0 Z" Fill="#444444" Visibility="Visible"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <!-- SORT ASCENDING: Hide Down, Highlight Up -->
+                                            <Trigger Property="SortDirection" Value="Ascending">
+                                                <Setter TargetName="SortDown" Property="Visibility" Value="Collapsed"/>
+                                                <Setter TargetName="SortUp" Property="Fill" Value="White"/>
+                                                <Setter TargetName="SortUp" Property="Margin" Value="0"/> <!-- Center vertically -->
+                                            </Trigger>
+                                            <!-- SORT DESCENDING: Hide Up, Highlight Down -->
+                                            <Trigger Property="SortDirection" Value="Descending">
+                                                <Setter TargetName="SortUp" Property="Visibility" Value="Collapsed"/>
+                                                <Setter TargetName="SortDown" Property="Fill" Value="White"/>
+                                                <Setter TargetName="SortDown" Property="Margin" Value="0"/> <!-- Center vertically -->
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        
+                        <!-- Specific Style for Centering Header (Inherits Template) -->
+                        <Style x:Key="CenteredHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+
+                         <Style TargetType="DataGridCell">
+                             <Setter Property="BorderThickness" Value="0"/>
+                             <Setter Property="Padding" Value="10,8"/>
+                             <Setter Property="Background" Value="Transparent"/>
+                             <Setter Property="Template">
+                                 <Setter.Value>
+                                     <ControlTemplate TargetType="DataGridCell">
+                                         <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                             <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                         </Border>
+                                     </ControlTemplate>
+                                 </Setter.Value>
+                             </Setter>
+                         </Style>
+                         <Style TargetType="DataGridRow">
+                             <Setter Property="Background" Value="Transparent"/>
+                             <Setter Property="Foreground" Value="#CCCCCC"/>
+                             <Setter Property="BorderThickness" Value="0"/>
+                             <Style.Triggers>
+                                 <Trigger Property="IsMouseOver" Value="True">
+                                     <Setter Property="Background" Value="#383838"/> <!-- Lighter Hover -->
+                                 </Trigger>
+                                 <Trigger Property="IsSelected" Value="True">
+                                     <Setter Property="Background" Value="#505050"/> <!-- Matches HighlightBrushKey -->
+                                     <Setter Property="Foreground" Value="White"/>
+                                 </Trigger>
+                             </Style.Triggers>
+                         </Style>
+                    </DataGrid.Resources>
+
+                     <DataGrid.Columns>
+                        <DataGridTextColumn Header="VIDEO MASTER" Binding="{Binding Video.Filename}" Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="0,0,16,0"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        
+                        <DataGridTextColumn Header="AUDIO SOURCE" Binding="{Binding Audio.Filename}" Width="0.75*">
+                             <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="0,0,16,0"/>
+                                    <Setter Property="Foreground" Value="#AAAAAA"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="OFFSET" Binding="{Binding OffsetDisplay}" Width="110" Foreground="{StaticResource Brush.Accent}" FontFamily="Consolas" HeaderStyle="{StaticResource CenteredHeaderStyle}">
+                             <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="120" Foreground="#888888" HeaderStyle="{StaticResource CenteredHeaderStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Delete Action (Hover Only) -->
+                        <DataGridTemplateColumn Width="40">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.RemoveMatchItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            CommandParameter="{Binding}"
+                                            Width="20" Height="20" Background="Transparent" BorderThickness="0">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="Transparent">
+                                                                <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                                                                        Fill="#666666" Height="10" Width="10" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                     <Setter Property="Cursor" Value="Hand"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <!-- FIX: Trigger on DataGridRow, NOT ListBoxItem -->
+                                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                     </DataGrid.Columns>
+                </DataGrid>
+
+
+            </Grid>
+        </Grid>
+
+        <!-- FOOTER: BATCH EXPORT -->
+        <Border Grid.Row="2" Background="#111111" Margin="0,20,0,0" Padding="15" CornerRadius="5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <Grid Grid.Column="0" VerticalAlignment="Center">
+                     <Grid.RowDefinitions>
+                         <RowDefinition Height="Auto"/>
+                         <RowDefinition Height="Auto"/>
+                     </Grid.RowDefinitions>
+                     <TextBlock Text="EXPORT DESTINATION" Foreground="#CCCCCC" FontWeight="Bold" Margin="0,0,0,5"/>
+                     <Grid Grid.Row="1">
+                         <Grid.ColumnDefinitions>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="35"/>
+                         </Grid.ColumnDefinitions>
+                         <TextBox Text="{Binding ExportDestination}" IsReadOnly="True" Background="#222222" BorderThickness="0" Foreground="White" Padding="8,6" VerticalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                         <Button Grid.Column="1" Command="{Binding SelectExportFolderCommand}" Content="..." Margin="5,0,0,0" Style="{StaticResource ActionButtonStyle}" Height="30" VerticalAlignment="Stretch"/>
+                     </Grid>
+                </Grid>
+
+                <Button Grid.Column="2" Command="{Binding ClearAllCommand}" Content="CLEAR ALL" Width="120" Height="26" VerticalAlignment="Bottom" Margin="0,0,0,1"  BorderThickness="1" BorderBrush="#555555">
+                     <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#333333"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <!-- Logic: Disable only if ALL lists are empty -->
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding VideoPool.Count}" Value="0"/>
+                                            <Condition Binding="{Binding AudioPool.Count}" Value="0"/>
+                                            <Condition Binding="{Binding Matches.Count}" Value="0"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </MultiDataTrigger>
+                                    
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Background" Value="#222222"/>
+                                        <Setter Property="Foreground" Value="#555555"/>
+                                        <Setter Property="BorderBrush" Value="#333333"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Background" Value="#1A4CB1"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#1A4CB1"/>
+                                    </Trigger>
+                                     <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsEnabled" Value="True"/>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" Value="#3565C8"/>
+                                    </MultiTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                </Button>
+                
+                <Button Grid.Column="4" Command="{Binding ExportBatchCommand}" Content="EXPORT ALL SYNCED" Height="26" Padding="20,0" Style="{StaticResource BlueActionButtonStyle}" VerticalAlignment="Bottom" Margin="0,0,0,1"/>
+            </Grid>
+        </Border>
+        
+        <!-- PROGRESS OVERLAY -->
+        <Grid Grid.RowSpan="3" Background="#AA000000" Visibility="{Binding IsBusy, Converter={x:Static local:Converters.BooleanToVisibilityConverter}}">
+             <Border Background="#252525" CornerRadius="10" Padding="30" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="400">
+                 <StackPanel>
+                     <TextBlock Text="PROCESSING" Foreground="{StaticResource Brush.Accent}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                     
+                     <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="10" Background="#333333" Foreground="{StaticResource Brush.Accent}" BorderThickness="0"/>
+                     <TextBlock Text="{Binding BusyMessage}" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,15,0,0"/>
+                 </StackPanel>
+             </Border>
+        </Grid>
     </Grid>
 </UserControl>
