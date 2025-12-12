@@ -372,8 +372,8 @@ namespace Veriflow.Desktop.ViewModels
                 {
                     string file = files[0];
                     string ext = System.IO.Path.GetExtension(file).ToLower();
-                    // Valid video extensions
-                    if (new[] { ".mp4", ".mov", ".mxf", ".avi", ".mkv", ".mts", ".ts" }.Contains(ext))
+                    // Valid video extensions (Expanded)
+                    if (new[] { ".mp4", ".mov", ".mxf", ".avi", ".mkv", ".mts", ".ts", ".webm", ".flv", ".wmv", ".m4v" }.Contains(ext))
                     {
                         await LoadVideo(file);
                     }

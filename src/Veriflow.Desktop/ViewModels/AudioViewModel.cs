@@ -95,6 +95,7 @@ namespace Veriflow.Desktop.ViewModels
                 if (_meteringProvider != null)
                 {
                    var peaks = _meteringProvider.ChannelPeaks;
+                   // Tracks count check to prevent index out of range
                    for(int i=0; i < Tracks.Count && i < peaks.Length; i++)
                    {
                        float linear = peaks[i];
@@ -116,7 +117,6 @@ namespace Veriflow.Desktop.ViewModels
         {
                 if (_inputStream != null && !_isTimerUpdating)
             {
-                // User is scrubbing
                 if (value >= 0 && value <= _playbackMaximum)
                 {
                     _inputStream.SetPosition(TimeSpan.FromSeconds(value));
@@ -136,7 +136,8 @@ namespace Veriflow.Desktop.ViewModels
                 {
                     string file = files[0];
                     string ext = System.IO.Path.GetExtension(file).ToLower();
-                    if (ext == ".wav" || ext == ".bwf")
+                    // Expanded extensions list for CSCore (MP3, WAV, etc.)
+                    if (new[] { ".wav", ".bwf", ".mp3", ".m4a", ".flac", ".aiff", ".ogg", ".wma" }.Contains(ext))
                     {
                         await LoadAudio(file);
                     }
@@ -170,7 +171,8 @@ namespace Veriflow.Desktop.ViewModels
         {
             var openFileDialog = new OpenFileDialog
             {
-                Filter = "Audio Files (*.wav;*.bwf;*.flac;*.mp3;*.aiff)|*.wav;*.bwf;*.flac;*.mp3;*.aiff|All Files (*.*)|*.*"
+                // Expanded extensions in Filter
+                Filter = "Audio Files|*.wav;*.bwf;*.flac;*.mp3;*.aiff;*.m4a;*.ogg;*.wma|All Files|*.*"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -218,6 +220,7 @@ namespace Veriflow.Desktop.ViewModels
                 await LoadMetadataWithFFprobe(path);
 
                 InitializeTracks(CurrentMetadata.ChannelCount > 0 ? CurrentMetadata.ChannelCount : _inputStream.WaveFormat.Channels);
+                
                 GenerateWaveforms(path);
                 GenerateRuler();
             }
@@ -282,25 +285,6 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
-        private void InitializeTracks(int channelCount)
-        {
-            Tracks.Clear();
-            var iXmlNames = CurrentMetadata?.TrackNames ?? new List<string>();
-
-            for (int i = 0; i < channelCount; i++)
-            {
-                string name = $"TRK {i + 1}";
-                
-                if (i < iXmlNames.Count && !string.IsNullOrWhiteSpace(iXmlNames[i]))
-                {
-                    name = iXmlNames[i];
-                }
-                
-                var track = new TrackViewModel(i, name, OnTrackSoloChanged, OnTrackVolumeChanged, OnTrackMuteChanged, OnTrackPanChanged);
-                Tracks.Add(track);
-            }
-        }
-
         private void OnTrackVolumeChanged(int channel, float volume)
         {
             _mixer?.SetChannelVolume(channel, volume);
@@ -332,6 +316,30 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
+        private void InitializeTracks(int channelCount)
+        {
+            Tracks.Clear();
+            var iXmlNames = CurrentMetadata?.TrackNames ?? new List<string>();
+
+            for (int i = 0; i < channelCount; i++)
+            {
+                string name = $"TRK {i + 1}";
+                
+                if (i < iXmlNames.Count && !string.IsNullOrWhiteSpace(iXmlNames[i]))
+                {
+                    name = iXmlNames[i];
+                }
+                
+                var track = new TrackViewModel(i, name, 
+                    OnTrackSoloChanged, 
+                    OnTrackVolumeChanged, 
+                    OnTrackMuteChanged, 
+                    OnTrackPanChanged
+                );
+                Tracks.Add(track);
+            }
+        }
+
         private void GenerateWaveforms(string path)
         {
             Application.Current.Dispatcher.InvokeAsync(async () =>
@@ -346,8 +354,10 @@ namespace Veriflow.Desktop.ViewModels
                         
                         int width = 500;
                         
-                        long totalSamplesAllChannels = source.Length / 4;
-                        long samplesPerChannel = totalSamplesAllChannels / totalChannels;
+                        long totalSamplesAllChannels = source.Length / 4; 
+                        try { totalSamplesAllChannels = source.Length; } catch {} 
+
+                        long samplesPerChannel = (source.Length / totalChannels); 
                         long samplesPerPoint = samplesPerChannel / width;
 
                         if (samplesPerPoint < 1) samplesPerPoint = 1;
@@ -501,7 +511,7 @@ namespace Veriflow.Desktop.ViewModels
             }
             if (_inputStream != null)
             {
-                _inputStream.Dispose(); 
+                _inputStream.Dispose();
                 _inputStream = null;
             }
             _mixer = null;

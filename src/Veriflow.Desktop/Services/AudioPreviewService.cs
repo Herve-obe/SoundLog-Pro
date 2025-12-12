@@ -14,32 +14,21 @@ namespace Veriflow.Desktop.Services
 
         public void Play(string filePath)
         {
-            Stop(); // Ensure any previous playback is stopped
+            Stop(); 
 
             try
             {
                 if (!File.Exists(filePath)) return;
 
-                // 1. Get Source (Supports WAV, FLAC, RF64, MP3 via MediaFoundation/Codecs)
                 _audioSource = CodecFactory.Instance.GetCodec(filePath);
 
-                // 2. Mono Downmix Logic (Preview on both speakers)
                 if (_audioSource.WaveFormat.Channels > 1)
                 {
-                    // Convert to SampleSource to manipulate data
                     var sampleSource = _audioSource.ToSampleSource();
-                    
-                    // Wrap in our custom Mono Mixer
                     var monoSource = new MonoSampleDownmixer(sampleSource);
-                    
-                    // Convert back to WaveSource for SoundOut (keeping sample rate, but Mono)
-                    // Actually, SoundOut handles Mono fine (plays on both usually) or we replicate to Stereo.
-                    // For "Preview on both speakers" from a Mono source, Wasapi typically maps Mono to L+R.
-                    // So simply making it 1 Channel is enough.
                     _audioSource = monoSource.ToWaveSource();
                 }
 
-                // 3. Init Output (WasapiOut for Pro/Low Latency)
                 _outputDevice = new WasapiOut();
                 _outputDevice.Initialize(_audioSource);
                 _outputDevice.Play();
@@ -72,7 +61,6 @@ namespace Veriflow.Desktop.Services
             Stop();
         }
 
-        // Simple Downmixer: Takes [L, R, ...] and outputs [Avg]
         private class MonoSampleDownmixer : ISampleSource
         {
             private readonly ISampleSource _source;
@@ -92,7 +80,6 @@ namespace Veriflow.Desktop.Services
                 if (source.WaveFormat.Channels == 1)
                     throw new ArgumentException("Source is already Mono");
 
-                // Output is Mono, IEEE Float (32-bit)
                 WaveFormat = new WaveFormat(source.WaveFormat.SampleRate, 32, 1, AudioEncoding.IeeeFloat);
             }
 

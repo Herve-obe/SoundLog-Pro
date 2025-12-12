@@ -29,6 +29,21 @@ namespace Veriflow.Desktop.Models
         public List<TrackInfo> Tracks { get; set; } = new List<TrackInfo>();
         
         public int ChannelCount { get; set; }
+        public string ChannelCountString => ChannelCount > 0 ? ChannelCount.ToString() : string.Empty;
+
+        // --- Tech Specs (MP3/General) ---
+        // --- Tech Specs (MP3/General) ---
+        public string FullPath { get; set; } = string.Empty;    // Full file path
+        public string FileSize { get; set; } = string.Empty;
+        public string Bitrate { get; set; } = string.Empty;     // e.g. "320 kb/s"
+        public string BitrateMode { get; set; } = string.Empty; // e.g. "CBR" or "VBR"
+        public string SampleRateString { get; set; } = string.Empty; // e.g. "48000 Hz"
+        public string BitDepthString { get; set; } = string.Empty; // e.g. "24 bits"
+        public string Codec { get; set; } = string.Empty;       // Legacy / Simple name
+        public string CodecName { get; set; } = string.Empty;   // e.g. "pcm_s24le"
+        public string ChannelLayout { get; set; } = string.Empty; // e.g. "stereo"
+        public string ContainerFormat { get; set; } = string.Empty; // e.g. "wav"
+        public string EncodingLibrary { get; set; } = string.Empty; // e.g. "LAME3.100"
 
         // Backwards compatibility helper if needed (though UI should bind to Tracks)
         public List<string> TrackNames => Tracks.Select(t => t.Name).ToList();

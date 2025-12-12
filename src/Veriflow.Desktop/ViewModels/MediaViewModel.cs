@@ -169,6 +169,9 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
+        private readonly string[] _audioExtensions = { ".wav", ".mp3", ".m4a" };
+        private readonly string[] _videoExtensions = { ".mov", ".mp4", ".ts", ".mxf", ".avi" };
+
         private void LoadDirectory(string path)
         {
             if (Directory.Exists(path))
@@ -179,14 +182,31 @@ namespace Veriflow.Desktop.ViewModels
 
                 try
                 {
-                    // Add supported media files
-                    var extensions = new[] { ".wav", ".mp3", ".m4a", ".mov", ".mp4", ".ts", ".mxf", ".avi" };
-                    foreach (var file in dirInfo.GetFiles().Where(f => extensions.Contains(f.Extension.ToLower())))
+                    // Filter based on Mode
+                    var targetExtensions = IsVideoMode ? _videoExtensions : _audioExtensions;
+                    
+                    var files = dirInfo.GetFiles()
+                                       .Where(f => targetExtensions.Contains(f.Extension.ToLower()))
+                                       .OrderBy(f => f.Name);
+
+                    foreach (var file in files)
                     {
                         FileList.Add(new MediaItemViewModel(file));
                     }
                 }
                 catch { /* Access denied or other error */ }
+            }
+        }
+
+        partial void OnIsVideoModeChanged(bool value)
+        {
+            // Stop any playing preview when switching modes to avoid phantom audio
+            StopPreview();
+            
+            // Reload current directory applying new filter
+            if (!string.IsNullOrEmpty(CurrentPath))
+            {
+                LoadDirectory(CurrentPath);
             }
         }
 

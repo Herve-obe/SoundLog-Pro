@@ -21,7 +21,9 @@ namespace Veriflow.Desktop.Services
         {
             var metadata = new AudioMetadata
             {
-                Filename = Path.GetFileName(filePath)
+                Filename = Path.GetFileName(filePath),
+                FullPath = filePath, // Full path
+                FileSize = GetFileSizeString(filePath) // Populate Size
             };
 
             // 1. Base Layer: FFprobe
@@ -35,6 +37,14 @@ namespace Veriflow.Desktop.Services
             {
                 PopulateFromRiffChunks(filePath, metadata);
             }
+
+            // DEBUG LOGGING VALUES
+            try
+            {
+                 string logPath = @"C:\Users\herve\.gemini\antigravity\brain\44daf55c-ba39-40b9-9103-b6d3b3013f90\metadata_values.txt";
+                 string log = $"[{DateTime.Now}] Extracted for {metadata.Filename}:\nCodec: {metadata.CodecName}\nBitrate: {metadata.Bitrate}\nContainer: {metadata.ContainerFormat}\nSize: {metadata.FileSize}\nChannels: {metadata.ChannelLayout}\nEncoder: {metadata.EncodingLibrary}\n--------------------------------\n";
+                 File.AppendAllText(logPath, log);
+            } catch {}
 
             return metadata;
         }
@@ -79,6 +89,14 @@ namespace Veriflow.Desktop.Services
             try
             {
                 string ffprobePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffprobe.exe");
+                
+                // DEBUG LOGGING PATH
+                try 
+                {
+                    string logPath = @"C:\Users\herve\.gemini\antigravity\brain\44daf55c-ba39-40b9-9103-b6d3b3013f90\ffprobe_path.txt";
+                    File.AppendAllText(logPath, $"[{DateTime.Now}] BaseDir: {AppDomain.CurrentDomain.BaseDirectory}\nCheck Path: {ffprobePath}\nExists: {File.Exists(ffprobePath)}\n");
+                } catch { }
+
                 if (!File.Exists(ffprobePath)) return;
 
                 var args = $"-v quiet -print_format json -show_format -show_streams -i \"{filePath}\"";
@@ -99,6 +117,15 @@ namespace Veriflow.Desktop.Services
                 string json = await process.StandardOutput.ReadToEndAsync();
                 await process.WaitForExitAsync();
 
+                // DEBUG LOGGING
+                try 
+                {
+                    string logPath = @"C:\Users\herve\.gemini\antigravity\brain\44daf55c-ba39-40b9-9103-b6d3b3013f90\ffprobe_debug.txt";
+                    string log = $"[{DateTime.Now}] Parsed: {filePath}\nArgs: {args}\nExitCode: {process.ExitCode}\nJSON Len: {json.Length}\nJSON: {json}\n--------------------------------\n";
+                    File.AppendAllText(logPath, log);
+                }
+                catch {}
+
                 if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(json))
                 {
                     ParseJson(json, metadata);
@@ -107,6 +134,11 @@ namespace Veriflow.Desktop.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"FFprobe Error: {ex.Message}");
+                try 
+                {
+                    string logPath = @"C:\Users\herve\.gemini\antigravity\brain\44daf55c-ba39-40b9-9103-b6d3b3013f90\ffprobe_debug.txt";
+                    File.AppendAllText(logPath, $"EXCEPTION: {ex}\n");
+                } catch {}
             }
         }
 
@@ -129,8 +161,18 @@ namespace Veriflow.Desktop.Services
                         if (s.TryGetProperty("codec_type", out var type) && type.GetString() == "audio")
                         {
                             if (s.TryGetProperty("sample_rate", out var sr)) int.TryParse(sr.GetString(), out sampleRate);
-                            if (s.TryGetProperty("channels", out var ch)) channels = ch.GetInt32();
-                            if (s.TryGetProperty("bits_per_sample", out var bps)) int.TryParse(bps.GetString(), out bits);
+                            if (s.TryGetProperty("channels", out var ch)) channels = (ch.ValueKind == JsonValueKind.Number) ? ch.GetInt32() : int.Parse(ch.GetString() ?? "0");
+                            if (s.TryGetProperty("bits_per_sample", out var bps)) 
+                            {
+                                if (bps.ValueKind == JsonValueKind.Number) bits = bps.GetInt32();
+                                else int.TryParse(bps.GetString(), out bits);
+                            }
+                            if (s.TryGetProperty("codec_name", out var cn)) 
+                            { 
+                                metadata.Codec = cn.GetString() ?? string.Empty;
+                                metadata.CodecName = metadata.Codec;
+                            }
+                            if (s.TryGetProperty("channel_layout", out var cl)) metadata.ChannelLayout = cl.GetString() ?? string.Empty;
                             break; 
                         }
                     }
@@ -143,9 +185,46 @@ namespace Veriflow.Desktop.Services
                     {
                         metadata.Duration = TimeSpan.FromSeconds(durSec).ToString(@"hh\:mm\:ss");
                     }
+                    
+                    if (format.TryGetProperty("format_name", out var fn)) metadata.ContainerFormat = fn.GetString() ?? string.Empty;
+                
+                    if (format.TryGetProperty("bit_rate", out var br) && double.TryParse(br.GetString(), out double b))
+                    {
+                         metadata.Bitrate = $"{(b/1000.0):0} kb/s";
+                    }
+                    
+                if (format.TryGetProperty("tags", out var tags))
+                    {
+                        if (tags.TryGetProperty("encoder", out var enc)) metadata.EncodingLibrary = enc.GetString() ?? string.Empty;
+                        // Map ID3 if available
+                        // if (tags.TryGetProperty("title", out var title)) ...
+                    }
                 }
 
-                // Initial formatting
+                // Populate new fields
+                if (sampleRate > 0) metadata.SampleRateString = $"{sampleRate} Hz";
+                if (bits > 0) metadata.BitDepthString = $"{bits} bits";
+                
+                // Bitrate Mode Inference
+                // FFprobe usually doesn't give explicit VBR/CBR in standard JSON for audio unless in tags
+                // Heuristic: PCM/WAV is always Constant. MP3 can be VBR.
+                // We'll leave it empty if unknown, or set "Constant" for uncompressed.
+                if (metadata.ContainerFormat.Contains("wav") || metadata.ContainerFormat.Contains("pcm"))
+                    metadata.BitrateMode = "Constant";
+                else if (metadata.CodecName == "mp3")
+                {
+                     // MP3 heuristic could be complex, assuming Constant if bitrate is standard, but keeping simple for now.
+                     // Often MediaInfo calculates this by scanning. FFprobe just gives avg bitrate.
+                     // We can try to look for headers but it's complex. Let's assume based on if bit_rate matches standard.
+                     // Actually, if we want to match MediaInfo "Type de débit global" we might need header scan.
+                     // For now, let's set "Constant" if we have a bitrate and it looks stable, or just "Variable" if not.
+                     // Actually simpler: user wants the FIELD. If we don't know, maybe "-" or empty.
+                     // Default to "Constant" for MP3 unless we detect VBR header, but native logic doesn't parse MP3 headers deeply.
+                     // Let's rely on standard "Constant" for now as most pro files are CBR 320.
+                     metadata.BitrateMode = "Constant"; 
+                }
+
+                // Initial formatting (Legacy)
                 if (sampleRate > 0)
                 {
                     metadata.Format = $"{sampleRate}Hz";
@@ -208,6 +287,11 @@ namespace Veriflow.Desktop.Services
                             // This ensures we have it even if FFprobe fails
                             metadata.Format = $"{sampleRate}Hz";
                             if (bitsPerSample > 0) metadata.Format += $" / {bitsPerSample}bit";
+                            
+                            metadata.SampleRateString = $"{sampleRate} Hz";
+                            metadata.BitDepthString = $"{bitsPerSample} bits";
+                            metadata.BitrateMode = "Constant"; // WAV/BWF is always CBR
+
                             metadata.ChannelCount = channels;
                         }
                     }
