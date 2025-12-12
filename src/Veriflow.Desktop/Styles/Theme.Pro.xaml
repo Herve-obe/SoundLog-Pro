@@ -22,7 +22,7 @@
     <SolidColorBrush x:Key="Brush.Panel" Color="#1E1E1E"/>
     <SolidColorBrush x:Key="Brush.Panel.Deep" Color="#181818"/>
     <SolidColorBrush x:Key="Brush.Border" Color="#333333"/>
-    <SolidColorBrush x:Key="Brush.Accent" Color="#007ACC"/>
+    <SolidColorBrush x:Key="Brush.Accent" Color="#1A4CB1"/>
     <SolidColorBrush x:Key="Brush.Text" Color="#CCCCCC"/>
     <SolidColorBrush x:Key="Brush.Text.Dark" Color="#111111"/>
     <SolidColorBrush x:Key="Brush.Input" Color="#101010"/>
@@ -242,10 +242,10 @@
                                 <Condition Property="IsEnabled" Value="True"/>
                                 <Condition Property="IsMouseOver" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="border" Property="Background" Value="#108BDE"/> <!-- Lighter Blue -->
+                            <Setter TargetName="border" Property="Background" Value="#3565C8"/> <!-- Lighter Blue -->
                         </MultiTrigger>
                          <Trigger Property="IsPressed" Value="True">
-                             <Setter TargetName="border" Property="Background" Value="#005A9E"/> <!-- Darker Blue -->
+                             <Setter TargetName="border" Property="Background" Value="#123680"/> <!-- Darker Blue -->
                          </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

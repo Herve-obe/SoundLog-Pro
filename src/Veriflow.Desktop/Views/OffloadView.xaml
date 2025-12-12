@@ -13,16 +13,26 @@
     </UserControl.Resources>
 
     <!-- NATIVE OPTICAL LAYOUT (1/Auto/2/Auto) -->
-    <Grid Margin="30">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- HEADER -->
             <RowDefinition Height="1*"/>   <!-- TOP SPACE -->
             <RowDefinition Height="Auto"/> <!-- FORM -->
             <RowDefinition Height="2*"/>   <!-- BOTTOM SPACE -->
             <RowDefinition Height="Auto"/> <!-- FOOTER -->
         </Grid.RowDefinitions>
 
+        <!-- HEADER -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+             <Path Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 1,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.82 18,15.47C17.76,16 17.47,16.5 17.13,17Z"
+                   Fill="{StaticResource Brush.Accent}"
+                   Height="20" Width="20" Stretch="Uniform"
+                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock Text="SECURE COPY" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
+        </StackPanel>
+
         <!-- FORM CONTENT -->
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" MaxWidth="1000" Width="800">
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center" MaxWidth="1000" Width="800">
             
             <!-- SOURCE -->
             <Grid Margin="0,0,0,25">
@@ -33,11 +43,11 @@
                 
                 <DockPanel LastChildFill="False" Margin="0,0,0,5">
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                        <!-- SD Card Icon (Custom Image) -->
-                        <Image Source="/Veriflow.Desktop;component/Assets/sdoclock.png"
-                               Height="24" Stretch="Uniform"
-                               VerticalAlignment="Center" Margin="0,0,8,0"
-                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <!-- SD Card Icon (Vector) -->
+                        <Path Data="M18,8L12,2H4A2,2 0 0,0 2,4V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V8H18M13,9H11V4H13V9M9,9H7V4H9V9"
+                              Fill="{StaticResource Brush.Accent}"
+                              Height="24" Width="24" Stretch="Uniform"
+                              VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBlock Text="MEDIA SOURCE" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
                     </StackPanel>
                     
@@ -110,11 +120,11 @@
             <!-- DESTINATIONS -->
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                     <!-- Hard Drive Icon (Custom Image) -->
-                    <Image Source="/Veriflow.Desktop;component/Assets/hdd.png"
-                           Height="24" Stretch="Uniform"
-                           VerticalAlignment="Center" Margin="0,0,8,0"
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                     <!-- Hard Drive Icon (Vector) -->
+                    <Path Data="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M12,18A2,2 0 0,0 14,16A2,2 0 0,0 12,14A2,2 0 0,0 10,16A2,2 0 0,0 12,18M6,4V10H18V4H6Z"
+                          Fill="{StaticResource Brush.Accent}"
+                          Height="24" Width="24" Stretch="Uniform"
+                          VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBlock Text="DESTINATION" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
                 </StackPanel>
 
@@ -243,7 +253,7 @@
         </StackPanel>
 
         <!-- FOOTER ACTIONS -->
-        <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0,0,0,30">
+        <StackPanel Grid.Row="4" VerticalAlignment="Bottom" Margin="0,0,0,30">
             <Button Command="{Binding ToggleCopyCommand}" 
                     Margin="0,0,0,15"
                     HorizontalAlignment="Center" Width="400">
@@ -277,20 +287,20 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding CurrentHashDisplay}" TextTrimming="CharacterEllipsis" Style="{StaticResource Style.Text.Mono}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding LogText}" Margin="0,2,0,0" Style="{StaticResource BodyStyle}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentHashDisplay}" TextTrimming="CharacterEllipsis" FontSize="{StaticResource Font.Size.Body}" FontWeight="Bold" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LogText}" Margin="10,0,0,0" FontSize="{StaticResource Font.Size.Body}" FontWeight="Bold" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
                 </StackPanel>
                 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                     <TextBlock Text="ETA: " FontWeight="Bold" Style="{StaticResource BodyStyle}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                     <TextBlock Text="{Binding TimeRemainingDisplay}" FontWeight="Bold" Style="{StaticResource Style.Text.Mono}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
+                     <TextBlock Text="ETA: " FontWeight="Bold" FontSize="{StaticResource Font.Size.Body}" Foreground="{StaticResource Brush.Text}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                     <TextBlock Text="{Binding TimeRemainingDisplay}" FontWeight="Bold" FontSize="{StaticResource Font.Size.Body}" Foreground="{StaticResource Brush.Text}" VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="2" Text="{Binding CurrentSpeedDisplay}" 
                            FontWeight="Bold"
                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Style="{StaticResource Style.Text.Mono}" FontSize="{StaticResource Font.Size.Small}" Foreground="{StaticResource Brush.Text}"/>
+                           FontSize="{StaticResource Font.Size.Body}" Foreground="{StaticResource Brush.Text}"/>
             </Grid>
         </StackPanel>
     </Grid>

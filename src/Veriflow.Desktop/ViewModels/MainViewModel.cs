@@ -33,7 +33,7 @@ namespace Veriflow.Desktop.ViewModels
         private readonly TranscodeViewModel _transcodeViewModel = new();
         private readonly MediaViewModel _mediaViewModel = new();
         private readonly SyncViewModel _syncViewModel = new();
-        private readonly string _reportsView = "Reports View (Coming Soon)";
+        private readonly ReportsViewModel _reportsViewModel = new();
 
         public ICommand ShowPlayerCommand { get; }
         public ICommand ShowMediaCommand { get; }
@@ -157,7 +157,7 @@ namespace Veriflow.Desktop.ViewModels
                     CurrentView = _syncViewModel;
                     break;
                 case PageType.Reports:
-                    CurrentView = _reportsView;
+                    CurrentView = _reportsViewModel;
                     break;
             }
             

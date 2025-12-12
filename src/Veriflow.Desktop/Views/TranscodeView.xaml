@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1024">
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.Resources>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             
@@ -197,30 +197,29 @@
             </Style>
         </Grid.Resources>
         
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Header -->
-            <RowDefinition Height="*"/>    <!-- Content -->
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>   <!-- File List Area -->
+            <ColumnDefinition Width="350"/> <!-- Settings Panel -->
+        </Grid.ColumnDefinitions>
 
-        <!-- HEADER -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-             <Path Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"
-                   Fill="{StaticResource Brush.Accent}"
-                   Height="20" Width="20" Stretch="Uniform"
-                   VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <TextBlock Text="TRANSCODE" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
-        </StackPanel>
+        <!-- LEFT COLUMN: HEADER + FILE LIST -->
+        <Grid Grid.Column="0" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Header -->
+                <RowDefinition Height="*"/>    <!-- File List -->
+            </Grid.RowDefinitions>
 
-        <!-- MAIN LAYOUT -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>   <!-- File List -->
-                <ColumnDefinition Width="20"/>  <!-- Spacer -->
-                <ColumnDefinition Width="400"/> <!-- Settings Panel -->
-            </Grid.ColumnDefinitions>
+            <!-- HEADER -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                 <Path Data="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"
+                       Fill="{StaticResource Brush.Accent}"
+                       Height="20" Width="20" Stretch="Uniform"
+                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="TRANSCODE" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
+            </StackPanel>
 
-            <!-- LEFT: FILE LIST -->
-            <Grid Grid.Column="0">
+            <!-- FILE LIST CONTENT -->
+            <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -229,14 +228,13 @@
                 <Grid Margin="0,0,0,5">
                     <TextBlock Text="FILE LIST" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Opacity="0.5"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="+ ADD FILES" Command="{Binding AddFilesCommand}" 
-                                Style="{StaticResource ActionButtonStyle}" 
+                        <Button Content="ADD FILE(S)" Command="{Binding AddFilesCommand}" 
+                                Style="{StaticResource BlueActionButtonStyle}" 
                                 Width="120" Height="26" FontSize="11" 
-                                Background="#333"/>
+                                Margin="0,0,10,0"/>
                         <Button Content="CLEAR LIST" Command="{Binding ClearListCommand}" 
-                                Style="{StaticResource ActionButtonStyle}" 
-                                Width="100" Height="26" FontSize="11" 
-                                Background="#333" Margin="10,0,0,0"/>
+                                Style="{StaticResource BlueActionButtonStyle}" 
+                                Width="100" Height="26" FontSize="11"/>
                     </StackPanel>
                 </Grid>
                 
@@ -337,103 +335,101 @@
                         </TextBlock>
                     </Grid>
                 </Border>
-
             </Grid>
+        </Grid>
 
-            <!-- RIGHT: SETTINGS PANEL -->
-            <Border Grid.Column="2" Background="{StaticResource Brush.Panel}" BorderThickness="0" CornerRadius="4" Padding="20">
-                <StackPanel>
-                    
-                    <TextBlock Text="CHOOSE FUNCTION" Style="{StaticResource LabelStyle}" Margin="0,0,0,10" Opacity="0.7"/>
-                    
-                    <!-- Formats -->
-                    <ComboBox ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedFormat}" Margin="0,0,0,20">
-                         <ComboBox.ItemContainerStyle>
-                            <Style TargetType="ComboBoxItem">
-                                <Setter Property="Padding" Value="10"/>
-                            </Style>
-                        </ComboBox.ItemContainerStyle>
-                    </ComboBox>
+        <!-- RIGHT: SETTINGS PANEL -->
+        <Border Grid.Column="1" Background="{StaticResource Brush.Panel}" BorderThickness="1,0,0,0" BorderBrush="{StaticResource Brush.Border}" CornerRadius="0" Padding="10">
+            <StackPanel>
+                
+                <TextBlock Text="CHOOSE FUNCTION" Style="{StaticResource LabelStyle}" Margin="0,0,0,10" Opacity="0.7"/>
+                
+                <!-- Formats -->
+                <ComboBox ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedFormat}" Margin="0,0,0,20">
+                     <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="Padding" Value="10"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
 
-                    <!-- Divider -->
-                    <Rectangle Height="1" Fill="#333" Margin="0,0,0,20"/>
+                <!-- Divider -->
+                <Rectangle Height="1" Fill="#333" Margin="0,0,0,20"/>
 
-                    <TextBlock Text="AUDIO SETTINGS" Style="{StaticResource LabelStyle}" Margin="0,0,0,10" Opacity="0.7"/>
-                    
-                    <StackPanel Margin="0,0,0,10">
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Sample Rate" Foreground="#888" Margin="0,0,0,5"/>
-                            <ComboBox ItemsSource="{Binding AvailableSampleRates}" SelectedItem="{Binding SelectedSampleRate}"/>
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,0,15">
-                             <TextBlock Text="Bit Depth" Foreground="#888" Margin="0,0,0,5"/>
-                            <ComboBox ItemsSource="{Binding AvailableBitDepths}" SelectedItem="{Binding SelectedBitDepth}"/>
-                        </StackPanel>
-
-                        <StackPanel>
-                            <TextBlock Text="Bitrate" Foreground="#888" Margin="0,0,0,5"/>
-                            <ComboBox ItemsSource="{Binding AvailableBitrates}" SelectedItem="{Binding SelectedBitrate}" IsEnabled="{Binding AvailableBitrates.Count}">
-                                <ComboBox.Style>
-                                    <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding AvailableBitrates.Count}" Value="0">
-                                                <Setter Property="IsEnabled" Value="False"/>
-                                                <Setter Property="Opacity" Value="0.3"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ComboBox.Style>
-                            </ComboBox>
-                        </StackPanel>
+                <TextBlock Text="AUDIO SETTINGS" Style="{StaticResource LabelStyle}" Margin="0,0,0,10" Opacity="0.7"/>
+                
+                <StackPanel Margin="0,0,0,10">
+                    <StackPanel Margin="0,0,0,15">
+                        <TextBlock Text="Sample Rate" Foreground="#888" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding AvailableSampleRates}" SelectedItem="{Binding SelectedSampleRate}"/>
                     </StackPanel>
 
-                    <!-- Divider -->
-                    <Rectangle Height="1" Fill="#333" Margin="0,10,0,20"/>
+                    <StackPanel Margin="0,0,0,15">
+                         <TextBlock Text="Bit Depth" Foreground="#888" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding AvailableBitDepths}" SelectedItem="{Binding SelectedBitDepth}"/>
+                    </StackPanel>
 
-                    <TextBlock Text="OUTPUT SETTINGS" Style="{StaticResource LabelStyle}" Margin="0,0,0,10" Opacity="0.7"/>
-
-                     <Grid Margin="0,0,0,20">
-                         <Grid.ColumnDefinitions>
-                             <ColumnDefinition Width="*"/>
-                             <ColumnDefinition Width="Auto"/>
-                         </Grid.ColumnDefinitions>
-                         <TextBox Text="{Binding DestinationFolder, TargetNullValue='Source Location'}" 
-                                  IsReadOnly="True" Height="30" VerticalContentAlignment="Center" 
-                                  Background="#151515" BorderThickness="0" Foreground="#AAA"/>
-                         <Button Grid.Column="1" Content="..." Width="40" Command="{Binding PickDestinationCommand}" Style="{StaticResource ActionButtonStyle}" Margin="5,0,0,0"/>
-                     </Grid>
-
-
-                     <StackPanel Margin="0,20,0,0">
-                         <!-- Progress Bar -->
-                         <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,10" FontWeight="Bold"/>
-                         <ProgressBar Value="{Binding TotalProgressValue}" Height="10" Background="#222" BorderThickness="0" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,20">
-                             <ProgressBar.Style>
-                                 <Style TargetType="ProgressBar">
-                                     <Style.Triggers>
-                                         <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                                             <Setter Property="Visibility" Value="Visible"/>
-                                         </DataTrigger>
-                                          <DataTrigger Binding="{Binding IsBusy}" Value="False">
-                                             <Setter Property="Visibility" Value="Collapsed"/>
-                                         </DataTrigger>
-                                     </Style.Triggers>
-                                 </Style>
-                             </ProgressBar.Style>
-                         </ProgressBar>
-
-                         <!-- START BUTTON -->
-                         <Button Content="START FUNCTION" 
-                                 Command="{Binding StartTranscodeCommand}"
-                                 Height="50" FontSize="14" FontWeight="Bold"
-                                 Background="{StaticResource Brush.Accent}" Foreground="White"
-                                 Style="{StaticResource ActionButtonStyle}">
-                         </Button>
-                     </StackPanel>
-
+                    <StackPanel>
+                        <TextBlock Text="Bitrate" Foreground="#888" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding AvailableBitrates}" SelectedItem="{Binding SelectedBitrate}" IsEnabled="{Binding AvailableBitrates.Count}">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AvailableBitrates.Count}" Value="0">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.3"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.Style>
+                        </ComboBox>
+                    </StackPanel>
                 </StackPanel>
-            </Border>
-        </Grid>
+
+                <!-- Divider -->
+                <Rectangle Height="1" Fill="#333" Margin="0,10,0,20"/>
+
+                <TextBlock Text="OUTPUT SETTINGS" Style="{StaticResource LabelStyle}" Margin="0,0,0,10" Opacity="0.7"/>
+
+                 <Grid Margin="0,0,0,20">
+                     <Grid.ColumnDefinitions>
+                         <ColumnDefinition Width="*"/>
+                         <ColumnDefinition Width="Auto"/>
+                     </Grid.ColumnDefinitions>
+                     <TextBox Text="{Binding DestinationFolder, TargetNullValue='Source Location'}" 
+                              IsReadOnly="True" Height="30" VerticalContentAlignment="Center" 
+                              Background="#151515" BorderThickness="0" Foreground="#AAA"/>
+                     <Button Grid.Column="1" Content="..." Width="40" Command="{Binding PickDestinationCommand}" Style="{StaticResource ActionButtonStyle}" Margin="5,0,0,0"/>
+                 </Grid>
+
+
+                 <StackPanel Margin="0,20,0,0">
+                     <!-- Progress Bar -->
+                     <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,10" FontWeight="Bold"/>
+                     <ProgressBar Value="{Binding TotalProgressValue}" Height="10" Background="#222" BorderThickness="0" Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,20">
+                         <ProgressBar.Style>
+                             <Style TargetType="ProgressBar">
+                                 <Style.Triggers>
+                                     <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                         <Setter Property="Visibility" Value="Visible"/>
+                                     </DataTrigger>
+                                      <DataTrigger Binding="{Binding IsBusy}" Value="False">
+                                         <Setter Property="Visibility" Value="Collapsed"/>
+                                     </DataTrigger>
+                                 </Style.Triggers>
+                             </Style>
+                         </ProgressBar.Style>
+                     </ProgressBar>
+
+                     <!-- START BUTTON -->
+                     <Button Content="START TRANSCODE" 
+                             Command="{Binding StartTranscodeCommand}"
+                             Height="26"
+                             Style="{StaticResource BlueActionButtonStyle}">
+                     </Button>
+                 </StackPanel>
+
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

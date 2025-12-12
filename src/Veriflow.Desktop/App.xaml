@@ -29,6 +29,10 @@
             <DataTemplate DataType="{x:Type vm:MediaViewModel}">
                 <views:MediaView />
             </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:ReportsViewModel}">
+                <views:ReportsView />
+            </DataTemplate>
             
             <!-- Fallback for String Placeholders -->
             <DataTemplate DataType="{x:Type sys:String}">
