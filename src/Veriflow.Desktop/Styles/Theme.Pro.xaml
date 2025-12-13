@@ -30,6 +30,16 @@
     <SolidColorBrush x:Key="Brush.Control.Hover" Color="#444444"/>
     <SolidColorBrush x:Key="Brush.Control.Pressed" Color="#222222"/>
 
+    <!-- COMPATIBILITY / ALIASES -->
+    <SolidColorBrush x:Key="Brush.Panel.Background" Color="#1E1E1E"/>
+    <SolidColorBrush x:Key="Brush.Input.Background" Color="#101010"/>
+    <SolidColorBrush x:Key="Brush.Border.Primary" Color="#333333"/>
+    <SolidColorBrush x:Key="Brush.Border.Secondary" Color="#444444"/>
+    <SolidColorBrush x:Key="Brush.Text.Primary" Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="Brush.Text.Secondary" Color="#888888"/>
+    <SolidColorBrush x:Key="Brush.Text.Accent" Color="#1A4CB1"/>
+    <SolidColorBrush x:Key="Brush.Accent.Transparent" Color="#331A4CB1"/>
+
     <!-- GLOBAL WINDOW STYLE -->
     <Style TargetType="{x:Type Window}">
          <Setter Property="Background" Value="{StaticResource Brush.Background}"/>
@@ -253,6 +263,12 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+
+    <Style x:Key="Style.Button.Primary" TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}"/>
+    <Style x:Key="Style.Button.Secondary" TargetType="Button" BasedOn="{StaticResource PrimaryActionStyle}"/>
+    <Style x:Key="Style.Text.Label" TargetType="TextBlock" BasedOn="{StaticResource LabelStyle}"/>
+    <Style x:Key="Style.TextBox.Form" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}"/>
 
     <!-- TRANSPORT CONTROL STYLE -->
     <Style x:Key="Style.Transport.Base" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

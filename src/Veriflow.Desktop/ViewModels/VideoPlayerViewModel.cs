@@ -105,6 +105,7 @@ namespace Veriflow.Desktop.ViewModels
         private VideoMetadata _currentVideoMetadata = new();
 
         public event Action<IEnumerable<string>>? RequestTranscode;
+        public event Action<string>? RequestModifyReport;
         // public event Action<string>? RequestOffloadSource;
 
         // Timer for updating UI slider/time
@@ -482,6 +483,15 @@ namespace Veriflow.Desktop.ViewModels
             {
                 RequestTranscode?.Invoke(new[] { FilePath });
             }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSendFileToTranscode))]
+        private void ModifyInReport()
+        {
+             if (!string.IsNullOrEmpty(FilePath))
+             {
+                 RequestModifyReport?.Invoke(FilePath);
+             }
         }
 
         public void Dispose()

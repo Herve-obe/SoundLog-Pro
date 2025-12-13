@@ -579,6 +579,7 @@ namespace Veriflow.Desktop.ViewModels
             CleanUpAudio();
         }
         public event Action<IEnumerable<string>>? RequestTranscode;
+        public event Action<string>? RequestModifyReport;
         public event Action<string>? RequestOffloadSource;
 
         private bool CanSendToSecureCopy() => IsAudioLoaded && !string.IsNullOrEmpty(FilePath);
@@ -603,6 +604,15 @@ namespace Veriflow.Desktop.ViewModels
             {
                 RequestTranscode?.Invoke(new[] { FilePath });
             }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSendFileToTranscode))] // Reusing condition as it checks file loaded + path
+        private void ModifyInReport()
+        {
+             if (!string.IsNullOrEmpty(FilePath))
+             {
+                 RequestModifyReport?.Invoke(FilePath);
+             }
         }
         private async Task LoadMetadataWithFFprobe(string path)
         {

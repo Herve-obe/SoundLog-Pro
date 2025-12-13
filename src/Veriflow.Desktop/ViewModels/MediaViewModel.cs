@@ -52,8 +52,35 @@ namespace Veriflow.Desktop.ViewModels
         }
 
 
+        public event Action<IEnumerable<MediaItemViewModel>, bool>? RequestCreateReport; // true=Video
+        public event Action<IEnumerable<MediaItemViewModel>>? RequestAddToReport;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(AddToReportCommand))]
+        private bool _hasActiveReport; // Controlled by MainViewModel
+
+        public void SetReportActive(bool active) => HasActiveReport = active;
+
         private bool CanSendToSecureCopy() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath);
         private bool CanSendToTranscode() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && FileList.Any();
+
+        [RelayCommand]
+        private void CreateReport()
+        {
+            if (FileList.Any())
+            {
+               RequestCreateReport?.Invoke(FileList, IsVideoMode);
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(HasActiveReport))]
+        private void AddToReport()
+        {
+             if (FileList.Any())
+            {
+               RequestAddToReport?.Invoke(FileList);
+            }
+        }
 
         [RelayCommand(CanExecute = nameof(CanSendToSecureCopy))]
         private void SendToSecureCopy()

@@ -4,9 +4,12 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Veriflow.Desktop.Models; // Ensure this is present
 
 namespace Veriflow.Desktop.ViewModels
 {
+
+
     public enum AppMode { Audio, Video }
     public enum PageType { Media, Player, Sync, Offload, Transcode, Reports }
 
@@ -23,6 +26,12 @@ namespace Veriflow.Desktop.ViewModels
 
         [ObservableProperty]
         private AppMode _currentAppMode = AppMode.Video;
+
+        partial void OnCurrentAppModeChanged(AppMode value)
+        {
+            _reportsViewModel.SetAppMode(value);
+            // Propagate to other VMs if needed
+        }
 
         [ObservableProperty]
         private PageType _currentPageType = PageType.Media;
@@ -111,6 +120,52 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _transcodeViewModel.AddFiles(files);
                 NavigateTo(PageType.Transcode);
+            };
+
+            // Reports Integration
+            _mediaViewModel.RequestCreateReport += (items, isVideo) =>
+            {
+               var type = isVideo ? ReportType.Video : ReportType.Audio;
+               _reportsViewModel.CreateReport(items, type);
+               // Sync state back to MediaVM (or use property binding if possible, but manual sync is fine here)
+               _mediaViewModel.SetReportActive(true);
+               NavigateTo(PageType.Reports);
+            };
+
+            _mediaViewModel.RequestAddToReport += (items) =>
+            {
+               _reportsViewModel.AddToReport(items);
+               NavigateTo(PageType.Reports);
+            };
+
+            // Player Integration
+            // Player Integration
+            _audioViewModel.RequestModifyReport += (path) =>
+            {
+                 var item = _reportsViewModel.GetReportItem(path);
+                 if (item != null)
+                 {
+                     // Open Popup
+                     // Use Dispatcher to ensure UI thread if needed (Event usually on UI thread but safe to be sure)
+                     Application.Current.Dispatcher.Invoke(() => 
+                     {
+                         var win = new Views.QuickEditReportWindow(item);
+                         win.Owner = Application.Current.MainWindow;
+                         win.ShowDialog();
+                     });
+                 }
+                 else
+                 {
+                     // Fallback: Navigate to Reports (User can see it's missing)
+                     _reportsViewModel.NavigateToPath(path);
+                     NavigateTo(PageType.Reports);
+                 }
+            };
+
+            _videoPlayerViewModel.RequestModifyReport += (path) =>
+            {
+                _reportsViewModel.NavigateToPath(path);
+                NavigateTo(PageType.Reports);
             };
         }
 

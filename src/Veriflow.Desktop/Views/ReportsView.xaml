@@ -4,30 +4,351 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Veriflow.Desktop.Views"
+             xmlns:conv="clr-namespace:Veriflow.Desktop.Converters"
+             xmlns:utils="clr-namespace:Veriflow.Desktop.Utilities"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- HEADER -->
-            <RowDefinition Height="*"/>    <!-- CONTENT -->
-        </Grid.RowDefinitions>
+    <UserControl.Resources>
+        <conv:EnumToVisibilityConverter x:Key="Converter.EnumToVisibility"/>
 
-        <!-- HEADER -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-             <!-- File Document Icon -->
-             <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
-                   Fill="{DynamicResource Brush.Accent}"
-                   Height="20" Width="20" Stretch="Uniform"
-                   VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <TextBlock Text="REPORTS" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
-        </StackPanel>
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource Brush.Panel.Background}"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Primary}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
 
-        <!-- CONTENT PLACEHOLDER -->
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
-                  Fill="#555555" Height="64" Width="64" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-            <TextBlock Text="Reports generation coming soon" 
-                       FontSize="20" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Center"/>
-        </StackPanel>
+        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                            <Border Background="{TemplateBinding Background}" BorderThickness="0" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.Accent.Transparent}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+         <!-- Style to force DatePicker Input to Black -->
+        <Style TargetType="DatePickerTextBox">
+             <Setter Property="Background" Value="#101010"/>
+             <Setter Property="Foreground" Value="White"/>
+             <Setter Property="SelectionBrush" Value="{DynamicResource Brush.Accent}"/>
+             <Setter Property="Template">
+                 <Setter.Value>
+                     <ControlTemplate TargetType="DatePickerTextBox">
+                         <TextBox x:Name="PART_TextBox" 
+                                  Text="{Binding Path=SelectedDate, StringFormat='dd/MM/yyyy', RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}"
+                                  Background="{TemplateBinding Background}"
+                                  Foreground="{TemplateBinding Foreground}"
+                                  BorderThickness="0"
+                                  Padding="2,0"
+                                  VerticalContentAlignment="Center"/>
+                     </ControlTemplate>
+                 </Setter.Value>
+             </Setter>
+        </Style>
+
+        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="Margin" Value="10,5,0,5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="DynamicHeaderIcon" TargetType="Path">
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            
+            <!-- Default (Video/Blue) -->
+            <Setter Property="Fill" Value="{DynamicResource Brush.Accent}"/> 
+            <!-- Report Icon Geometry -->
+            <Setter Property="Data" Value="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3"/>
+
+            <Style.Triggers>
+                <!-- Audio Mode (SOUND REPORT) -> Red -->
+                <DataTrigger Binding="{Binding ReportTitle}" Value="SOUND REPORT">
+                    <Setter Property="Fill" Value="#FF5252"/>
+                </DataTrigger>
+                
+                 <!-- Video Mode (CAMERA REPORT) -> Blue (Default, but explicit for safety if needed) -->
+                <DataTrigger Binding="{Binding ReportTitle}" Value="CAMERA REPORT">
+                    <Setter Property="Fill" Value="{DynamicResource Brush.Accent}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DarkCalendarStyle" TargetType="{x:Type Calendar}">
+            <Setter Property="Background" Value="#1E1E1E"/>
+            <Setter Property="BorderBrush" Value="#444444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Calendar}">
+                         <StackPanel HorizontalAlignment="Center" x:Name="Root">
+                             <CalendarItem x:Name="CalendarItem" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- MAIN CONTENT (Left) -->
+        <Grid Grid.Column="0" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Header Block -->
+                <RowDefinition Height="*"/>    <!-- DataGrid -->
+                <RowDefinition Height="Auto"/> <!-- Footer -->
+            </Grid.RowDefinitions>
+
+            <!-- HEADER BLOCK (Exact Player Match) -->
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <StackPanel VerticalAlignment="Center">
+                    <!-- Top Row: Icon + Module Name -->
+                    <StackPanel Orientation="Horizontal">
+                        <Path Style="{StaticResource DynamicHeaderIcon}"/>
+                        <TextBlock Text="{Binding ReportTitle}" Style="{StaticResource HeaderStyle}"/> 
+                    </StackPanel>
+
+                    <!-- Bottom Row: Main Title (Project Name) -->
+                    <TextBlock Text="{Binding Header.ProjectName, TargetNullValue='NEW PROJECT', FallbackValue='NEW PROJECT'}" 
+                               FontSize="{StaticResource Font.Size.Header}" 
+                               FontWeight="Bold" 
+                               Foreground="#DDDDDD" 
+                               Margin="0,2"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- DATAGRID -->
+            <DataGrid Grid.Row="1" ItemsSource="{Binding ReportItems}" AutoGenerateColumns="False" 
+                      SelectedItem="{Binding SelectedReportItem}"
+                      Background="Transparent"
+                      RowBackground="Transparent"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#333333"
+                      BorderThickness="0"
+                      CanUserAddRows="False"
+                      RowStyle="{StaticResource DataGridRowStyle}"
+                      CellStyle="{StaticResource DataGridCellStyle}"
+                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
+                <DataGrid.Resources>
+                   <utils:BindingProxy x:Key="Proxy" Data="{Binding}"/>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                     <!-- Status -->
+                    <DataGridTemplateColumn Width="30">
+                         <DataGridTemplateColumn.CellTemplate>
+                             <DataTemplate>
+                                 <Path Data="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" 
+                                       Fill="#4CAF50" 
+                                       Height="10" Width="10" Stretch="Uniform"
+                                       Visibility="{Binding IsCircled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                             </DataTemplate>
+                         </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- EDITABLE FIELDS -->
+                    <DataGridTemplateColumn Header="SCENE" Width="60">
+                         <DataGridTemplateColumn.CellTemplate>
+                             <DataTemplate>
+                                 <TextBox Text="{Binding Scene, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Style.TextBox.Form}" BorderThickness="0" Background="Transparent"/>
+                             </DataTemplate>
+                         </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="TAKE" Width="50">
+                         <DataGridTemplateColumn.CellTemplate>
+                             <DataTemplate>
+                                 <TextBox Text="{Binding Take, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Style.TextBox.Form}" BorderThickness="0" Background="Transparent"/>
+                             </DataTemplate>
+                         </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                     <!-- Video Specific: THUMBNAIL -->
+                     <DataGridTemplateColumn Header="THUMB" Width="80" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding ThumbnailPath}" Height="40" Stretch="Uniform"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                     </DataGridTemplateColumn>
+
+                    <!-- METADATA -->
+                    <DataGridTextColumn Header="TC START" Binding="{Binding Timecode}" Width="90" Foreground="#AAAAAA" FontFamily="Consolas"/>
+                    <DataGridTextColumn Header="DUR" Binding="{Binding Duration}" Width="90" Foreground="#888888" FontFamily="Consolas"/>
+                    <DataGridTextColumn Header="FILENAME" Binding="{Binding Filename}" Width="*" Foreground="White"/>
+                    
+                    <!-- Audio Specific -->
+                    <DataGridTextColumn Header="TRACKS" Binding="{Binding TrackNames}" Width="120" Foreground="#AAAAAA" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Audio}"/>
+                    <DataGridTextColumn Header="SR" Binding="{Binding SampleRate}" Width="60" Foreground="#888888" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Audio}"/>
+
+                    <!-- Video Specific -->
+                    <DataGridTextColumn Header="RES" Binding="{Binding Resolution}" Width="80" Foreground="#AAAAAA" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}"/>
+                    <DataGridTextColumn Header="CODEC" Binding="{Binding Codec}" Width="80" Foreground="#888888" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}"/>
+
+                    <!-- Editable Notes -->
+                    <DataGridTemplateColumn Header="NOTES" Width="200">
+                         <DataGridTemplateColumn.CellTemplate>
+                             <DataTemplate>
+                                 <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Style.TextBox.Form}" BorderThickness="0" Background="Transparent"/>
+                             </DataTemplate>
+                         </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <!-- Circle Checkbox -->
+                     <DataGridTemplateColumn Header="OK" Width="40">
+                         <DataGridTemplateColumn.CellTemplate>
+                             <DataTemplate>
+                                 <CheckBox IsChecked="{Binding IsCircled, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"/>
+                             </DataTemplate>
+                         </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- SIDEBAR (Right) -->
+        <Border Grid.Column="1" Background="{DynamicResource Brush.Panel.Background}" BorderBrush="{DynamicResource Brush.Border.Secondary}" BorderThickness="1,0,0,0">
+            <Grid Margin="15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="*"/>    <!-- Scrollable Inputs -->
+                    <RowDefinition Height="Auto"/> <!-- Actions -->
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="REPORT INFO" Style="{StaticResource HeaderStyle}" Margin="0,0,0,15"/>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- PROJECT -->
+                        <TextBlock Text="PROJECT" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Header.ProjectName}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+
+                        <!-- DATE -->
+                        <TextBlock Text="DATE" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                         <DatePicker SelectedDate="{Binding Header.ReportDate}" Margin="0,0,0,15"
+                                    BorderThickness="0"
+                                    CalendarStyle="{StaticResource DarkCalendarStyle}">
+                            <DatePicker.Resources>
+                                <Style TargetType="DatePickerTextBox">
+                                     <Setter Property="Background" Value="#101010"/>
+                                     <Setter Property="Foreground" Value="White"/>
+                                     <Setter Property="SelectionBrush" Value="{DynamicResource Brush.Accent}"/>
+                                     <Setter Property="Template">
+                                         <Setter.Value>
+                                             <ControlTemplate TargetType="DatePickerTextBox">
+                                                 <TextBox x:Name="PART_TextBox" 
+                                                          Text="{Binding Path=SelectedDate, StringFormat='dd/MM/yyyy', RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}"
+                                                          Background="{TemplateBinding Background}"
+                                                          Foreground="{TemplateBinding Foreground}"
+                                                          BorderThickness="1" BorderBrush="#444444"
+                                                          Height="26"
+                                                          Padding="4,0"
+                                                          VerticalContentAlignment="Center"/>
+                                             </ControlTemplate>
+                                         </Setter.Value>
+                                     </Setter>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>
+
+                        <!-- COMPANY -->
+                        <TextBlock Text="PRODUCTION CO." Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Header.ProductionCompany}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+
+                        <!-- EPISODE / SCENE Common -->
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="EPISODE" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding Header.Episode}" Style="{StaticResource Style.TextBox.Form}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="SCENE" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding Header.Scene}" Style="{StaticResource Style.TextBox.Form}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- PEOPLE -->
+                        <TextBlock Text="OPERATOR" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Header.OperatorName}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+
+                        <!-- Dynamic: Audio Mixer vs Director -->
+                        <!-- Audio -->
+                        <StackPanel Visibility="{Binding CurrentReportType, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Audio}">
+                            <TextBlock Text="SOUND MIXER" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding Header.SoundMixer}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+                        </StackPanel>
+                        <!-- Video -->
+                        <StackPanel Visibility="{Binding CurrentReportType, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}">
+                             <TextBlock Text="DIRECTOR" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                             <TextBox Text="{Binding Header.Director}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+                             
+                             <TextBlock Text="DOP" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                             <TextBox Text="{Binding Header.Dop}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+                        </StackPanel>
+                        
+                        <!-- GLOBAL NOTES -->
+                        <TextBlock Text="GLOBAL NOTES" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Header.GlobalNotes}" Style="{StaticResource Style.TextBox.Form}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="4"/>
+                        
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ACTIONS -->
+                <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
+                    <TextBlock Text="ACTIONS" Style="{StaticResource HeaderStyle}" Margin="0,20,0,10"/>
+                    
+                    <!-- Clear Buttons -->
+                    <Button Content="CLEAR MEDIA" Height="30" Margin="0,0,0,10" Style="{StaticResource Style.Button.Secondary}" Command="{Binding ClearMediaCommand}"/>
+                    <Button Content="CLEAR INFOS" Height="30" Margin="0,0,0,10" Style="{StaticResource Style.Button.Secondary}" Command="{Binding ClearInfosCommand}"/>
+                    <Button Content="CLEAR ALL"   Height="30" Margin="0,0,0,20" Style="{StaticResource Style.Button.Secondary}" Command="{Binding ClearAllCommand}" Foreground="#FF6666"/>
+                    
+                    <Separator Background="#333333" Margin="0,0,0,20"/>
+
+                    <!-- Export Buttons -->
+                    <Button Content="EXPORT PDF" Command="{Binding ExportPdfCommand}" Height="40" Margin="0,0,0,10" Style="{StaticResource Style.Button.Primary}"/>
+                    <Button Content="PRINT"      Command="{Binding PrintCommand}"      Height="40" Margin="0,0,0,0"  Style="{StaticResource Style.Button.Primary}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

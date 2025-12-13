@@ -425,6 +425,22 @@
                         </Button.Style>
                     </Button>
 
+                    <Button Command="{Binding ModifyInReportCommand}"
+                            Content="MODIFY IN REPORT"
+                            Height="30" Margin="0,0,0,10"
+                            Foreground="White" FontWeight="Bold">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Setter Property="Background" Value="{StaticResource Brush.Control}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
                     <Button Command="{Binding SendFileToTranscodeCommand}"
                             Content="SEND FILE TO TRANSCODE"
                             Height="30" Margin="0,0,0,20"
@@ -441,8 +457,8 @@
                         </Button.Style>
                     </Button>
 
-                    <!-- SPACER (Compensate for missing 4th button to align with Media Page) -->
-                    <Grid Height="70" />
+                    <!-- SPACER (Adjusted for extra button) -->
+                    <Grid Height="30" />
 
                     <TextBlock Text="METADATA" Margin="0,0,0,15" FontSize="{StaticResource Font.Size.SubHeader}" FontWeight="SemiBold"/>
 
