@@ -4,350 +4,733 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Veriflow.Desktop.Views"
+             xmlns:vm="clr-namespace:Veriflow.Desktop.ViewModels"
              xmlns:conv="clr-namespace:Veriflow.Desktop.Converters"
-             xmlns:utils="clr-namespace:Veriflow.Desktop.Utilities"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="1024"
+             Focusable="True"
+             FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Space" Command="{Binding TogglePlayPauseCommand}"/>
+        <KeyBinding Key="Return" Command="{Binding StopCommand}"/>
+    </UserControl.InputBindings>
+
     <UserControl.Resources>
-        <conv:EnumToVisibilityConverter x:Key="Converter.EnumToVisibility"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <conv:PercentToPositionConverter x:Key="PercentToPositionConverter"/>
 
-        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{DynamicResource Brush.Panel.Background}"/>
-            <Setter Property="Foreground" Value="#888888"/>
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Primary}"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-
-        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
-
-        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="5"/>
+        <!-- Mute Button Style -->
+        <Style x:Key="DawMuteButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="25"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="DataGridCell">
-                            <Border Background="{TemplateBinding Background}" BorderThickness="0" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter VerticalAlignment="Center"/>
-                            </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource Brush.Accent.Transparent}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-
-         <!-- Style to force DatePicker Input to Black -->
-        <Style TargetType="DatePickerTextBox">
-             <Setter Property="Background" Value="#101010"/>
-             <Setter Property="Foreground" Value="White"/>
-             <Setter Property="SelectionBrush" Value="{DynamicResource Brush.Accent}"/>
-             <Setter Property="Template">
-                 <Setter.Value>
-                     <ControlTemplate TargetType="DatePickerTextBox">
-                         <TextBox x:Name="PART_TextBox" 
-                                  Text="{Binding Path=SelectedDate, StringFormat='dd/MM/yyyy', RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}"
-                                  Background="{TemplateBinding Background}"
-                                  Foreground="{TemplateBinding Foreground}"
-                                  BorderThickness="0"
-                                  Padding="2,0"
-                                  VerticalContentAlignment="Center"/>
-                     </ControlTemplate>
-                 </Setter.Value>
-             </Setter>
-        </Style>
-
-        <Style x:Key="HeaderStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#888888"/>
-            <Setter Property="Margin" Value="10,5,0,5"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-
-        <Style x:Key="DynamicHeaderIcon" TargetType="Path">
-            <Setter Property="Height" Value="20"/>
-            <Setter Property="Width" Value="20"/>
-            <Setter Property="Stretch" Value="Uniform"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,0,0"/>
-            
-            <!-- Default (Video/Blue) -->
-            <Setter Property="Fill" Value="{DynamicResource Brush.Accent}"/> 
-            <!-- Report Icon Geometry -->
-            <Setter Property="Data" Value="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3"/>
-
-            <Style.Triggers>
-                <!-- Audio Mode (SOUND REPORT) -> Red -->
-                <DataTrigger Binding="{Binding ReportTitle}" Value="SOUND REPORT">
-                    <Setter Property="Fill" Value="#FF5252"/>
-                </DataTrigger>
-                
-                 <!-- Video Mode (CAMERA REPORT) -> Blue (Default, but explicit for safety if needed) -->
-                <DataTrigger Binding="{Binding ReportTitle}" Value="CAMERA REPORT">
-                    <Setter Property="Fill" Value="{DynamicResource Brush.Accent}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="DarkCalendarStyle" TargetType="{x:Type Calendar}">
-            <Setter Property="Background" Value="#1E1E1E"/>
-            <Setter Property="BorderBrush" Value="#444444"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#CCCCCC"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Calendar}">
-                         <StackPanel HorizontalAlignment="Center" x:Name="Root">
-                             <CalendarItem x:Name="CalendarItem" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-                        </StackPanel>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border" Background="{DynamicResource Brush.Control}" CornerRadius="2" BorderBrush="{DynamicResource Brush.Text.Dark}" BorderThickness="1">
+                            <TextBlock Text="M" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Mini}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.State.Mute}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-    </UserControl.Resources>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="300"/>
-        </Grid.ColumnDefinitions>
+        <!-- Solo Button Style -->
+        <Style x:Key="DawSoloButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="25"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border" Background="{DynamicResource Brush.Control}" CornerRadius="2" BorderBrush="{DynamicResource Brush.Text.Dark}" BorderThickness="1">
+                            <TextBlock x:Name="txt" Text="S" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Mini}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.State.Solo}"/>
+                                <Setter TargetName="txt" Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <!-- MAIN CONTENT (Left) -->
-        <Grid Grid.Column="0" Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Header Block -->
-                <RowDefinition Height="*"/>    <!-- DataGrid -->
-                <RowDefinition Height="Auto"/> <!-- Footer -->
-            </Grid.RowDefinitions>
 
-            <!-- HEADER BLOCK (Exact Player Match) -->
-            <Grid Grid.Row="0" Margin="0,0,0,15">
-                <StackPanel VerticalAlignment="Center">
-                    <!-- Top Row: Icon + Module Name -->
-                    <StackPanel Orientation="Horizontal">
-                        <Path Style="{StaticResource DynamicHeaderIcon}"/>
-                        <TextBlock Text="{Binding ReportTitle}" Style="{StaticResource HeaderStyle}"/> 
-                    </StackPanel>
+        <!-- Modern Transport Button Base Style -->
+        <Style x:Key="Style.Transport.Base" TargetType="Button">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse x:Name="circle" Fill="Transparent" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="circle" Property="Fill" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Setter Property="Foreground" Value="#111111"/> 
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="circle" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <!-- NEW: Trigger based on Binding (passed via Tag) -->
+                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter TargetName="circle" Property="Fill" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                <Setter Property="Foreground" Value="#111111"/> 
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                    <!-- Bottom Row: Main Title (Project Name) -->
-                    <TextBlock Text="{Binding Header.ProjectName, TargetNullValue='NEW PROJECT', FallbackValue='NEW PROJECT'}" 
-                               FontSize="{StaticResource Font.Size.Header}" 
-                               FontWeight="Bold" 
-                               Foreground="#DDDDDD" 
-                               Margin="0,2"/>
-                </StackPanel>
-            </Grid>
+        <!-- Red Stop Button -->
+        <Style x:Key="Style.Transport.Stop" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Stop}"/> <!-- Red Accent -->
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Stop}"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+        </Style>
 
-            <!-- DATAGRID -->
-            <DataGrid Grid.Row="1" ItemsSource="{Binding ReportItems}" AutoGenerateColumns="False" 
-                      SelectedItem="{Binding SelectedReportItem}"
-                      Background="Transparent"
-                      RowBackground="Transparent"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal"
-                      HorizontalGridLinesBrush="#333333"
-                      BorderThickness="0"
-                      CanUserAddRows="False"
-                      RowStyle="{StaticResource DataGridRowStyle}"
-                      CellStyle="{StaticResource DataGridCellStyle}"
-                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
-                <DataGrid.Resources>
-                   <utils:BindingProxy x:Key="Proxy" Data="{Binding}"/>
-                </DataGrid.Resources>
-                <DataGrid.Columns>
-                     <!-- Status -->
-                    <DataGridTemplateColumn Width="30">
-                         <DataGridTemplateColumn.CellTemplate>
-                             <DataTemplate>
-                                 <Path Data="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" 
-                                       Fill="#4CAF50" 
-                                       Height="10" Width="10" Stretch="Uniform"
-                                       Visibility="{Binding IsCircled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                             </DataTemplate>
-                         </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+        <!-- Green Play Button -->
+        <Style x:Key="Style.Transport.Play" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Play}"/> <!-- Green Accent -->
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Play}"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+        </Style>
 
-                    <!-- EDITABLE FIELDS -->
-                    <DataGridTemplateColumn Header="SCENE" Width="60">
-                         <DataGridTemplateColumn.CellTemplate>
-                             <DataTemplate>
-                                 <TextBox Text="{Binding Scene, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Style.TextBox.Form}" BorderThickness="0" Background="Transparent"/>
-                             </DataTemplate>
-                         </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+        <!-- Yellow Pause Button -->
+        <Style x:Key="Style.Transport.Pause" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Pause}"/> <!-- Yellow Accent -->
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Pause}"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+        </Style>
 
-                    <DataGridTemplateColumn Header="TAKE" Width="50">
-                         <DataGridTemplateColumn.CellTemplate>
-                             <DataTemplate>
-                                 <TextBox Text="{Binding Take, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Style.TextBox.Form}" BorderThickness="0" Background="Transparent"/>
-                             </DataTemplate>
-                         </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+        <!-- Round Slider Style -->
+        <Style x:Key="RoundSliderStyle" TargetType="Slider">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Bright}"/>
+            <Setter Property="IsSelectionRangeEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Grid.Resources>
+                                <!-- Transparent RepeatButton Template to prevent hover effects -->
+                                <Style x:Key="TransparentRepeatButtonStyle" TargetType="RepeatButton">
+                                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="IsTabStop" Value="False"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Rectangle Fill="{TemplateBinding Background}" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
 
-                     <!-- Video Specific: THUMBNAIL -->
-                     <DataGridTemplateColumn Header="THUMB" Width="80" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Image Source="{Binding ThumbnailPath}" Height="40" Stretch="Uniform"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                     </DataGridTemplateColumn>
+                                <!-- Blue RepeatButton Template for Filled Track -->
+                                <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
+                                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                    <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="IsTabStop" Value="False"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Rectangle Fill="{TemplateBinding Background}" Height="2" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Grid.Resources>
+                            
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="26"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Track Layer -->
+                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="{DynamicResource Brush.Border.Secondary}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
+                            
+                            <!-- Thumb -->
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource BlueTrackRepeatButtonStyle}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource TransparentRepeatButtonStyle}"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="{DynamicResource Brush.Text.Dark}" StrokeThickness="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                    <!-- METADATA -->
-                    <DataGridTextColumn Header="TC START" Binding="{Binding Timecode}" Width="90" Foreground="#AAAAAA" FontFamily="Consolas"/>
-                    <DataGridTextColumn Header="DUR" Binding="{Binding Duration}" Width="90" Foreground="#888888" FontFamily="Consolas"/>
-                    <DataGridTextColumn Header="FILENAME" Binding="{Binding Filename}" Width="*" Foreground="White"/>
-                    
-                    <!-- Audio Specific -->
-                    <DataGridTextColumn Header="TRACKS" Binding="{Binding TrackNames}" Width="120" Foreground="#AAAAAA" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Audio}"/>
-                    <DataGridTextColumn Header="SR" Binding="{Binding SampleRate}" Width="60" Foreground="#888888" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Audio}"/>
-
-                    <!-- Video Specific -->
-                    <DataGridTextColumn Header="RES" Binding="{Binding Resolution}" Width="80" Foreground="#AAAAAA" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}"/>
-                    <DataGridTextColumn Header="CODEC" Binding="{Binding Codec}" Width="80" Foreground="#888888" Visibility="{Binding Data.CurrentReportType, Source={StaticResource Proxy}, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}"/>
-
-                    <!-- Editable Notes -->
-                    <DataGridTemplateColumn Header="NOTES" Width="200">
-                         <DataGridTemplateColumn.CellTemplate>
-                             <DataTemplate>
-                                 <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource Style.TextBox.Form}" BorderThickness="0" Background="Transparent"/>
-                             </DataTemplate>
-                         </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    
-                    <!-- Circle Checkbox -->
-                     <DataGridTemplateColumn Header="OK" Width="40">
-                         <DataGridTemplateColumn.CellTemplate>
-                             <DataTemplate>
-                                 <CheckBox IsChecked="{Binding IsCircled, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"/>
-                             </DataTemplate>
-                         </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-
-        <!-- SIDEBAR (Right) -->
-        <Border Grid.Column="1" Background="{DynamicResource Brush.Panel.Background}" BorderBrush="{DynamicResource Brush.Border.Secondary}" BorderThickness="1,0,0,0">
-            <Grid Margin="15">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/> <!-- Header -->
-                    <RowDefinition Height="*"/>    <!-- Scrollable Inputs -->
-                    <RowDefinition Height="Auto"/> <!-- Actions -->
-                </Grid.RowDefinitions>
-
-                <TextBlock Text="REPORT INFO" Style="{StaticResource HeaderStyle}" Margin="0,0,0,15"/>
-
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <!-- PROJECT -->
-                        <TextBlock Text="PROJECT" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding Header.ProjectName}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
-
-                        <!-- DATE -->
-                        <TextBlock Text="DATE" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                         <DatePicker SelectedDate="{Binding Header.ReportDate}" Margin="0,0,0,15"
-                                    BorderThickness="0"
-                                    CalendarStyle="{StaticResource DarkCalendarStyle}">
-                            <DatePicker.Resources>
-                                <Style TargetType="DatePickerTextBox">
-                                     <Setter Property="Background" Value="#101010"/>
-                                     <Setter Property="Foreground" Value="White"/>
-                                     <Setter Property="SelectionBrush" Value="{DynamicResource Brush.Accent}"/>
+        <!-- Round Filled Slider Style (For Volume - Blue Fill) -->
+        <Style x:Key="RoundFilledSliderStyle" TargetType="Slider">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Bright}"/>
+            <Setter Property="IsSelectionRangeEnabled" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Grid.Resources>
+                                <!-- Blue RepeatButton Template for Filled Track -->
+                                <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
+                                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                    <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="IsTabStop" Value="False"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Grid Background="Transparent">
+                                                    <Rectangle Fill="{TemplateBinding Background}" Height="2" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <Style x:Key="TransparentRepeatButtonStyle" TargetType="RepeatButton">
+                                     <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                     <Setter Property="Background" Value="Transparent"/>
+                                     <Setter Property="Focusable" Value="False"/>
+                                     <Setter Property="IsTabStop" Value="False"/>
                                      <Setter Property="Template">
                                          <Setter.Value>
-                                             <ControlTemplate TargetType="DatePickerTextBox">
-                                                 <TextBox x:Name="PART_TextBox" 
-                                                          Text="{Binding Path=SelectedDate, StringFormat='dd/MM/yyyy', RelativeSource={RelativeSource AncestorType={x:Type DatePicker}}}"
-                                                          Background="{TemplateBinding Background}"
-                                                          Foreground="{TemplateBinding Foreground}"
-                                                          BorderThickness="1" BorderBrush="#444444"
-                                                          Height="26"
-                                                          Padding="4,0"
-                                                          VerticalContentAlignment="Center"/>
+                                             <ControlTemplate TargetType="RepeatButton">
+                                                 <Rectangle Fill="{TemplateBinding Background}" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}"/>
                                              </ControlTemplate>
                                          </Setter.Value>
                                      </Setter>
-                                </Style>
-                            </DatePicker.Resources>
-                        </DatePicker>
-
-                        <!-- COMPANY -->
-                        <TextBlock Text="PRODUCTION CO." Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding Header.ProductionCompany}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
-
-                        <!-- EPISODE / SCENE Common -->
-                        <Grid Margin="0,0,0,15">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="EPISODE" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                                <TextBox Text="{Binding Header.Episode}" Style="{StaticResource Style.TextBox.Form}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="SCENE" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                                <TextBox Text="{Binding Header.Scene}" Style="{StaticResource Style.TextBox.Form}"/>
-                            </StackPanel>
+                                 </Style>
+                            </Grid.Resources>
+                            
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="26"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Track Layer -->
+                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="{DynamicResource Brush.Border.Secondary}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
+                            
+                            <!-- Thumb -->
+                            <Track x:Name="PART_Track" Grid.Row="1">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource BlueTrackRepeatButtonStyle}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource TransparentRepeatButtonStyle}"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="{DynamicResource Brush.Text.Dark}" StrokeThickness="1"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
                         </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                        <!-- PEOPLE -->
-                        <TextBlock Text="OPERATOR" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding Header.OperatorName}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
+    </UserControl.Resources>
 
-                        <!-- Dynamic: Audio Mixer vs Director -->
-                        <!-- Audio -->
-                        <StackPanel Visibility="{Binding CurrentReportType, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Audio}">
-                            <TextBlock Text="SOUND MIXER" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                            <TextBox Text="{Binding Header.SoundMixer}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
-                        </StackPanel>
-                        <!-- Video -->
-                        <StackPanel Visibility="{Binding CurrentReportType, Converter={StaticResource Converter.EnumToVisibility}, ConverterParameter=Video}">
-                             <TextBlock Text="DIRECTOR" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                             <TextBox Text="{Binding Header.Director}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
-                             
-                             <TextBlock Text="DOP" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                             <TextBox Text="{Binding Header.Dop}" Style="{StaticResource Style.TextBox.Form}" Margin="0,0,0,15"/>
-                        </StackPanel>
+    <Grid AllowDrop="True" Background="Transparent">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="Drop">
+                <i:InvokeCommandAction Command="{Binding DropFileCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>   <!-- Console (Left) -->
+            <ColumnDefinition Width="350"/>  <!-- Metadata (Right) -->
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT COLUMN: CONSOLE -->
+        <Grid Grid.Column="0" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Header -->
+                <RowDefinition Height="Auto"/> <!-- Transport -->
+                <RowDefinition Height="30"/>   <!-- Ruler Header -->
+                <RowDefinition Height="*"/>    <!-- Tracks -->
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <StackPanel VerticalAlignment="Center">
+                    <!-- Title Row -->
+                    <StackPanel Orientation="Horizontal">
+                        <!-- Headphones Icon -->
+                        <Path Data="M8,5.14V19.14L19,12.14L8,5.14Z"
+                              Fill="{DynamicResource Brush.Accent}"
+                              Height="20" Width="20" Stretch="Uniform"
+                              VerticalAlignment="Center" Margin="0,0,10,0"/>
+                              
+                        <TextBlock Text="PLAYER AUDIO" Style="{StaticResource HeaderStyle}" VerticalAlignment="Center"/>
+
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding FileName, TargetNullValue='No file loaded'}" FontSize="{StaticResource Font.Size.Header}" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Bright}" Margin="0,2"/>
+                    
+                    <!-- Timecode Display -->
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Text="{Binding CurrentTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Foreground="{DynamicResource Brush.Accent}"/>
+                            <TextBlock Text=" / " FontSize="{StaticResource Font.Size.Large}" Opacity="0.5"/>
+                            <TextBlock Text="{Binding TotalTimeDisplay}" FontSize="{StaticResource Font.Size.Large}" FontFamily="Consolas" Opacity="0.5"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Transport Controls -->
+            <Border Grid.Row="1" Background="Transparent" Margin="0,0,0,10" Padding="0"
+                    Visibility="{Binding IsAudioLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="15,0,0,0" VerticalAlignment="Center">
+                    
+                    <!-- STOP -->
+                    <Button Command="{Binding StopCommand}" Tag="{Binding IsStopPressed}" Margin="0,0,15,0" ToolTip="Stop" Style="{StaticResource Style.Transport.Stop}">
+                        <Path Data="M6,6H18V18H6V6Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Height="14" Width="14" Stretch="Uniform"/>
+                    </Button>
+                    
+                    <!-- PLAY -->
+                    <Button Command="{Binding PlayCommand}" Tag="{Binding IsPlaying}" Margin="0,0,15,0" ToolTip="Play" Style="{StaticResource Style.Transport.Play}">
+                         <Path Data="M8,5.14V19.14L19,12.14L8,5.14Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Height="20" Width="20" Stretch="Uniform" Margin="2,0,0,0"/>
+                    </Button>
+                    
+                    <!-- PAUSE -->
+                    <Button Command="{Binding PauseCommand}" Tag="{Binding IsPaused}" ToolTip="Pause" Style="{StaticResource Style.Transport.Pause}">
+                        <Path Data="M14,19H18V5H14M6,19H10V5H6V19Z" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Height="14" Width="14" Stretch="Uniform"/>
+                    </Button>
+                    
+                </StackPanel>
+            </Border>
+
+            <!-- Ruler (Aligned to Waveform Column) -->
+            <Grid Grid.Row="2" Background="Transparent" Margin="0,0,0,5"
+                  Visibility="{Binding IsAudioLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/> <!-- Console Controls Width -->
+                    <ColumnDefinition Width="30"/>  <!-- Meter Width -->
+                    <ColumnDefinition Width="*"/>   <!-- Audio/Ruler Column -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Ruler in Col 2 -->
+                <Border Grid.Column="2" ClipToBounds="True" Margin="0" Background="Transparent" Cursor="Hand">
+                     <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonDown">
+                            <i:InvokeCommandAction Command="{Binding SeekCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    
+                    <Canvas x:Name="RulerCanvas" Background="Transparent">
+                        <ItemsControl ItemsSource="{Binding RulerTicks}" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas IsItemsHost="True"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left">
+                                        <Setter.Value>
+                                            <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
+                                                <Binding Path="Percent"/>
+                                                <Binding ElementName="RulerCanvas" Path="ActualWidth"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <!-- Tick Mark -->
+                                        <Rectangle Width="1" Height="10" Fill="White" Opacity="0.3" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                                        <!-- Time Label -->
+                                        <TextBlock Text="{Binding Label}" FontSize="{StaticResource Font.Size.Micro}" Opacity="0.7" Margin="2,10,0,0" Foreground="White" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Canvas>
+                </Border>
+            </Grid>
+
+            <!-- Tracks List (Reaper Console Layout) -->
+            <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Background="Transparent" Focusable="False"
+                          Visibility="{Binding IsAudioLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid VerticalAlignment="Top">
+                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260"/> <!-- Controls -->
+                        <ColumnDefinition Width="30"/>  <!-- Meter -->
+                        <ColumnDefinition Width="*"/>   <!-- Audio -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Tracks ItemsControl (Spans all 3 cols to sync row heights) -->
+                    <ItemsControl Grid.ColumnSpan="3" ItemsSource="{Binding Tracks}" Background="Transparent" BorderThickness="0" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:TrackViewModel}">
+                                <Border Background="{DynamicResource Brush.Panel.Light}" Margin="0,0,0,1" BorderBrush="{DynamicResource Brush.Text.Dark}" BorderThickness="0,0,0,2">
+                                    <Grid Height="70"> <!-- Reduced height for density -->
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="260"/>
+                                            <ColumnDefinition Width="30"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Col 0: Console Controls (Name, Faders, Buttons) -->
+                                        <Grid Grid.Column="0" Margin="5">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/> <!-- Name -->
+                                                <RowDefinition Height="*"/>    <!-- Faders + Buttons -->
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Name -->
+                                            <TextBlock Text="{Binding TrackName}" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Bright}" FontSize="{StaticResource Font.Size.Small}" Margin="5,0,0,2" TextTrimming="CharacterEllipsis"/>
+
+                                            <!-- Controls Area -->
+                                            <Grid Grid.Row="1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/> <!-- Buttons -->
+                                                    <ColumnDefinition Width="*"/>    <!-- Faders -->
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Buttons -->
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,5,0">
+                                                    <ToggleButton IsChecked="{Binding IsMuted}" Style="{StaticResource DawMuteButtonStyle}" ToolTip="Mute" Focusable="False"/>
+                                                    <ToggleButton IsChecked="{Binding IsSoloed}" Style="{StaticResource DawSoloButtonStyle}" ToolTip="Solo" Focusable="False"/>
+                                                </StackPanel>
+
+                                                <!-- Faders -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <!-- Volume -->
+                                                    <Grid Margin="0,0,0,2">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="VOL" FontSize="{StaticResource Font.Size.Micro}" Opacity="0.6" VerticalAlignment="Center"/>
+                                                        <Slider Grid.Column="1" Value="{Binding Volume}" Maximum="1" Minimum="0" 
+                                                                LargeChange="0.1" SmallChange="0.01" 
+                                                                Focusable="False" ToolTip="Volume" Style="{StaticResource RoundFilledSliderStyle}"
+                                                                PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                                                                PreviewMouseMove="Slider_PreviewMouseMove"
+                                                                PreviewMouseLeftButtonUp="Slider_PreviewMouseLeftButtonUp">
+                                                            <i:Interaction.Triggers>
+                                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                                    <i:InvokeCommandAction Command="{Binding ResetVolumeCommand}"/>
+                                                                </i:EventTrigger>
+                                                            </i:Interaction.Triggers>
+                                                        </Slider>
+                                                    </Grid>
+                                                    
+                                                    <!-- Pan -->
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="PAN" FontSize="{StaticResource Font.Size.Micro}" Opacity="0.6" VerticalAlignment="Center"/>
+                                                        <Slider Grid.Column="1" Value="{Binding Pan}" Maximum="1" Minimum="-1" 
+                                                                LargeChange="0.1" SmallChange="0.01" 
+                                                                Focusable="False" ToolTip="Pan" Style="{StaticResource RoundSliderStyle}"
+                                                                PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"
+                                                                PreviewMouseMove="Slider_PreviewMouseMove"
+                                                                PreviewMouseLeftButtonUp="Slider_PreviewMouseLeftButtonUp">
+                                                            <i:Interaction.Triggers>
+                                                                <i:EventTrigger EventName="MouseDoubleClick">
+                                                                    <i:InvokeCommandAction Command="{Binding ResetPanCommand}"/>
+                                                                </i:EventTrigger>
+                                                            </i:Interaction.Triggers>
+                                                        </Slider>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+
+                                        <!-- Col 1: VU Meter (REDESIGNED) -->
+                                        <Border Grid.Column="1" Background="{DynamicResource Brush.Text.Dark}" Width="10" Margin="0,5" VerticalAlignment="Stretch">
+                                           <Rectangle Fill="{DynamicResource Brush.Meter.fill}" VerticalAlignment="Stretch">
+                                               <Rectangle.RenderTransform>
+                                                    <ScaleTransform ScaleY="{Binding CurrentLevel}"/>
+                                               </Rectangle.RenderTransform>
+                                               <Rectangle.RenderTransformOrigin>
+                                                   <Point X="0.5" Y="1"/>
+                                               </Rectangle.RenderTransformOrigin>
+                                           </Rectangle>
+                                        </Border>
+
+                                        <!-- Col 2: Audio Waveform -->
+                                        <Border Grid.Column="2" Background="Transparent" ClipToBounds="True" Margin="0,2">
+                                            <Viewbox Stretch="Fill">
+                                                <Polygon Points="{Binding WaveformPoints}" Fill="White" />
+                                            </Viewbox>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                
+                    <!-- Overlay Canvas (Global Playhead) -->
+                    <Grid Grid.Column="2" IsHitTestVisible="True" Background="Transparent">
+                        <Canvas Background="Transparent" x:Name="WaveformOverlay">
+                             <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                    <i:InvokeCommandAction Command="{Binding SeekCommand}" PassEventArgsToCommand="True"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         
-                        <!-- GLOBAL NOTES -->
-                        <TextBlock Text="GLOBAL NOTES" Style="{StaticResource Style.Text.Label}" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding Header.GlobalNotes}" Style="{StaticResource Style.TextBox.Form}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" Padding="4"/>
-                        
+                            <Line Y1="0" Y2="{Binding ActualHeight, ElementName=WaveformOverlay}" 
+                                  Stroke="#FFFFFF" StrokeThickness="1" Opacity="1">
+                                <Line.X1>
+                                    <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
+                                        <Binding Path="PlaybackPercent" />
+                                        <Binding ElementName="WaveformOverlay" Path="ActualWidth"/>
+                                    </MultiBinding>
+                                </Line.X1>
+                                <Line.X2>
+                                    <MultiBinding Converter="{StaticResource PercentToPositionConverter}">
+                                        <Binding Path="PlaybackPercent" />
+                                        <Binding ElementName="WaveformOverlay" Path="ActualWidth"/>
+                                    </MultiBinding>
+                                </Line.X2>
+                            </Line>
+                        </Canvas>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <Border Grid.Column="1" Padding="10" VerticalAlignment="Stretch" Background="{StaticResource Brush.Panel}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1,0,0,0" CornerRadius="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Buttons -->
+                    <RowDefinition Height="*"/>    <!-- Layout -->
+                </Grid.RowDefinitions>
+
+                <!-- Action Buttons Area (Vertical Stack) -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,41">
+                    <Button Command="{Binding LoadFileCommand}"
+                            Content="OPEN FILE" Height="26" ToolTip="Import Audio File" Margin="0,0,0,5"
+                            Style="{StaticResource BlueActionButtonStyle}"/>
+                    
+                    <Button Command="{Binding UnloadMediaCommand}"
+                            Content="CLOSE FILE" Height="26" ToolTip="Unload current media" Margin="0,0,0,5"
+                            Style="{StaticResource BlueActionButtonStyle}"/>
+
+                    <Button Command="{Binding ModifyInReportCommand}"
+                            Content="MODIFY IN REPORT" Height="26" ToolTip="Navigate to Reports Page with this item" Margin="0,0,0,5"
+                            Style="{StaticResource BlueActionButtonStyle}"/>
+
+                    <Button Command="{Binding SendFileToTranscodeCommand}"
+                            Content="SEND TO TRANSCODE" Height="26" ToolTip="Send current file to Transcode Page"
+                            Style="{StaticResource BlueActionButtonStyle}"/>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" Focusable="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer.Resources>
+                         <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBarStyle}"/>
+                    </ScrollViewer.Resources>
+                    <StackPanel>
+                        <!-- 1. GENERAL INFO -->
+                            <Expander Header="GENERAL INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                                <Grid Margin="5,0,5,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Text="Name:" Foreground="{DynamicResource Brush.Text.Secondary}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.FullPath}" TextWrapping="Wrap" Foreground="White" ToolTip="{Binding CurrentMetadata.FullPath}"/>
+                                    
+                                    <TextBlock Grid.Row="1" Text="Project:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMetadata.Project}" Foreground="White" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="2" Text="Scene:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMetadata.Scene}" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="3" Text="Take:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMetadata.Take}" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="4" Text="Tape:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentMetadata.Tape}" Foreground="White" Margin="0,2,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="5" Text="Date:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CurrentMetadata.CreationDate}" Foreground="White" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="6" Text="Size:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,5,0,0"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding CurrentMetadata.FileSize}" Foreground="White" Margin="0,5,0,0"/>
+                                </Grid>
+                            </Expander>
+
+                            <!-- 2. RECORDING INFO -->
+                            <Expander Header="RECORDING INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                                <Grid Margin="5,0,5,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="Sample Rate:" Foreground="{DynamicResource Brush.Text.Secondary}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.SampleRateString}" Foreground="White"/>
+
+                                    <TextBlock Grid.Row="1" Text="Bit Depth:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMetadata.BitDepthString}" Foreground="White" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="2" Text="Frame Rate:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMetadata.FrameRate}" Foreground="White" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="3" Text="Start TC:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMetadata.TimecodeStart}" FontFamily="Consolas" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="4" Text="Length:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentMetadata.Duration}" FontFamily="Consolas" Foreground="White" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="5" Text="User Bits:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CurrentMetadata.UBits}" FontFamily="Consolas" Foreground="White" Margin="0,2,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="6" Text="Bitrate:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding CurrentMetadata.Bitrate}" Foreground="White" Margin="0,2,0,0"/>
+
+                                    <TextBlock Grid.Row="7" Text="Bitrate Mode:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CurrentMetadata.BitrateMode}" Foreground="White" Margin="0,2,0,0"/>
+                                </Grid>
+                            </Expander>
+
+
+                        <!-- 3. TECHNICAL INFO -->
+                        <Expander Header="TECHNICAL INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                            <Grid Margin="5,0,5,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="Container:" Foreground="{DynamicResource Brush.Text.Secondary}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.ContainerFormat}" Foreground="White"/>
+
+                                <TextBlock Grid.Row="1" Text="Codec:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMetadata.CodecName}" Foreground="White" Margin="0,2,0,0"/>
+
+                                <TextBlock Grid.Row="2" Text="Channels:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMetadata.ChannelCountString}" Foreground="White" Margin="0,2,0,0"/>
+                            </Grid>
+                        </Expander>
+
+                        <!-- 4. TRACK INFO -->
+                        <Expander Header="TRACK INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                            <DataGrid ItemsSource="{Binding CurrentMetadata.Tracks}" 
+                                      AutoGenerateColumns="False" 
+                                      CanUserAddRows="False" 
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      RowBackground="Transparent"
+                                      Foreground="White"
+                                      Margin="0,0,20,10">
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Secondary}"/>
+                                        <Setter Property="Padding" Value="5,2"/>
+                                    </Style>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Padding" Value="2"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="DataGridCell">
+                                                    <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="#" Binding="{Binding ChannelIndex}" Width="30"/>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridTextColumn Header="Function" Binding="{Binding Function}" Width="90"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Expander>
                     </StackPanel>
                 </ScrollViewer>
-
-                <!-- ACTIONS -->
-                <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
-                    <TextBlock Text="ACTIONS" Style="{StaticResource HeaderStyle}" Margin="0,20,0,10"/>
-                    
-                    <!-- Clear Buttons -->
-                    <Button Content="CLEAR MEDIA" Height="30" Margin="0,0,0,10" Style="{StaticResource Style.Button.Secondary}" Command="{Binding ClearMediaCommand}"/>
-                    <Button Content="CLEAR INFOS" Height="30" Margin="0,0,0,10" Style="{StaticResource Style.Button.Secondary}" Command="{Binding ClearInfosCommand}"/>
-                    <Button Content="CLEAR ALL"   Height="30" Margin="0,0,0,20" Style="{StaticResource Style.Button.Secondary}" Command="{Binding ClearAllCommand}" Foreground="#FF6666"/>
-                    
-                    <Separator Background="#333333" Margin="0,0,0,20"/>
-
-                    <!-- Export Buttons -->
-                    <Button Content="EXPORT PDF" Command="{Binding ExportPdfCommand}" Height="40" Margin="0,0,0,10" Style="{StaticResource Style.Button.Primary}"/>
-                    <Button Content="PRINT"      Command="{Binding PrintCommand}"      Height="40" Margin="0,0,0,0"  Style="{StaticResource Style.Button.Primary}"/>
-                </StackPanel>
             </Grid>
         </Border>
     </Grid>
