@@ -30,12 +30,12 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="border" Background="#333333" CornerRadius="2" BorderBrush="#111111" BorderThickness="1">
+                        <Border x:Name="border" Background="{DynamicResource Brush.Control}" CornerRadius="2" BorderBrush="{DynamicResource Brush.Text.Dark}" BorderThickness="1">
                             <TextBlock Text="M" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Mini}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#D32F2F"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.State.Mute}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -53,12 +53,12 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="border" Background="#333333" CornerRadius="2" BorderBrush="#111111" BorderThickness="1">
+                        <Border x:Name="border" Background="{DynamicResource Brush.Control}" CornerRadius="2" BorderBrush="{DynamicResource Brush.Text.Dark}" BorderThickness="1">
                             <TextBlock x:Name="txt" Text="S" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource Font.Size.Mini}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#FBC02D"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.State.Solo}"/>
                                 <Setter TargetName="txt" Property="Foreground" Value="Black"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -100,24 +100,24 @@
 
         <!-- Red Stop Button -->
         <Style x:Key="Style.Transport.Stop" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
-            <Setter Property="BorderBrush" Value="#FF5252"/> <!-- Red Accent -->
-            <Setter Property="Foreground" Value="#FF5252"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Stop}"/> <!-- Red Accent -->
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Stop}"/>
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="36"/>
         </Style>
 
         <!-- Green Play Button -->
         <Style x:Key="Style.Transport.Play" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
-            <Setter Property="BorderBrush" Value="#69F0AE"/> <!-- Green Accent -->
-            <Setter Property="Foreground" Value="#69F0AE"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Play}"/> <!-- Green Accent -->
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Play}"/>
             <Setter Property="Width" Value="48"/>
             <Setter Property="Height" Value="48"/>
         </Style>
 
         <!-- Yellow Pause Button -->
         <Style x:Key="Style.Transport.Pause" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
-            <Setter Property="BorderBrush" Value="#FFD740"/> <!-- Yellow Accent -->
-            <Setter Property="Foreground" Value="#FFD740"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Pause}"/> <!-- Yellow Accent -->
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Pause}"/>
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="36"/>
         </Style>
@@ -126,7 +126,7 @@
         <Style x:Key="RoundSliderStyle" TargetType="Slider">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#DDDDDD"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Bright}"/>
             <Setter Property="IsSelectionRangeEnabled" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -171,7 +171,7 @@
                             </Grid.RowDefinitions>
                             
                             <!-- Track Layer -->
-                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="#444444" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
+                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="{DynamicResource Brush.Border.Secondary}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
                             
                             <!-- Thumb -->
                             <Track x:Name="PART_Track" Grid.Row="1">
@@ -185,7 +185,7 @@
                                     <Thumb x:Name="Thumb">
                                         <Thumb.Template>
                                             <ControlTemplate TargetType="Thumb">
-                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="#111111" StrokeThickness="1"/>
+                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="{DynamicResource Brush.Text.Dark}" StrokeThickness="1"/>
                                             </ControlTemplate>
                                         </Thumb.Template>
                                     </Thumb>
@@ -201,7 +201,7 @@
         <Style x:Key="RoundFilledSliderStyle" TargetType="Slider">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#DDDDDD"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Bright}"/>
             <Setter Property="IsSelectionRangeEnabled" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -246,7 +246,7 @@
                             </Grid.RowDefinitions>
                             
                             <!-- Track Layer -->
-                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="#444444" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
+                            <Border x:Name="TrackBackground" Grid.Row="1" Height="2" Background="{DynamicResource Brush.Border.Secondary}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="5,0"/>
                             
                             <!-- Thumb -->
                             <Track x:Name="PART_Track" Grid.Row="1">
@@ -260,7 +260,7 @@
                                     <Thumb x:Name="Thumb">
                                         <Thumb.Template>
                                             <ControlTemplate TargetType="Thumb">
-                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="#111111" StrokeThickness="1"/>
+                                                <Ellipse Width="12" Height="12" Fill="#FFFFFF" Stroke="{DynamicResource Brush.Text.Dark}" StrokeThickness="1"/>
                                             </ControlTemplate>
                                         </Thumb.Template>
                                     </Thumb>
@@ -310,7 +310,7 @@
 
                     </StackPanel>
 
-                    <TextBlock Text="{Binding FileName, TargetNullValue='No file loaded'}" FontSize="{StaticResource Font.Size.Header}" FontWeight="Bold" Foreground="#DDDDDD" Margin="0,2"/>
+                    <TextBlock Text="{Binding FileName, TargetNullValue='No file loaded'}" FontSize="{StaticResource Font.Size.Header}" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Bright}" Margin="0,2"/>
                     
                     <!-- Timecode Display -->
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
@@ -414,7 +414,7 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:TrackViewModel}">
-                                <Border Background="#2E2E2E" Margin="0,0,0,1" BorderBrush="#111111" BorderThickness="0,0,0,2">
+                                <Border Background="{DynamicResource Brush.Panel.Light}" Margin="0,0,0,1" BorderBrush="{DynamicResource Brush.Text.Dark}" BorderThickness="0,0,0,2">
                                     <Grid Height="70"> <!-- Reduced height for density -->
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="260"/>
@@ -430,7 +430,7 @@
                                             </Grid.RowDefinitions>
 
                                             <!-- Name -->
-                                            <TextBlock Text="{Binding TrackName}" FontWeight="Bold" Foreground="#ECEFF1" FontSize="{StaticResource Font.Size.Small}" Margin="5,0,0,2" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding TrackName}" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Bright}" FontSize="{StaticResource Font.Size.Small}" Margin="5,0,0,2" TextTrimming="CharacterEllipsis"/>
 
                                             <!-- Controls Area -->
                                             <Grid Grid.Row="1">
@@ -493,8 +493,8 @@
                                         </Grid>
 
                                         <!-- Col 1: VU Meter (REDESIGNED) -->
-                                        <Border Grid.Column="1" Background="#111111" Width="10" Margin="0,5" VerticalAlignment="Stretch">
-                                           <Rectangle Fill="#00FF00" VerticalAlignment="Stretch">
+                                        <Border Grid.Column="1" Background="{DynamicResource Brush.Text.Dark}" Width="10" Margin="0,5" VerticalAlignment="Stretch">
+                                           <Rectangle Fill="{DynamicResource Brush.Meter.fill}" VerticalAlignment="Stretch">
                                                <Rectangle.RenderTransform>
                                                     <ScaleTransform ScaleY="{Binding CurrentLevel}"/>
                                                </Rectangle.RenderTransform>
@@ -594,25 +594,25 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     
-                                    <TextBlock Text="Name:" Foreground="#888888"/>
+                                    <TextBlock Text="Name:" Foreground="{DynamicResource Brush.Text.Secondary}"/>
                                     <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.FullPath}" TextWrapping="Wrap" Foreground="White" ToolTip="{Binding CurrentMetadata.FullPath}"/>
                                     
-                                    <TextBlock Grid.Row="1" Text="Project:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="1" Text="Project:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMetadata.Project}" Foreground="White" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="2" Text="Scene:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="2" Text="Scene:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMetadata.Scene}" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="3" Text="Take:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="3" Text="Take:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMetadata.Take}" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="4" Text="Tape:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="4" Text="Tape:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentMetadata.Tape}" Foreground="White" Margin="0,2,0,0"/>
                                     
-                                    <TextBlock Grid.Row="5" Text="Date:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="5" Text="Date:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CurrentMetadata.CreationDate}" Foreground="White" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="6" Text="Size:" Foreground="#888888" Margin="0,5,0,0"/>
+                                    <TextBlock Grid.Row="6" Text="Size:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,5,0,0"/>
                                     <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding CurrentMetadata.FileSize}" Foreground="White" Margin="0,5,0,0"/>
                                 </Grid>
                             </Expander>
@@ -635,28 +635,28 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Text="Sample Rate:" Foreground="#888888"/>
+                                    <TextBlock Text="Sample Rate:" Foreground="{DynamicResource Brush.Text.Secondary}"/>
                                     <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.SampleRateString}" Foreground="White"/>
 
-                                    <TextBlock Grid.Row="1" Text="Bit Depth:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="1" Text="Bit Depth:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMetadata.BitDepthString}" Foreground="White" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="2" Text="Frame Rate:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="2" Text="Frame Rate:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMetadata.FrameRate}" Foreground="White" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="3" Text="Start TC:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="3" Text="Start TC:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMetadata.TimecodeStart}" FontFamily="Consolas" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="4" Text="Length:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="4" Text="Length:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentMetadata.Duration}" FontFamily="Consolas" Foreground="White" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="5" Text="User Bits:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="5" Text="User Bits:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CurrentMetadata.UBits}" FontFamily="Consolas" Foreground="White" Margin="0,2,0,0"/>
                                     
-                                    <TextBlock Grid.Row="6" Text="Bitrate:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="6" Text="Bitrate:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding CurrentMetadata.Bitrate}" Foreground="White" Margin="0,2,0,0"/>
 
-                                    <TextBlock Grid.Row="7" Text="Bitrate Mode:" Foreground="#888888" Margin="0,2,0,0"/>
+                                    <TextBlock Grid.Row="7" Text="Bitrate Mode:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CurrentMetadata.BitrateMode}" Foreground="White" Margin="0,2,0,0"/>
                                 </Grid>
                             </Expander>
@@ -675,13 +675,13 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Text="Container:" Foreground="#888888"/>
+                                <TextBlock Text="Container:" Foreground="{DynamicResource Brush.Text.Secondary}"/>
                                 <TextBlock Grid.Column="1" Text="{Binding CurrentMetadata.ContainerFormat}" Foreground="White"/>
 
-                                <TextBlock Grid.Row="1" Text="Codec:" Foreground="#888888" Margin="0,2,0,0"/>
+                                <TextBlock Grid.Row="1" Text="Codec:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMetadata.CodecName}" Foreground="White" Margin="0,2,0,0"/>
 
-                                <TextBlock Grid.Row="2" Text="Channels:" Foreground="#888888" Margin="0,2,0,0"/>
+                                <TextBlock Grid.Row="2" Text="Channels:" Foreground="{DynamicResource Brush.Text.Secondary}" Margin="0,2,0,0"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMetadata.ChannelCountString}" Foreground="White" Margin="0,2,0,0"/>
                             </Grid>
                         </Expander>
@@ -702,9 +702,9 @@
                                 <DataGrid.Resources>
                                     <Style TargetType="DataGridColumnHeader">
                                         <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Foreground" Value="#888888"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Secondary}"/>
                                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" Value="#444444"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border.Secondary}"/>
                                         <Setter Property="Padding" Value="5,2"/>
                                     </Style>
                                     <Style TargetType="DataGridCell">

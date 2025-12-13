@@ -40,6 +40,20 @@
     <SolidColorBrush x:Key="Brush.Text.Accent" Color="#1A4CB1"/>
     <SolidColorBrush x:Key="Brush.Accent.Transparent" Color="#331A4CB1"/>
 
+    <!-- SEMANTIC STATES -->
+    <SolidColorBrush x:Key="Brush.State.Mute" Color="#D32F2F"/>
+    <SolidColorBrush x:Key="Brush.State.Solo" Color="#FBC02D"/>
+    
+    <!-- TRANSPORT COLORS -->
+    <SolidColorBrush x:Key="Brush.Transport.Play" Color="#69F0AE"/>
+    <SolidColorBrush x:Key="Brush.Transport.Stop" Color="#FF5252"/>
+    <SolidColorBrush x:Key="Brush.Transport.Pause" Color="#FFD740"/>
+    
+    <!-- ADDITIONAL UI -->
+    <SolidColorBrush x:Key="Brush.Panel.Light" Color="#2E2E2E"/>
+    <SolidColorBrush x:Key="Brush.Text.Bright" Color="#DDDDDD"/>
+    <SolidColorBrush x:Key="Brush.Meter.fill" Color="#00FF00"/>
+
     <!-- GLOBAL WINDOW STYLE -->
     <Style TargetType="{x:Type Window}">
          <Setter Property="Background" Value="{StaticResource Brush.Background}"/>
