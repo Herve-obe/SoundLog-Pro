@@ -84,11 +84,48 @@
 
         <!-- 1. MENU SYSTEM -->
         <Menu Grid.Row="0" VerticalAlignment="Center" Padding="5,0">
-            <MenuItem Header="File"/>
-            <MenuItem Header="Edit"/>
-            <MenuItem Header="View"/>
+            <!-- FILE -->
+            <MenuItem Header="File">
+                <MenuItem Header="New Session" InputGestureText="Ctrl+N" />
+                <MenuItem Header="Open Session..." InputGestureText="Ctrl+O" />
+                <MenuItem Header="Save Session" InputGestureText="Ctrl+S" />
+                <Separator/>
+                <MenuItem Header="Settings" />
+                <Separator/>
+                <MenuItem Header="Exit" InputGestureText="Alt+F4" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+
+            <!-- EDIT -->
+            <MenuItem Header="Edit">
+                <MenuItem Header="Undo" InputGestureText="Ctrl+Z" />
+                <MenuItem Header="Redo" InputGestureText="Ctrl+Y" />
+                <Separator/>
+                <MenuItem Header="Cut" />
+                <MenuItem Header="Copy" />
+                <MenuItem Header="Paste" />
+                <Separator/>
+                <MenuItem Header="Reset Metadata" />
+            </MenuItem>
+
+            <!-- VIEW -->
+            <MenuItem Header="View">
+                <MenuItem Header="Full Screen" InputGestureText="F11" />
+                <MenuItem Header="Minimize to Tray" />
+                <Separator/>
+                <MenuItem Header="Go to Media" InputGestureText="Ctrl+1" Command="{Binding ShowMediaCommand}" />
+                <MenuItem Header="Go to Player" InputGestureText="Ctrl+2" Command="{Binding ShowPlayerCommand}" />
+                <MenuItem Header="Go to Sync" InputGestureText="Ctrl+3" Command="{Binding ShowSyncCommand}" />
+                <MenuItem Header="Go to Secure Copy" InputGestureText="Ctrl+4" Command="{Binding ShowOffloadCommand}" />
+                <MenuItem Header="Go to Transcode" InputGestureText="Ctrl+5" Command="{Binding ShowTranscodeCommand}" />
+                <MenuItem Header="Go to Report" InputGestureText="Ctrl+6" Command="{Binding ShowReportsCommand}" />
+            </MenuItem>
+
+            <!-- HELP -->
             <MenuItem Header="Help">
-                <MenuItem Header="About / Legal" Command="{Binding OpenAboutCommand}"/>
+                <MenuItem Header="View Help" InputGestureText="F1" />
+                <MenuItem Header="Open Log Folder" />
+                <Separator/>
+                <MenuItem Header="About Veriflow" Command="{Binding OpenAboutCommand}" />
             </MenuItem>
         </Menu>
 

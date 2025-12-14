@@ -56,6 +56,7 @@ namespace Veriflow.Desktop.ViewModels
         public ICommand SwitchToAudioCommand { get; }
         public ICommand SwitchToVideoCommand { get; }
         public ICommand OpenAboutCommand { get; }
+        public ICommand ExitCommand { get; }
 
         public MainViewModel()
         {
@@ -70,6 +71,7 @@ namespace Veriflow.Desktop.ViewModels
             SwitchToAudioCommand = new RelayCommand(() => SetMode(AppMode.Audio));
             SwitchToVideoCommand = new RelayCommand(() => SetMode(AppMode.Video));
             OpenAboutCommand = new RelayCommand(OpenAbout);
+            ExitCommand = new RelayCommand(() => Application.Current.Shutdown());
 
             // Default
             SetMode(AppMode.Video);

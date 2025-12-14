@@ -10,6 +10,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- NATIVE THEME ONLY -->
                 <ResourceDictionary Source="/Styles/Theme.Pro.xaml"/>
+                <ResourceDictionary Source="/Styles/Theme.Menus.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- View Models DataTemplates -->
