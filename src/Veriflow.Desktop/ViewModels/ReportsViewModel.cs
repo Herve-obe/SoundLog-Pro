@@ -56,10 +56,12 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty] private bool _isAudioCalendarOpen;
 
         private readonly IReportPrintingService _printingService;
+        private readonly PdfReportService _pdfService;
 
         public ReportsViewModel()
         {
             _printingService = new ReportPrintingService();
+            _pdfService = new PdfReportService();
             _header = _videoHeader; // Initialize default
             SubscribeToHeader();
             
@@ -304,7 +306,19 @@ namespace Veriflow.Desktop.ViewModels
         private void ExportPdf()
         {
              if (!IsReportActive) return;
-             _printingService.PrintReport(Header, CurrentReportItems, CurrentReportType);
+
+             var dlg = new Microsoft.Win32.SaveFileDialog
+             {
+                 FileName = $"{(string.IsNullOrWhiteSpace(Header.ProjectName) ? "Report" : Header.ProjectName)}_Report",
+                 DefaultExt = ".pdf",
+                 Filter = "PDF Documents (.pdf)|*.pdf"
+             };
+
+             if (dlg.ShowDialog() == true)
+             {
+                 bool isVideo = CurrentReportType == ReportType.Video;
+                 _pdfService.GeneratePdf(dlg.FileName, Header, CurrentReportItems, isVideo);
+             }
         }
     }
 }
