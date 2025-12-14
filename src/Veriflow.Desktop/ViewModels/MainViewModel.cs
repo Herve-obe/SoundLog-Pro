@@ -54,6 +54,7 @@ namespace Veriflow.Desktop.ViewModels
         public ICommand ShowReportsCommand { get; }
         public ICommand SwitchToAudioCommand { get; }
         public ICommand SwitchToVideoCommand { get; }
+        public ICommand OpenAboutCommand { get; }
 
         public MainViewModel()
         {
@@ -67,6 +68,7 @@ namespace Veriflow.Desktop.ViewModels
 
             SwitchToAudioCommand = new RelayCommand(() => SetMode(AppMode.Audio));
             SwitchToVideoCommand = new RelayCommand(() => SetMode(AppMode.Video));
+            OpenAboutCommand = new RelayCommand(OpenAbout);
 
             // Default
             SetMode(AppMode.Video);
@@ -197,6 +199,13 @@ namespace Veriflow.Desktop.ViewModels
                 UpdateCurrentView();
             }
             catch { /* Log */ }
+        }
+
+        private void OpenAbout()
+        {
+            var window = new Views.AboutWindow();
+            window.Owner = System.Windows.Application.Current.MainWindow;
+            window.ShowDialog();
         }
 
         private void SetMode(AppMode mode)

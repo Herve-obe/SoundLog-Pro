@@ -190,6 +190,7 @@
                  <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Buttons -->
                     <RowDefinition Height="*"/>    <!-- Layout -->
+                    <RowDefinition Height="Auto"/> <!-- Footer -->
                 </Grid.RowDefinitions>
                 
                 <!-- Action Buttons Area (Vertical Stack) -->
@@ -216,8 +217,10 @@
                             Style="{StaticResource BlueActionButtonStyle}"/>
 
                     <Button Command="{Binding DataContext.SendToTranscodeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="SEND FOLDER TO TRANSCODE" Height="26" ToolTip="Send all files in folder to Transcode"
+                            Content="SEND FOLDER TO TRANSCODE" Height="26" ToolTip="Send all files in folder to Transcode" Margin="0,0,0,5"
                             Style="{StaticResource BlueActionButtonStyle}"/>
+
+
                 </StackPanel>
 
                 <!-- METADATA PANELS CONTAINER -->
@@ -511,10 +514,15 @@
                                     <TextBlock Grid.Row="2" Text="Start TC:" Foreground="#888888" Margin="0,2,0,0"/>
                                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentVideoMetadata.StartTimecode}" FontFamily="Consolas" Foreground="White" FontWeight="Bold" Margin="0,2,0,0"/>
                                 </Grid>
+
                             </Expander>
                          </StackPanel>
                     </ScrollViewer>
                 </Grid>
+
+                <Button Grid.Row="2" Command="{Binding DataContext.EditMetadataCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        Content="EDIT METADATA" Height="26" ToolTip="Edit metadata for selected media" Margin="0,10,0,0"
+                        Style="{StaticResource BlueActionButtonStyle}"/>
             </Grid>
         </Border>
     </Grid>

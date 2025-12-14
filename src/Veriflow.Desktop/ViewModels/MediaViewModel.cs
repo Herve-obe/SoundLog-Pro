@@ -12,12 +12,14 @@ using Veriflow.Desktop.Models;
 using System.Windows;
 using Veriflow.Desktop.Views;
 using System.Threading.Tasks; // Explicitly added for Task
+using Veriflow.Desktop.Helpers;
 
 namespace Veriflow.Desktop.ViewModels
 {
     public partial class MediaViewModel : ObservableObject
     {
         private readonly AudioPreviewService _audioService = new();
+        private readonly MetadataEditorService _metadataEditorService = new();
 
         [ObservableProperty]
         private ObservableCollection<DriveViewModel> _drives = new();
@@ -25,6 +27,7 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(OpenInPlayerCommand))]
         [NotifyCanExecuteChangedFor(nameof(SendFileToTranscodeCommand))]
+        [NotifyCanExecuteChangedFor(nameof(EditMetadataCommand))]
         private MediaItemViewModel? _selectedMedia;
 
         partial void OnSelectedMediaChanged(MediaItemViewModel? value)
@@ -154,7 +157,7 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand(CanExecute = nameof(CanSendToSecureCopy))]
         private void SendToSecureCopy()
         {
-             RequestOffloadSource?.Invoke(CurrentPath);
+             RequestOffloadSource?.Invoke(CurrentPath ?? "");
         }
 
         private bool CanSendFileToTranscode() => SelectedMedia != null;
@@ -172,6 +175,61 @@ namespace Veriflow.Desktop.ViewModels
             var files = FileList.Select(x => x.FullName).ToList();
             if (files.Any())
                 RequestTranscode?.Invoke(files);
+        }
+
+        private bool CanEditMetadata() => SelectedMedia != null;
+
+        [RelayCommand(CanExecute = nameof(CanEditMetadata))]
+        private async Task EditMetadata()
+        {
+            // Requirement: "SelectedMedia or generic file list". V1: SelectedMedia
+            if (SelectedMedia == null) return;
+
+            // 1. Critical Warning
+            // 1. Critical Warning
+            var result = ProMessageBox.Show(
+                "Modifier les métadonnées va réécrire le fichier et changer son Checksum. Cela invalidera les rapports de vérification précédents. Continuer ?",
+                "Attention - Modification Destructive",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != true) return;
+
+            // 2. Open Dialog
+            var dialog = new Views.MetadataEditWindow();
+            dialog.Owner = Application.Current.MainWindow;
+
+            if (dialog.ShowDialog() == true)
+            {
+                // 3. Collect Metadata
+                var startTags = new Dictionary<string, string>();
+                if (!string.IsNullOrWhiteSpace(dialog.Project)) startTags["title"] = dialog.Project; // "title" is often used for Project/Title in basic metadata
+                if (!string.IsNullOrWhiteSpace(dialog.Scene)) startTags["scene"] = dialog.Scene; // FFmpeg mapping depends on container, but we pass these tags
+                if (!string.IsNullOrWhiteSpace(dialog.Take)) startTags["take"] = dialog.Take;
+                if (!string.IsNullOrWhiteSpace(dialog.Tape)) startTags["tape"] = dialog.Tape;
+                if (!string.IsNullOrWhiteSpace(dialog.Comment)) startTags["comment"] = dialog.Comment;
+
+                if (startTags.Count == 0) return;
+
+                // 4. Batch Process 
+                // Currently implementing for SelectedMedia as safest V1 approach
+                var fileToProcess = SelectedMedia.FullName;
+                
+                // TODO: Wrap in IsBusy or Progress implementation in future
+                bool success = await _metadataEditorService.UpdateMetadataAsync(fileToProcess, startTags);
+                
+                if (success)
+                {
+                    // 5. Refresh to reload metadata
+                    LoadDirectory(CurrentPath);
+                    // Reselect the file if possible
+                    SelectedMedia = FileList.FirstOrDefault(f => f.FullName == fileToProcess);
+                }
+                else
+                {
+                     ProMessageBox.Show("Erreur lors de la mise à jour des métadonnées.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         [ObservableProperty]

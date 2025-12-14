@@ -56,16 +56,16 @@ namespace Veriflow.Desktop.Models
         public MediaItemViewModel OriginalMedia { get; }
 
         // Core Identity
-        [ObservableProperty] private string _clipName;
-        [ObservableProperty] private string _filename;
+        [ObservableProperty] private string _clipName = "";
+        [ObservableProperty] private string _filename = "";
         [ObservableProperty] private string _status = "Ready";
 
         // Time / Specs
-        [ObservableProperty] private string _startTimeCode;
-        [ObservableProperty] private string _duration;
-        [ObservableProperty] private string _fps;
-        [ObservableProperty] private string _codec; // Also serves as Format
-        [ObservableProperty] private string _resolution;
+        [ObservableProperty] private string _startTimeCode = "00:00:00:00";
+        [ObservableProperty] private string _duration = "--:--";
+        [ObservableProperty] private string _fps = "";
+        [ObservableProperty] private string _codec = ""; // Also serves as Format
+        [ObservableProperty] private string _resolution = "";
 
         // Editorial (Editable)
         [ObservableProperty] private string _scene = "";
