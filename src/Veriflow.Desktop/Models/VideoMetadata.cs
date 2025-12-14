@@ -9,7 +9,7 @@ namespace Veriflow.Desktop.Models
         
         // General
         public string Container { get; set; } = ""; // .mov, .mxf
-        public string Duration { get; set; } = "--:--:--:--";
+        public string Duration { get; set; } = "";
         public string Size { get; set; } = ""; // File size
         
         // Video
@@ -25,8 +25,8 @@ namespace Veriflow.Desktop.Models
         public string GopStructure { get; set; } = ""; // Intra / LongGOP
 
         // Timecode
-        public string StartTimecode { get; set; } = "00:00:00:00";
-        public string EndTimecode { get; set; } = "00:00:00:00";
+        public string StartTimecode { get; set; } = "";
+        public string EndTimecode { get; set; } = "";
         
         // Audio in Video
         public string AudioFormat { get; set; } = ""; // PCM 24-bit 48kHz
