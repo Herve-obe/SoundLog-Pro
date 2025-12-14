@@ -453,7 +453,7 @@
                 <Border Grid.Row="1" Background="{StaticResource Brush.Panel.Deep}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" CornerRadius="4">
                     <Grid>
                         <!-- VIDEO REPORT DATAGRID -->
-                        <DataGrid ItemsSource="{Binding ReportItems}" 
+                        <DataGrid ItemsSource="{Binding VideoReportItems}" 
                                   AutoGenerateColumns="False" 
                                   CanUserSortColumns="True"
                                   Background="Transparent" 
@@ -479,38 +479,47 @@
 
                              <DataGrid.Columns>
                                 <!-- CLIP NAME -->
-                                <DataGridTemplateColumn Header="CLIP NAME" Width="200" SortMemberPath="Filename" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="CLIP NAME" Width="200" SortMemberPath="ClipName" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Filename}" FontWeight="Bold" Foreground="White" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding ClipName}" FontWeight="Bold" Foreground="White" Margin="6,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- SCENE / TAKE -->
-                                <DataGridTemplateColumn Header="SCENE / TAKE" Width="120" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="SCENE / TAKE" Width="140" IsReadOnly="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="6,0,0,0">
                                                 <TextBlock Text="{Binding Scene}" Foreground="#DDD"/>
-                                                <TextBlock Text=" / " Foreground="#888"/>
+                                                <TextBlock Text=" / " Foreground="#888" Margin="4,0"/>
                                                 <TextBlock Text="{Binding Take}" Foreground="#DDD"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Text="{Binding Scene, UpdateSourceTrigger=LostFocus}" Width="50" Background="#222" Foreground="White" BorderThickness="0" ToolTip="Scene"/>
+                                                <TextBlock Text="/" Foreground="#888" Margin="4,0" VerticalAlignment="Center"/>
+                                                <TextBox Text="{Binding Take, UpdateSourceTrigger=LostFocus}" Width="40" Background="#222" Foreground="White" BorderThickness="0" ToolTip="Take"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- TC START -->
-                                <DataGridTemplateColumn Header="TC START" Width="100" SortMemberPath="Timecode" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="TC START" Width="100" SortMemberPath="StartTimeCode" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Timecode}" FontFamily="Consolas" Foreground="#AAA" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding StartTimeCode}" FontFamily="Consolas" Foreground="#AAA" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- DURATION -->
-                                <DataGridTemplateColumn Header="DURATION" Width="80" SortMemberPath="Duration" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="DURATION" Width="90" SortMemberPath="Duration" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Duration}" FontFamily="Consolas" Foreground="#888" Margin="6,0,0,0" VerticalAlignment="Center"/>
@@ -528,26 +537,34 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- ISO / WB -->
-                                <DataGridTemplateColumn Header="ISO / WB" Width="100" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="ISO / WB" Width="120" IsReadOnly="False">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="6,0,0,0">
                                                 <TextBlock Text="{Binding Iso}" Foreground="#DDD"/>
-                                                <TextBlock Text=" / " Foreground="#888"/>
+                                                <TextBlock Text=" / " Foreground="#888" Margin="4,0"/>
                                                 <TextBlock Text="{Binding WhiteBalance}" Foreground="#DDD"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBox Text="{Binding Iso, UpdateSourceTrigger=LostFocus}" Width="40" Background="#222" Foreground="White" BorderThickness="0" ToolTip="ISO"/>
+                                                <TextBlock Text="/" Foreground="#888" Margin="4,0" VerticalAlignment="Center"/>
+                                                <TextBox Text="{Binding WhiteBalance, UpdateSourceTrigger=LostFocus}" Width="40" Background="#222" Foreground="White" BorderThickness="0" ToolTip="WB"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- CODEC / RES -->
-                                <DataGridTemplateColumn Header="CODEC / RES" Width="140" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="CODEC / RES" Width="150" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="6,0,0,0">
-                                                <TextBlock Text="{Binding Codec}" Foreground="#DDD"/>
-                                                <TextBlock Text=" / " Foreground="#888"/>
-                                                <TextBlock Text="{Binding Resolution}" Foreground="#DDD"/>
+                                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                <TextBlock Text="{Binding Codec}" Foreground="#DDD" FontSize="11"/>
+                                                <TextBlock Text="{Binding Resolution}" Foreground="#888" FontSize="10"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -562,7 +579,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                     <DataGridTemplateColumn.CellEditingTemplate>
                                         <DataTemplate>
-                                            <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0"/>
+                                            <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="40"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
@@ -581,7 +598,7 @@
                         </DataGrid>
 
                         <!-- AUDIO REPORT DATAGRID -->
-                        <DataGrid ItemsSource="{Binding ReportItems}" 
+                        <DataGrid ItemsSource="{Binding AudioReportItems}" 
                                   AutoGenerateColumns="False" 
                                   CanUserSortColumns="True"
                                   Background="Transparent" 
@@ -610,34 +627,44 @@
                                 <DataGridTemplateColumn Header="FILENAME" Width="220" SortMemberPath="Filename" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Filename}" FontWeight="Bold" Foreground="White" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Filename}" FontWeight="Bold" Foreground="White" Margin="6,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- SCENE -->
-                                <DataGridTemplateColumn Header="SCENE" Width="70" SortMemberPath="Scene" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="SCENE" Width="70" SortMemberPath="Scene">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Scene}" Foreground="#DDD" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Scene, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- TAKE -->
-                                <DataGridTemplateColumn Header="TAKE" Width="50" SortMemberPath="Take" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="TAKE" Width="50" SortMemberPath="Take">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Take}" Foreground="#DDD" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Take, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- START TC -->
-                                <DataGridTemplateColumn Header="START TC" Width="100" SortMemberPath="Timecode" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="START TC" Width="100" SortMemberPath="StartTimeCode" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Timecode}" FontFamily="Consolas" Foreground="#AAA" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding StartTimeCode}" FontFamily="Consolas" Foreground="#AAA" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -652,12 +679,17 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- TRACKS -->
-                                <DataGridTemplateColumn Header="TRACKS" Width="160" SortMemberPath="TrackNames" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="TRACKS" Width="160" SortMemberPath="Tracks">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding TrackNames}" Foreground="#AAA" Margin="6,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding TrackNames}"/>
+                                            <TextBlock Text="{Binding Tracks}" Foreground="#AAA" Margin="6,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Tracks}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Tracks, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <!-- CIRCLE -->
@@ -679,7 +711,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                      <DataGridTemplateColumn.CellEditingTemplate>
                                         <DataTemplate>
-                                            <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0"/>
+                                            <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=LostFocus}" Background="#222" Foreground="White" BorderThickness="0" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="40"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using Veriflow.Desktop.ViewModels;
+using System.Linq;
 
 namespace Veriflow.Desktop.Models
 {
@@ -54,77 +55,108 @@ namespace Veriflow.Desktop.Models
     {
         public MediaItemViewModel OriginalMedia { get; }
 
-        public ReportItem(MediaItemViewModel media)
-        {
-            OriginalMedia = media;
-            Filename = media.Name;
-            
-            // Resolve Timecode
-            string? tc = media.CurrentVideoMetadata?.StartTimecode;
-            if (string.IsNullOrEmpty(tc)) tc = media.CurrentMetadata?.TimecodeStart;
-            Timecode = tc ?? "00:00:00:00";
+        // Core Identity
+        [ObservableProperty] private string _clipName;
+        [ObservableProperty] private string _filename;
+        [ObservableProperty] private string _status = "Ready";
 
-            Duration = media.Duration;
-            Format = System.IO.Path.GetExtension(media.FullName).ToUpperInvariant().Replace(".", "");
-            
-            // New Fields Population
-            // Try to parse Scene/Take from metadata if available (Video usually has this in Name or Metadata)
-            Scene = media.CurrentMetadata?.Scene ?? ""; 
-            Take = media.CurrentMetadata?.Take ?? ""; 
-            
-            // Audio Specifics
-            // Check based on extension or metadata presence
-            bool isVideo = MediaViewModel.VideoExtensions.Contains(System.IO.Path.GetExtension(media.FullName).ToLower());
+        // Time / Specs
+        [ObservableProperty] private string _startTimeCode;
+        [ObservableProperty] private string _duration;
+        [ObservableProperty] private string _fps;
+        [ObservableProperty] private string _codec; // Also serves as Format
+        [ObservableProperty] private string _resolution;
 
-            if (!isVideo && media.CurrentMetadata != null)
-            {
-                SampleRate = media.CurrentMetadata.SampleRateString;
-                // Build Track Names string "1:MixL 2:MixR"
-                if (media.CurrentMetadata.Tracks != null)
-                {
-                     var trackList = new System.Collections.Generic.List<string>();
-                     foreach(var t in media.CurrentMetadata.Tracks)
-                     {
-                         trackList.Add($"{t.ChannelIndex}:{t.Name}");
-                     }
-                     TrackNames = string.Join(" ", trackList);
-                }
-            }
-            // Video Specifics
-            if (isVideo && media.CurrentVideoMetadata != null)
-            {
-                 Resolution = media.CurrentVideoMetadata.Resolution; // Use Resolution string directly
-                 Codec = media.CurrentVideoMetadata.Codec;
-                 ThumbnailPath = media.ThumbnailPath;
-            }
-        }
-
-        // Display Properties (Snapshot of media state)
-        public string Filename { get; }
-        public string Timecode { get; }
-        public string Duration { get; }
-        public string Format { get; }
-
-        // Editable / New Fields
+        // Editorial (Editable)
         [ObservableProperty] private string _scene = "";
         [ObservableProperty] private string _take = "";
         [ObservableProperty] private bool _isCircled;
         [ObservableProperty] private string _itemNotes = "";
-        
-        // Audio Specific
-        public string TrackNames { get; set; } = "";
-        public string SampleRate { get; set; } = "";
-        
-        // Video Specific
-        public string Resolution { get; set; } = "";
-        public string Codec { get; set; } = "";
+
+        // Video Specific (Editable)
+        [ObservableProperty] private string _iso = "";
+        [ObservableProperty] private string _whiteBalance = "";
         public string? ThumbnailPath { get; set; }
-        
-        // Additional Video Properties
-        public string Fps { get; set; } = "";
-        public string Iso { get; set; } = "";
-        public string WhiteBalance { get; set; } = "";
 
+        // Audio Specific (Editable)
+        [ObservableProperty] private string _tracks = ""; // For track names
+        [ObservableProperty] private string _sampleRate = "";
 
+        public ReportItem(MediaItemViewModel media)
+        {
+            OriginalMedia = media;
+            
+            // 1. Shared Properties
+            ClipName = media.Name;
+            Filename = media.Name;
+            Duration = media.Duration ?? "--:--"; // Ensure default
+            
+            // 2. Video vs Audio Logic
+            string ext = System.IO.Path.GetExtension(media.FullName).ToLower();
+            bool isVideo = MediaViewModel.VideoExtensions.Contains(ext);
+
+            if (isVideo)
+            {
+                 // Handle Video Metadata
+                 var vMeta = media.CurrentVideoMetadata;
+                 if (vMeta != null)
+                 {
+                     Fps = vMeta.FrameRate ?? "--";
+                     Resolution = vMeta.Resolution ?? "--";
+                     StartTimeCode = vMeta.StartTimecode ?? "00:00:00:00";
+                     Codec = media.Format; // Per instruction: Codec -> Defaults to OriginalMedia.Format
+                     // Note: If media.Format holds Resolution as per VM logic, this might be weird, but I follow instruction "Defaults to OriginalMedia.Format".
+                     // However, if MediaViewModel stores "1920x1080" in Format, then Codec becomes "1920x1080". 
+                     // Safe check: if media.Format looks like resolution, maybe use vMeta.Codec? 
+                     // I will stick to the instruction: "Defaults to OriginalMedia.Format". If users says otherwise later I fix.
+                     // Wait, actually user says "Codec (string) -> Defaults to OriginalMedia.Format." 
+                 }
+                 else
+                 {
+                     Fps = "--";
+                     Resolution = "--";
+                     StartTimeCode = "00:00:00:00";
+                     Codec = media.Format ?? "Unknown";
+                 }
+                 
+                 Iso = "N/A";
+                 WhiteBalance = "N/A";
+                 ThumbnailPath = media.ThumbnailPath;
+            }
+            else
+            {
+                // Handle Audio Metadata
+                var aMeta = media.CurrentMetadata;
+                
+                Codec = media.Format; // Generic Format
+                
+                 if (aMeta != null)
+                 {
+                      SampleRate = media.SampleRate ?? ""; // User instruction for SampleRate
+                      // BitDepth = media.BitDepth; // Skipped as property not added yet
+                      StartTimeCode = aMeta.TimecodeStart ?? "00:00:00:00";
+                      
+                      if (aMeta.Tracks != null)
+                      {
+                           var trackList = aMeta.Tracks.Select(t => $"{t.ChannelIndex}:{t.Name}");
+                           Tracks = string.Join(" ", trackList);
+                      }
+                      
+                      Scene = aMeta.Scene ?? "";
+                      Take = aMeta.Take ?? "";
+                 }
+                 else
+                 {
+                     StartTimeCode = "00:00:00:00";
+                     SampleRate = "--";
+                 }
+            }
+
+            // Fallback for nulls on properties that must be strings
+            if (string.IsNullOrEmpty(StartTimeCode)) StartTimeCode = "00:00:00:00";
+            if (Fps == null) Fps = "--";
+            if (Resolution == null) Resolution = "--";
+            if (Codec == null) Codec = "";
+        }
     }
 }

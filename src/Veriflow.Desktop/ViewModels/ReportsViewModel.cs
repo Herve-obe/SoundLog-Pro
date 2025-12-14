@@ -16,9 +16,15 @@ namespace Veriflow.Desktop.ViewModels
         private ReportHeader _audioHeader = new() { ProductionCompany = "SoundLog Pro Production" };
 
         [ObservableProperty] private ReportHeader _header;
-        [ObservableProperty] private ObservableCollection<ReportItem> _reportItems = new();
+        
+        // Strict Separation
+        [ObservableProperty] private ObservableCollection<ReportItem> _videoReportItems = new();
+        [ObservableProperty] private ObservableCollection<ReportItem> _audioReportItems = new();
+
         [ObservableProperty] 
         [NotifyPropertyChangedFor(nameof(ReportTitle))]
+        [NotifyPropertyChangedFor(nameof(HasMedia))]
+        [NotifyPropertyChangedFor(nameof(HasAnyData))]
         private ReportType _currentReportType = ReportType.Video;
 
         partial void OnCurrentReportTypeChanged(ReportType value)
@@ -31,34 +37,47 @@ namespace Veriflow.Desktop.ViewModels
             {
                 Header = _videoHeader;
             }
+            ClearListCommand.NotifyCanExecuteChanged();
+            ClearMediaCommand.NotifyCanExecuteChanged();
         }
 
         public string ReportTitle => CurrentReportType == ReportType.Audio ? "SOUND REPORT" : "CAMERA REPORT";
+
+        public ObservableCollection<ReportItem> CurrentReportItems => CurrentReportType == ReportType.Audio ? AudioReportItems : VideoReportItems;
 
         // --- STATE ---
         [ObservableProperty] 
         [NotifyPropertyChangedFor(nameof(HasReport))]
         private bool _isReportActive;
 
-        public bool HasReport => IsReportActive && ReportItems.Count > 0;
-
-
+        public bool HasReport => IsReportActive && HasMedia;
 
         [ObservableProperty] private bool _isVideoCalendarOpen;
         [ObservableProperty] private bool _isAudioCalendarOpen;
 
-        // --- NAVIGATION REQUEST ---
-        // Simple event or messenger could be used. For simplicity, we might assume MainViewModel 
-        // observes this or we inject a service. 
-        // Let's keep it simple: MainViewModel has access to this VM.
+        private readonly IReportPrintingService _printingService;
 
         public ReportsViewModel()
         {
             _printingService = new ReportPrintingService();
             _header = _videoHeader; // Initialize default
             SubscribeToHeader();
-            ReportItems.CollectionChanged += (s, e) => ClearListCommand.NotifyCanExecuteChanged();
-            // Default title logic handles initialization
+            
+            // Subscriptions to triggers
+            VideoReportItems.CollectionChanged += (s, e) => NotifyCollectionChanges();
+            AudioReportItems.CollectionChanged += (s, e) => NotifyCollectionChanges();
+        }
+
+        private void NotifyCollectionChanges()
+        {
+            OnPropertyChanged(nameof(HasMedia));
+            OnPropertyChanged(nameof(HasReport));
+            OnPropertyChanged(nameof(HasAnyData));
+             // Explicitly notify commands
+            ClearListCommand.NotifyCanExecuteChanged();
+            ClearMediaCommand.NotifyCanExecuteChanged();
+            PrintCommand.NotifyCanExecuteChanged();
+            ExportPdfCommand.NotifyCanExecuteChanged();
         }
 
         public void SetAppMode(AppMode mode)
@@ -66,30 +85,26 @@ namespace Veriflow.Desktop.ViewModels
             CurrentReportType = mode == AppMode.Audio ? ReportType.Audio : ReportType.Video;
         }
 
-        private readonly IReportPrintingService _printingService;
-
         // --- ACTIONS ---
 
         public void CreateReport(IEnumerable<MediaItemViewModel> items, ReportType type)
         {
             CurrentReportType = type;
             
-            // Re-initialize specific header
+            // Re-initialize specific header if needed
             if (type == ReportType.Audio) 
             {
-                 _audioHeader = new ReportHeader() { ProductionCompany = "SoundLog Pro Production" };
+                 if (_audioHeader == null) _audioHeader = new ReportHeader() { ProductionCompany = "SoundLog Pro Production" };
                  Header = _audioHeader;
+                 AudioReportItems.Clear();
+                 foreach (var item in items) AudioReportItems.Add(new ReportItem(item));
             }
             else 
             {
-                 _videoHeader = new ReportHeader() { ProductionCompany = "Veriflow Video" };
+                 if (_videoHeader == null) _videoHeader = new ReportHeader() { ProductionCompany = "Veriflow Video" };
                  Header = _videoHeader;
-            }
-
-            ReportItems.Clear();
-            foreach (var item in items)
-            {
-                ReportItems.Add(new ReportItem(item));
+                 VideoReportItems.Clear();
+                 foreach (var item in items) VideoReportItems.Add(new ReportItem(item));
             }
 
             IsReportActive = true;
@@ -99,9 +114,10 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (!IsReportActive) return;
 
+            var targetCollection = CurrentReportType == ReportType.Audio ? AudioReportItems : VideoReportItems;
             foreach (var item in items)
             {
-                ReportItems.Add(new ReportItem(item));
+                targetCollection.Add(new ReportItem(item));
             }
         }
 
@@ -111,31 +127,41 @@ namespace Veriflow.Desktop.ViewModels
             // TODO: Implement file picker
         }
 
-        private bool CanClearList() => ReportItems.Count > 0;
-
-        [RelayCommand(CanExecute = nameof(CanClearList))]
+        [RelayCommand(CanExecute = nameof(HasMedia))]
         private void ClearList()
         {
-            ReportItems.Clear();
+             if (CurrentReportType == ReportType.Audio)
+                AudioReportItems.Clear();
+            else
+                VideoReportItems.Clear();
         }
 
+        [RelayCommand(CanExecute = nameof(CanRemoveFile))]
+        private void RemoveFile(ReportItem item)
+        {
+            if (item != null)
+            {
+                if (CurrentReportType == ReportType.Audio)
+                    AudioReportItems.Remove(item);
+                else
+                    VideoReportItems.Remove(item);
+            }
+        }
 
-
-
-
+        private bool CanRemoveFile(ReportItem item) => item != null;
 
         public void NavigateToItem(MediaItemViewModel item)
         {
-            var reportItem = ReportItems.FirstOrDefault(r => r.OriginalMedia == item);
-            if (reportItem != null)
-            {
-                SelectedReportItem = reportItem;
-            }
+             var reportItem = CurrentReportItems.FirstOrDefault(r => r.OriginalMedia == item);
+             if (reportItem != null)
+             {
+                 SelectedReportItem = reportItem;
+             }
         }
 
         public ReportItem? GetReportItem(string path)
         {
-            return ReportItems.FirstOrDefault(r => r.OriginalMedia.FullName.Equals(path, System.StringComparison.OrdinalIgnoreCase));
+            return CurrentReportItems.FirstOrDefault(r => r.OriginalMedia.FullName.Equals(path, System.StringComparison.OrdinalIgnoreCase));
         }
 
         public void NavigateToPath(string path)
@@ -147,14 +173,19 @@ namespace Veriflow.Desktop.ViewModels
              }
         }
 
-        public bool HasMedia => ReportItems.Count > 0;
+        public bool HasMedia
+        {
+            get
+            {
+                return CurrentReportType == ReportType.Audio ? AudioReportItems.Count > 0 : VideoReportItems.Count > 0;
+            }
+        }
         
         public bool HasInfos
         {
             get
             {
                 if (Header == null) return false;
-                // Check if any significant field is modified from default
                 bool hasData = !string.IsNullOrEmpty(Header.ReportDate) ||
                                !string.IsNullOrEmpty(Header.ProjectName) || 
                                !string.IsNullOrEmpty(Header.OperatorName) || 
@@ -165,12 +196,6 @@ namespace Veriflow.Desktop.ViewModels
                                !string.IsNullOrEmpty(Header.Scene) ||
                                !string.IsNullOrEmpty(Header.Take) ||
                                !string.IsNullOrEmpty(Header.GlobalNotes);
-                
-                // Account for default Production Company
-                // If it differs from default, it's info. 
-                // However, user might consider just the structure itself.
-                // Let's stick to user inputs. 
-                // If user typed anything, it returns true.
                 return hasData;
             }
         }
@@ -180,12 +205,7 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand(CanExecute = nameof(HasMedia))]
         private void ClearMedia()
         {
-            ReportItems.Clear();
-            OnPropertyChanged(nameof(HasReport));
-            OnPropertyChanged(nameof(HasMedia));
-            OnPropertyChanged(nameof(HasAnyData));
-            ClearMediaCommand.NotifyCanExecuteChanged();
-            ClearAllCommand.NotifyCanExecuteChanged();
+            ClearList(); // Logic reused
         }
 
         [RelayCommand(CanExecute = nameof(HasInfos))]
@@ -215,7 +235,7 @@ namespace Veriflow.Desktop.ViewModels
         private void ClearAll()
         {
             ClearMedia();
-            ClearInfos(); // This handles notifications
+            ClearInfos(); 
         }
         
         // Hook into Header changes
@@ -260,15 +280,14 @@ namespace Veriflow.Desktop.ViewModels
         private void Print()
         {
             if (!IsReportActive) return;
-            _printingService.PrintReport(Header, ReportItems, CurrentReportType);
+            _printingService.PrintReport(Header, CurrentReportItems, CurrentReportType);
         }
 
         [RelayCommand(CanExecute = nameof(HasReport))]
         private void ExportPdf()
         {
              if (!IsReportActive) return;
-             // Re-use Print logic
-             _printingService.PrintReport(Header, ReportItems, CurrentReportType);
+             _printingService.PrintReport(Header, CurrentReportItems, CurrentReportType);
         }
     }
 }

@@ -83,9 +83,13 @@
                 <TreeView Grid.Row="1" ItemsSource="{Binding Drives}" Background="Transparent" BorderThickness="0" Margin="5"
                           ItemTemplate="{StaticResource DriveTemplate}">
                     <TreeView.ItemContainerStyle>
-                        <Style TargetType="TreeViewItem">
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                             <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                            <!-- Foreground and FontSize are set in base style or can be overridden here. 
+                                 Base style has Foreground={StaticResource Brush.Text} (Whiteish). 
+                                 Original local style had #CCCCCC. I will keep local overrides if they are desired, 
+                                 or remove them if they conflict. User said "Keep the existing setters". -->
                             <Setter Property="Foreground" Value="#CCCCCC"/>
                             <Setter Property="FontSize" Value="13"/>
                         </Style>
@@ -231,9 +235,7 @@
                                 </Style.Triggers>
                             </Style>
                         </ScrollViewer.Style>
-                        <ScrollViewer.Resources>
-                            <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBarStyle}"/>
-                        </ScrollViewer.Resources>
+
 
                         <StackPanel>
                             <!-- 1. GENERAL INFO -->
@@ -402,9 +404,7 @@
                                 </Style.Triggers>
                             </Style>
                         </ScrollViewer.Style>
-                        <ScrollViewer.Resources>
-                            <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBarStyle}"/>
-                        </ScrollViewer.Resources>
+
 
                         <StackPanel>
 

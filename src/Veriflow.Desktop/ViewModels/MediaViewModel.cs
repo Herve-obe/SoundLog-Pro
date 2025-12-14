@@ -11,6 +11,7 @@ using System.Windows.Input;
 using Veriflow.Desktop.Models;
 using System.Windows;
 using Veriflow.Desktop.Views;
+using System.Threading.Tasks; // Explicitly added for Task
 
 namespace Veriflow.Desktop.ViewModels
 {
@@ -28,7 +29,7 @@ namespace Veriflow.Desktop.ViewModels
 
         partial void OnSelectedMediaChanged(MediaItemViewModel? value)
         {
-            value?.LoadMetadata();
+            value?.LoadMetadata(); // Fire and forget OK here for UI responsiveness
         }
 
         [ObservableProperty]
@@ -37,7 +38,10 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SendToSecureCopyCommand))]
         [NotifyCanExecuteChangedFor(nameof(SendToTranscodeCommand))]
-        private string _currentPath = @"C:\";
+        private string? _currentPath = null;
+
+        private string? _lastVideoPath = null;
+        private string? _lastAudioPath = null;
 
         public event Action<string>? RequestOffloadSource;
         public event Action<IEnumerable<string>>? RequestTranscode;
@@ -47,37 +51,102 @@ namespace Veriflow.Desktop.ViewModels
 
         public void SetAppMode(AppMode mode)
         {
+            // Immediate clean slate to avoid ghost files from previous mode
+            FileList.Clear();
+
+            // Save current path
+            if (IsVideoMode)
+                _lastVideoPath = CurrentPath;
+            else
+                _lastAudioPath = CurrentPath;
+
             IsVideoMode = (mode == AppMode.Video);
-            // Tree structure is identical, do not reset drives.
+
+            // Restore path
+            string? targetPath = IsVideoMode ? _lastVideoPath : _lastAudioPath;
+            
+            CurrentPath = targetPath;
+            
+            // Only load if valid
+            if (!string.IsNullOrEmpty(CurrentPath))
+            {
+                LoadDirectory(CurrentPath);
+                _ = ExpandAndSelectPath(CurrentPath);
+            }
         }
 
 
         public event Action<IEnumerable<MediaItemViewModel>, bool>? RequestCreateReport; // true=Video
         public event Action<IEnumerable<MediaItemViewModel>>? RequestAddToReport;
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(AddToReportCommand))]
-        private bool _hasActiveReport; // Controlled by MainViewModel
+        private bool _hasVideoReport = false;
+        private bool _hasAudioReport = false;
 
-        public void SetReportActive(bool active) => HasActiveReport = active;
+        // Track files currently in the active report to prevent duplicates
+        private HashSet<string> _currentReportFilePaths = new();
+
+        public void UpdateReportContext(IEnumerable<string> reportPaths, bool isReportActive)
+        {
+            // Only update if the incoming context matches our current mode
+            // This assumes MainViewModel filters calls to match the active mode
+            
+            _currentReportFilePaths = isReportActive 
+                ? new HashSet<string>(reportPaths, StringComparer.OrdinalIgnoreCase)
+                : new HashSet<string>();
+
+            if (IsVideoMode) _hasVideoReport = isReportActive;
+            else _hasAudioReport = isReportActive;
+
+            AddToReportCommand.NotifyCanExecuteChanged();
+        }
+
+        // Deprecated but kept for compatibility if needed, though replaced by UpdateReportContext usage
+        public void SetReportStatus(bool isVideo, bool hasContent)
+        {
+            if (isVideo) _hasVideoReport = hasContent;
+            else _hasAudioReport = hasContent;
+
+            AddToReportCommand.NotifyCanExecuteChanged();
+        }
 
         private bool CanSendToSecureCopy() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath);
         private bool CanSendToTranscode() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && FileList.Any();
 
         [RelayCommand]
-        private void CreateReport()
+        private async Task CreateReport()
         {
             if (FileList.Any())
             {
+               // Force load metadata for all files
+               await Task.WhenAll(FileList.Select(item => item.LoadMetadata()));
+               
                RequestCreateReport?.Invoke(FileList.ToList(), IsVideoMode);
             }
         }
 
-        [RelayCommand(CanExecute = nameof(HasActiveReport))]
-        private void AddToReport()
+        private bool CanAddToReport() 
+        {
+            // 1. Strict Active Check (Must have content to be "Active")
+            bool isReportActive = IsVideoMode ? _hasVideoReport : _hasAudioReport;
+            if (!isReportActive) return false;
+            
+            // 2. Duplicate Prevention
+            // "Enable if at least one new file to add"
+            // If report is empty (which is caught by #1, but for safety), All are "new". Button Enabled.
+            // If all files in FileList are in _currentReportFilePaths, Any returns false. Button Disabled.
+            bool hasNewFiles = FileList.Any(file => !_currentReportFilePaths.Contains(file.FullName));
+            
+            return hasNewFiles;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanAddToReport))]
+        private async Task AddToReport()
         {
              if (FileList.Any())
             {
+               // Force load metadata for all files
+               await Task.WhenAll(FileList.Select(item => item.LoadMetadata()));
+
                RequestAddToReport?.Invoke(FileList.ToList());
             }
         }
@@ -199,8 +268,10 @@ namespace Veriflow.Desktop.ViewModels
         public static readonly string[] AudioExtensions = { ".wav", ".mp3", ".m4a", ".aac", ".aiff", ".aif", ".flac", ".ogg", ".opus", ".ac3" };
         public static readonly string[] VideoExtensions = { ".mov", ".mp4", ".ts", ".mxf", ".avi", ".mkv", ".webm", ".wmv", ".flv", ".m4v", ".mpg", ".mpeg", ".3gp", ".dv", ".ogv", ".m2v", ".vob", ".m2ts" };
 
-        private void LoadDirectory(string path)
+        private void LoadDirectory(string? path)
         {
+            if (string.IsNullOrEmpty(path)) return;
+
             if (Directory.Exists(path))
             {
                 CurrentPath = path; // Update breadcrumb/path if we had one
@@ -222,6 +293,9 @@ namespace Veriflow.Desktop.ViewModels
                     }
                 }
                 catch { /* Access denied or other error */ }
+
+                // Re-evaluate "Add To Report" in case this folder contains duplicates
+                AddToReportCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -230,11 +304,12 @@ namespace Veriflow.Desktop.ViewModels
             // Stop any playing preview when switching modes to avoid phantom audio
             StopPreview();
             
-            // Reload current directory applying new filter
-            if (!string.IsNullOrEmpty(CurrentPath))
-            {
-                LoadDirectory(CurrentPath);
-            }
+            // Reload was moved to SetAppMode to handle path persistence logic correctly.
+            // If checking here we would be reloading the old path before the new one is set.
+            // However, if IsVideoMode changes by other means (not SetAppMode), we might want to ensure consistency,
+            // but relying on SetAppMode is cleaner for this specific requirement.
+            
+            AddToReportCommand.NotifyCanExecuteChanged();
         }
 
         [ObservableProperty]
@@ -439,22 +514,20 @@ namespace Veriflow.Desktop.ViewModels
              ObservableCollection<FolderViewModel> currentCollection = drive.Folders;
              object currentItem = drive;
 
-             foreach (var part in targetParts)
-             {
-                 var folder = currentCollection.FirstOrDefault(f => f.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
-                 if (folder == null) return false; // Not found
+              foreach (var part in targetParts)
+              {
+                  var folder = currentCollection.FirstOrDefault(f => f.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
+                  if (folder == null) return false; // Not found
 
-                 folder.IsExpanded = true;
-                 
-                 // Since LoadChildren is synchronous but triggered by setter, it should populate immediately.
-                 // However, since it involves IO, we might ideally want to delay or yield slightly if UI is sluggish,
-                 // but functionally it's fine.
-                 
-                 currentCollection = folder.Children;
-                 currentItem = folder;
-             }
-             
-             // 3. Select final item
+                  // Explicitly expand parent
+                  folder.IsExpanded = true;
+                  await Task.Delay(50); // Small delay to allow UI binding to catch up (important for TreeView)
+                  
+                  currentCollection = folder.Children;
+                  currentItem = folder;
+              }
+              
+              // 3. Select final item
 
 
              if (currentItem is FolderViewModel finalFolder)
@@ -539,7 +612,7 @@ namespace Veriflow.Desktop.ViewModels
             });
         }
 
-        public async void LoadMetadata()
+        public async Task LoadMetadata()
         {
             if (_metadataLoaded) return;
             

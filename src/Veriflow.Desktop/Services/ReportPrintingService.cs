@@ -227,7 +227,7 @@ namespace Veriflow.Desktop.Services
                 row.Cells.Add(CreateTextCell(item.Take));
                 
                 // Monospace for TC
-                var tcCell = CreateTextCell(item.Timecode);
+                var tcCell = CreateTextCell(item.StartTimeCode);
                 tcCell.FontFamily = new FontFamily("Consolas");
                 row.Cells.Add(tcCell);
 
@@ -236,7 +236,7 @@ namespace Veriflow.Desktop.Services
                 
                 if (type == ReportType.Audio)
                 {
-                    row.Cells.Add(CreateTextCell(item.TrackNames));
+                    row.Cells.Add(CreateTextCell(item.Tracks));
                     row.Cells.Add(CreateTextCell(item.SampleRate));
                 }
                 else

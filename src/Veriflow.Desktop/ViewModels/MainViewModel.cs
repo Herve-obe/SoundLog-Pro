@@ -127,8 +127,8 @@ namespace Veriflow.Desktop.ViewModels
             {
                var type = isVideo ? ReportType.Video : ReportType.Audio;
                _reportsViewModel.CreateReport(items, type);
-               // Sync state back to MediaVM (or use property binding if possible, but manual sync is fine here)
-               _mediaViewModel.SetReportActive(true);
+               // Update with specific context
+               _mediaViewModel.SetReportStatus(isVideo, true);
                NavigateTo(PageType.Reports);
             };
 
@@ -166,6 +166,26 @@ namespace Veriflow.Desktop.ViewModels
             {
                 _reportsViewModel.NavigateToPath(path);
                 NavigateTo(PageType.Reports);
+            };
+
+            // Real-time Feedback Loop
+            // Real-time Feedback Loop
+            _reportsViewModel.VideoReportItems.CollectionChanged += (s, e) =>
+            {
+                if (CurrentAppMode == AppMode.Video)
+                {
+                     var paths = _reportsViewModel.VideoReportItems.Select(x => x.OriginalMedia.FullName).ToList();
+                     _mediaViewModel.UpdateReportContext(paths, _reportsViewModel.VideoReportItems.Any());
+                }
+            };
+
+            _reportsViewModel.AudioReportItems.CollectionChanged += (s, e) =>
+            {
+                if (CurrentAppMode == AppMode.Audio)
+                {
+                    var paths = _reportsViewModel.AudioReportItems.Select(x => x.OriginalMedia.FullName).ToList();
+                    _mediaViewModel.UpdateReportContext(paths, _reportsViewModel.AudioReportItems.Any());
+                }
             };
         }
 
@@ -209,6 +229,19 @@ namespace Veriflow.Desktop.ViewModels
                 }
 
                 _mediaViewModel.SetAppMode(mode);
+                
+                // Push Report Context for the new mode immediately
+                if (mode == AppMode.Video)
+                {
+                     var paths = _reportsViewModel.VideoReportItems.Select(x => x.OriginalMedia.FullName).ToList();
+                     _mediaViewModel.UpdateReportContext(paths, _reportsViewModel.VideoReportItems.Any());
+                }
+                else
+                {
+                     var paths = _reportsViewModel.AudioReportItems.Select(x => x.OriginalMedia.FullName).ToList();
+                     _mediaViewModel.UpdateReportContext(paths, _reportsViewModel.AudioReportItems.Any());
+                }
+                
                 UpdateCurrentView();
             }
              catch { /* Log */ }
