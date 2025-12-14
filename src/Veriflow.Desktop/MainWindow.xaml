@@ -191,7 +191,7 @@
                         </RadioButton.Tag>
                     </RadioButton>
 
-                    <RadioButton Content="REPORTS" 
+                    <RadioButton Content="REPORT" 
                                  Command="{Binding ShowReportsCommand}" 
                                  IsChecked="{Binding IsReportsActive, Mode=OneWay}"
                                  Style="{StaticResource NavButtonStyle}">
