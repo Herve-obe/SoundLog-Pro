@@ -30,6 +30,7 @@ namespace Veriflow.Desktop.ViewModels
         partial void OnCurrentAppModeChanged(AppMode value)
         {
             _reportsViewModel.SetAppMode(value);
+            _transcodeViewModel.SetAppMode(value);
             // Propagate to other VMs if needed
         }
 
@@ -253,6 +254,7 @@ namespace Veriflow.Desktop.ViewModels
                 }
 
                 _mediaViewModel.SetAppMode(mode);
+                _transcodeViewModel.SetAppMode(mode);
                 
                 // Push Report Context for the new mode immediately
                 if (mode == AppMode.Video)

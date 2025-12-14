@@ -780,12 +780,12 @@
                         </DataGrid>
                         
                         <!-- Empty State Hint -->
-                        <TextBlock Text="Drop Media Files Here" 
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" 
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" 
                                    Foreground="#555" FontSize="18" FontWeight="Bold"
                                    IsHitTestVisible="False">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="DROP MEDIA FILE HERE"/>
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                     <Style.Triggers>
                                         <!-- Video Hint -->

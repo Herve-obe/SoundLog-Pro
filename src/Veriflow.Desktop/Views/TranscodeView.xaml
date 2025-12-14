@@ -318,16 +318,22 @@
                         </DataGrid>
                         
                         <!-- Empty State Hint -->
-                        <TextBlock Text="Drop Media Files Here" 
-                                   VerticalAlignment="Center" HorizontalAlignment="Center" 
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" 
                                    Foreground="#555" FontSize="18" FontWeight="Bold"
                                    IsHitTestVisible="False">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="DROP MEDIA FILE HERE"/>
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Files.Count}" Value="0">
                                             <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsVideoCategory}" Value="True">
+                                            <Setter Property="Text" Value="DROP VIDEO MEDIA FILE HERE"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsAudioCategory}" Value="True">
+                                            <Setter Property="Text" Value="DROP AUDIO MEDIA FILE HERE"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

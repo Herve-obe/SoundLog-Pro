@@ -110,8 +110,8 @@ namespace Veriflow.Desktop.ViewModels
         public bool IsAudioFormat => !IsVideoFormat;
         
         // Settings Visibility: Only show if Category matches AND a format is selected
-        public bool IsAudioCategory => SelectedCategory == ExportCategory.Audio && !string.IsNullOrEmpty(SelectedFormat);
-        public bool IsVideoCategory => SelectedCategory == ExportCategory.Video && !string.IsNullOrEmpty(SelectedFormat);
+        public bool IsAudioCategory => SelectedCategory == ExportCategory.Audio;
+        public bool IsVideoCategory => SelectedCategory == ExportCategory.Video;
 
         partial void OnSelectedFormatChanged(string? value)
         {
@@ -134,6 +134,15 @@ namespace Veriflow.Desktop.ViewModels
             {
                 SelectedCategory = result;
             }
+        }
+
+        public void SetAppMode(AppMode mode)
+        {
+            // Sync Transcode tab with App Mode
+            if (mode == AppMode.Video)
+                SelectedCategory = ExportCategory.Video;
+            else
+                SelectedCategory = ExportCategory.Audio;
         }
 
         // Removed UpdateAvailableFormats() as it's not needed for Split Dropdowns
