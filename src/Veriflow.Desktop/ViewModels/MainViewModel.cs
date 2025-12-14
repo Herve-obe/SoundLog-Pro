@@ -131,7 +131,7 @@ namespace Veriflow.Desktop.ViewModels
                _reportsViewModel.CreateReport(items, type);
                // Update with specific context
                _mediaViewModel.SetReportStatus(isVideo, true);
-               NavigateTo(PageType.Reports);
+               // Stay on page
             };
 
             _mediaViewModel.RequestAddToReport += (items) =>

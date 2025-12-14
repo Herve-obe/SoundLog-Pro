@@ -355,6 +355,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Buttons -->
                     <RowDefinition Height="*"/>    <!-- Layout -->
+                    <RowDefinition Height="Auto"/> <!-- Bottom Actions -->
                 </Grid.RowDefinitions>
 
                 <!-- Action Buttons Area -->
@@ -370,10 +371,6 @@
 
                     <Button Command="{Binding SendFileToTranscodeCommand}"
                             Content="SEND TO TRANSCODE" Height="26" ToolTip="Send current file to Transcode Page"
-                            Style="{StaticResource BlueActionButtonStyle}"/>
-                    
-                    <Button Command="{Binding UpdateReportCommand}"
-                            Content="UPDATE REPORT" Height="26" ToolTip="Update Report Note" Margin="0,5,0,0"
                             Style="{StaticResource BlueActionButtonStyle}"/>
                 </StackPanel>
 
@@ -488,6 +485,12 @@
                         </Expander>
                     </StackPanel>
                 </ScrollViewer>
+
+
+                <!-- BOTTOM ACTIONS -->
+                <Button Grid.Row="2" Command="{Binding UpdateReportCommand}"
+                        Content="UPDATE REPORT NOTES" Height="26" ToolTip="Update Report Note" Margin="0,10,0,0"
+                        Style="{StaticResource BlueActionButtonStyle}"/>
             </Grid>
         </Border>
     </Grid>

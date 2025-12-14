@@ -551,6 +551,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Buttons -->
                     <RowDefinition Height="*"/>    <!-- Layout -->
+                    <RowDefinition Height="Auto"/> <!-- Bottom Actions -->
                 </Grid.RowDefinitions>
 
                 <!-- Action Buttons Area (Vertical Stack) -->
@@ -561,10 +562,6 @@
                     
                     <Button Command="{Binding UnloadMediaCommand}"
                             Content="CLOSE FILE" Height="26" ToolTip="Unload current media" Margin="0,0,0,5"
-                            Style="{StaticResource BlueActionButtonStyle}"/>
-
-                    <Button Command="{Binding ModifyInReportCommand}"
-                            Content="UPDATE REPORT" Height="26" ToolTip="Navigate to Reports Page with this item" Margin="0,0,0,5"
                             Style="{StaticResource BlueActionButtonStyle}"/>
 
                     <Button Command="{Binding SendFileToTranscodeCommand}"
@@ -731,6 +728,11 @@
                         </Expander>
                     </StackPanel>
                 </ScrollViewer>
+
+                <!-- BOTTOM ACTIONS -->
+                <Button Grid.Row="2" Command="{Binding ModifyInReportCommand}"
+                        Content="UPDATE REPORT NOTES" Height="26" ToolTip="Navigate to Reports Page with this item" Margin="0,10,0,0"
+                        Style="{StaticResource BlueActionButtonStyle}"/>
             </Grid>
         </Border>
     </Grid>
