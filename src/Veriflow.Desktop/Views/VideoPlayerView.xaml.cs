@@ -52,19 +52,38 @@ namespace Veriflow.Desktop.Views
                 // Defer attachment to ensure HWND is ready (fixes Black Screen on tab switch)
                 Dispatcher.BeginInvoke(new Action(() => 
                 {
-                    // FORCE Re-attach even if same instance to refresh HWND linkage
+                    // HARD RESET STRATEGY (Fixes White/Gray Screen):
+                    // Simply re-attaching a Paused player often fails to recreate the Vout on the new HWND.
+                    // We must force a pipeline reset to guarantee rendering.
+                    
+                    long resumeTime = vm.Player.Time;
+                    bool wasPaused = vm.IsPaused; // Use VM state as source of truth
+                    bool wasPlaying = vm.IsPlaying;
+
+                    // 1. Stop to clear old Vout resources
+                    vm.Player.Stop();
+
+                    // 2. Attach to new HWND
                     if (VideoViewControl != null)
                     {
                         VideoViewControl.MediaPlayer = null; 
                         VideoViewControl.MediaPlayer = vm.Player;
                     }
 
-                    // FORCE FRAME REPAINT
-                    // If paused, the Vout might render black until the next frame decode.
-                    // NextFrame() forces the pipeline to decode and render one frame to the new Vout.
-                    if (vm.Player != null && vm.Player.State == LibVLCSharp.Shared.VLCState.Paused)
+                    // 3. Restart and Restore
+                    if (wasPlaying || wasPaused)
                     {
-                        vm.Player.NextFrame();
+                        vm.Player.Play();
+                        
+                        if (resumeTime > 0)
+                        {
+                            vm.Player.Time = resumeTime;
+                        }
+
+                        if (wasPaused)
+                        {
+                            vm.Player.SetPause(true);
+                        }
                     }
                 }), System.Windows.Threading.DispatcherPriority.ContextIdle);
             }
