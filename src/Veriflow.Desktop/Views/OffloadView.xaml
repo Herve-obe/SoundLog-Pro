@@ -126,7 +126,7 @@
                             </Grid>
                             
                             <Button Grid.Column="1" Command="{Binding PickSourceCommand}" Content="OPEN" 
-                                    Background="{DynamicResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                                    Background="{DynamicResource Brush.Accent}" Foreground="White"
                                     Style="{StaticResource ActionButtonStyle}"/>
                         </Grid>
                     </Grid>
@@ -198,7 +198,7 @@
                                 </Grid>
 
                                 <Button Grid.Column="1" Command="{Binding PickDest1Command}" Content="OPEN" 
-                                        Background="{DynamicResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                                        Background="{DynamicResource Brush.Accent}" Foreground="White"
                                         Style="{StaticResource ActionButtonStyle}"/>
                             </Grid>
                         </Grid>
@@ -259,7 +259,7 @@
                                 </Grid>
 
                                 <Button Grid.Column="1" Command="{Binding PickDest2Command}" Content="OPEN" 
-                                        Background="{DynamicResource Brush.Accent}" Foreground="White" FontWeight="Bold"
+                                        Background="{DynamicResource Brush.Accent}" Foreground="White"
                                         Style="{StaticResource ActionButtonStyle}"/>
                             </Grid>
                         </Grid>

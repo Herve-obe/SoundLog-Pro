@@ -135,6 +135,25 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         private VideoMetadata _currentVideoMetadata = new();
 
+
+
+        // --- PROFESSIONAL LOGGING ---
+        public ObservableCollection<ClipLogItem> TaggedClips { get; } = new();
+
+        private TimeSpan? _currentInPoint;
+        private TimeSpan? _currentOutPoint;
+
+        [ObservableProperty]
+        private string _currentMarkInDisplay = "xx:xx:xx:xx";
+
+        [ObservableProperty]
+        private string _currentMarkOutDisplay = "yy:yy:yy:yy";
+
+
+
+        [ObservableProperty]
+        private bool _isLoggingPending;
+
         public event Action<IEnumerable<string>>? RequestTranscode;
 
         
@@ -696,6 +715,88 @@ namespace Veriflow.Desktop.ViewModels
             _frameStepDirection = direction;
             PerformFrameStep();
             _frameStepDirection = 0;
+        }
+
+        // --- LOGGING COMMANDS ---
+
+        [RelayCommand]
+        private void SetIn()
+        {
+            if (_mediaPlayer == null || !IsVideoLoaded) return;
+            
+            _currentInPoint = TimeSpan.FromMilliseconds(_mediaPlayer.Time);
+            CurrentMarkInDisplay = FormatTimecode(_currentInPoint.Value);
+            IsLoggingPending = true;
+        }
+
+        [RelayCommand]
+        private void SetOut()
+        {
+            if (_mediaPlayer == null || !IsVideoLoaded) return;
+            
+            _currentOutPoint = TimeSpan.FromMilliseconds(_mediaPlayer.Time);
+            CurrentMarkOutDisplay = FormatTimecode(_currentOutPoint.Value);
+            IsLoggingPending = true;
+        }
+
+        [RelayCommand]
+        private void TagClip()
+        {
+             // Validate Points
+             if (_currentInPoint == null || _currentOutPoint == null)
+             {
+                 // Logic: If user tries to Tag without In/Out, we could either ignore or set defaults.
+                 // The instruction implies "If both... are valid".
+                 // However, for UX, if one is missing, we might want to auto-fill or fail. 
+                 // Sticking to strict "Commit" logic: Only commit if valid.
+                 // For safety/fallback (as in previous code), I will retain the fallback logic but only if points actally exist or explicitly allowing fallback if current setup implies immediate tag.
+                 // Requirement: "The 'TAG Clip' command validates these temporary points and commits them"
+                 
+                 // Fallback: If null, grab current time? The prompt implies Strict 2-step.
+                 // But previous implementation allowed immediate tag.
+                 // I will strictly check for validity to respect "validates these temporary points".
+                 if (_currentInPoint == null || _currentOutPoint == null) return;
+             }
+             
+             // Ensure Out > In
+             var inTime = _currentInPoint.Value;
+             var outTime = _currentOutPoint.Value;
+
+             if (outTime <= inTime) 
+             {
+                 // Auto-correction or Fail? 
+                 // Let's simple fail or correct if it's a mistake? 
+                 // Previous logic was `outTime = inTime.Add(1s)`.
+                 if (outTime <= inTime) outTime = inTime.Add(TimeSpan.FromSeconds(1));
+             }
+
+             var duration = outTime - inTime;
+
+             // Commit to List
+             TaggedClips.Add(new ClipLogItem 
+             {
+                 InPoint = FormatTimecode(inTime),
+                 OutPoint = FormatTimecode(outTime),
+                 Duration = duration.ToString(@"hh\:mm\:ss"),
+                 Notes = $"Clip {TaggedClips.Count + 1}"
+             });
+
+             // Reset / Cleanup
+             _currentInPoint = null;
+             _currentOutPoint = null;
+             CurrentMarkInDisplay = "xx:xx:xx:xx";
+             CurrentMarkOutDisplay = "yy:yy:yy:yy";
+             IsLoggingPending = false;
+        }
+
+
+        [RelayCommand]
+        private void ExportLogs()
+        {
+            // Placeholder: Export logic (e.g., save CSV/EDL)
+            // Ideally, open a SaveFileDialog via a Service or simple Dialog
+            System.Diagnostics.Debug.WriteLine("Exporting Logs...");
+            MessageBox.Show($"Exported {TaggedClips.Count} clips (Simulation).", "Veriflow Export");
         }
 
         public void Dispose()

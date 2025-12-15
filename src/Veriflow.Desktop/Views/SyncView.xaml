@@ -59,11 +59,11 @@
                     
                     <!-- Import Button: Square, Blue, No Icon -->
                     <!-- Import Button: Square, Blue, No Icon -->
-                    <Button Grid.Column="0" Command="{Binding ImportVideoCommand}" Content="IMPORT VIDEO" Width="120" Style="{StaticResource BlueActionButtonStyle}"/>
+                    <Button Grid.Column="0" Command="{Binding ImportVideoCommand}" Content="IMPORT VIDEO" Width="125" Style="{StaticResource BlueActionButtonStyle}"/>
                     
                     <!-- Clear List Button: Square, Logic Fixed -->
                     <!-- Clear List Button: Square, Logic Fixed -->
-                    <Button Grid.Column="2" Command="{Binding ClearVideoPoolCommand}" Content="CLEAR LIST" Width="120">
+                    <Button Grid.Column="2" Command="{Binding ClearVideoPoolCommand}" Content="CLEAR LIST" Width="125">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}">
                                 <Style.Triggers>
@@ -197,11 +197,11 @@
 
                      <!-- Import Button: Square, Blue, No Icon -->
                     <!-- Import Button: Square, Blue, No Icon -->
-                    <Button Grid.Column="0" Command="{Binding ImportAudioCommand}" Content="IMPORT AUDIO" Width="120" Style="{StaticResource BlueActionButtonStyle}"/>
+                    <Button Grid.Column="0" Command="{Binding ImportAudioCommand}" Content="IMPORT AUDIO" Width="125" Style="{StaticResource BlueActionButtonStyle}"/>
                     
                     <!-- Clear List Button: Square, Logic Fixed -->
                     <!-- Clear List Button: Square, Logic Fixed -->
-                    <Button Grid.Column="2" Command="{Binding ClearAudioPoolCommand}" Content="CLEAR LIST" Width="120">
+                    <Button Grid.Column="2" Command="{Binding ClearAudioPoolCommand}" Content="CLEAR LIST" Width="125">
                          <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}">
                                 <Style.Triggers>

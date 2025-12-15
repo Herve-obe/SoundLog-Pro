@@ -40,7 +40,7 @@
                 </ScrollViewer.Resources>
                 <StackPanel>
                     <!-- 1. GENERAL INFO -->
-                        <Expander Header="GENERAL INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                        <Expander Header="GENERAL INFO" IsExpanded="False" Style="{StaticResource ProExpanderStyle}" Focusable="False">
                             <Grid Margin="5,0,5,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="80"/>
@@ -80,7 +80,7 @@
                         </Expander>
 
                         <!-- 2. RECORDING INFO -->
-                        <Expander Header="RECORDING INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                        <Expander Header="RECORDING INFO" IsExpanded="False" Style="{StaticResource ProExpanderStyle}" Focusable="False">
                             <Grid Margin="5,0,5,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="110"/>
@@ -125,7 +125,7 @@
 
 
                     <!-- 3. TECHNICAL INFO -->
-                    <Expander Header="TECHNICAL INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                    <Expander Header="TECHNICAL INFO" IsExpanded="False" Style="{StaticResource ProExpanderStyle}" Focusable="False">
                         <Grid Margin="5,0,5,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="110"/>
@@ -149,7 +149,7 @@
                     </Expander>
 
                     <!-- 4. TRACK INFO -->
-                    <Expander Header="TRACK INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}">
+                    <Expander Header="TRACK INFO" IsExpanded="True" Style="{StaticResource ProExpanderStyle}" Focusable="False">
                         <DataGrid ItemsSource="{Binding CurrentMetadata.Tracks}" 
                                   AutoGenerateColumns="False" 
                                   CanUserAddRows="False" 
