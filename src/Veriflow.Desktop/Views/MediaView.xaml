@@ -73,7 +73,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <TextBlock Text="EXPLORER" Style="{StaticResource HeaderStyle}"/>
+                <TextBlock Text="EXPLORER" FontSize="14" FontWeight="SemiBold" Foreground="#888888" Margin="10,5"/>
                 
                 <TreeView Grid.Row="1" ItemsSource="{Binding Drives}" Background="Transparent" BorderThickness="0" Margin="5"
                           ItemTemplate="{StaticResource DriveTemplate}">
