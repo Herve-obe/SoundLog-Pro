@@ -411,37 +411,242 @@
         </Setter>
     </Style>
 
+    <!-- ========================================================================= -->
+    <!-- TRANSPORT CONTROL STYLES (Consolidated from multiple views)              -->
+    <!-- ========================================================================= -->
+
+    <!-- Modern Transport Button Base Style -->
+    <Style x:Key="Style.Transport.Base" TargetType="Button">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Ellipse x:Name="circle" Fill="Transparent" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="circle" Property="Fill" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Dark}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="circle" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="circle" Property="Fill" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Dark}"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Stop Button (Red) -->
+    <Style x:Key="Style.Transport.Stop" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Stop}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Stop}"/>
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="36"/>
+    </Style>
+
+    <!-- Play Button (Green/Blue depending on mode) -->
+    <Style x:Key="Style.Transport.Play" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Play}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Play}"/>
+        <Setter Property="Width" Value="48"/>
+        <Setter Property="Height" Value="48"/>
+    </Style>
+
+    <!-- Pause Button (Yellow) -->
+    <Style x:Key="Style.Transport.Pause" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Pause}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Pause}"/>
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="36"/>
+    </Style>
+
 
     <Style x:Key="Style.Button.Primary" TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}"/>
     <Style x:Key="Style.Button.Secondary" TargetType="Button" BasedOn="{StaticResource PrimaryActionStyle}"/>
     <Style x:Key="Style.Text.Label" TargetType="TextBlock" BasedOn="{StaticResource LabelStyle}"/>
     <Style x:Key="Style.TextBox.Form" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}"/>
 
-    <!-- TRANSPORT CONTROL STYLE -->
-    <Style x:Key="Style.Transport.Base" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+    <!-- OLD TRANSPORT STYLES REMOVED - Now consolidated above (lines 414-469) -->
+
+    <!-- ========================================================================= -->
+    <!-- SLIDER STYLES (Consolidated from multiple views)                         -->
+    <!-- ========================================================================= -->
+
+    <!-- Round Filled Slider Style for Volume/Pan -->
+    <Style x:Key="RoundFilledSliderStyle" TargetType="Slider">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="2"/>
-        <Setter Property="BorderBrush" Value="White"/>
-        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Bright}"/>
+        <Setter Property="IsSelectionRangeEnabled" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
+                <ControlTemplate TargetType="Slider">
                     <Grid>
-                        <Ellipse Stroke="{TemplateBinding BorderBrush}" StrokeThickness="{TemplateBinding BorderThickness}" Fill="{TemplateBinding Background}"/>
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid.Resources>
+                            <!-- Blue RepeatButton Template for Filled Track -->
+                            <Style x:Key="BlueTrackRepeatButtonStyle" TargetType="RepeatButton">
+                                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="6"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                            <!-- Gray RepeatButton Template for Unfilled Track -->
+                            <Style x:Key="GrayTrackRepeatButtonStyle" TargetType="RepeatButton">
+                                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                <Setter Property="Background" Value="#333333"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="6"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
+                        <Track x:Name="PART_Track" Height="12">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource BlueTrackRepeatButtonStyle}"/>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource GrayTrackRepeatButtonStyle}"/>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <!-- Thumb Style -->
+                                <Thumb x:Name="Thumb">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="12" Height="12" Fill="White" Stroke="{DynamicResource Brush.Text.Dark}" StrokeThickness="1"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ========================================================================= -->
+    <!-- DATAGRID STYLES (Consolidated from multiple views)                       -->
+    <!-- ========================================================================= -->
+
+    <!-- DataGrid Column Header Style -->
+    <Style x:Key="ProDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource Brush.Control}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="6,8"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Hover}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Height" Value="35"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridColumnHeader">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                <Path x:Name="SortArrow"
+                                      Grid.Column="1"
+                                      Data="M0,0 L10,0 L5,5 z"
+                                      Fill="#AAA"
+                                      Margin="5,0,0,0"
+                                      VerticalAlignment="Center"
+                                      Visibility="Collapsed"
+                                      Stretch="Fill" 
+                                      Width="8" Height="6"/>
+                            </Grid>
+                        </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                             <Setter Property="Background" Value="#44FFFFFF"/>
-                             <Setter Property="Cursor" Value="Hand"/>
+                        <Trigger Property="SortDirection" Value="Ascending">
+                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="SortArrow" Property="LayoutTransform">
+                                <Setter.Value>
+                                    <RotateTransform Angle="180" />
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                             <Setter Property="Background" Value="#88FFFFFF"/>
+                        <Trigger Property="SortDirection" Value="Descending">
+                            <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- DataGrid Cell Style -->
+    <Style x:Key="ProDataGridCellStyle" TargetType="DataGridCell">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- DataGrid Row Style -->
+    <Style x:Key="ProDataGridRowStyle" TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource Brush.Panel.Hover}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource Brush.Panel.Selected}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Default DataGrid Style (applies to all DataGrids) -->
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="CanUserResizeRows" Value="False"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource ProDataGridColumnHeaderStyle}"/>
+        <Setter Property="CellStyle" Value="{StaticResource ProDataGridCellStyle}"/>
+        <Setter Property="RowStyle" Value="{StaticResource ProDataGridRowStyle}"/>
     </Style>
 
     <!-- MODERN SCROLLBAR STYLE ("Antigravity") -->

@@ -68,59 +68,9 @@
         </Style>
 
 
-        <!-- Modern Transport Button Base Style -->
-        <Style x:Key="Style.Transport.Base" TargetType="Button">
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Grid>
-                            <Ellipse x:Name="circle" Fill="Transparent" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2"/>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="circle" Property="Fill" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
-                                <Setter Property="Foreground" Value="#111111"/> 
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="circle" Property="Opacity" Value="0.8"/>
-                            </Trigger>
-                            <!-- NEW: Trigger based on Binding (passed via Tag) -->
-                            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
-                                <Setter TargetName="circle" Property="Fill" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
-                                <Setter Property="Foreground" Value="#111111"/> 
-                            </DataTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Red Stop Button -->
-        <Style x:Key="Style.Transport.Stop" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
-            <Setter Property="BorderBrush" Value="#FF5252"/> <!-- Red Accent -->
-            <Setter Property="Foreground" Value="#FF5252"/>
-            <Setter Property="Width" Value="36"/>
-            <Setter Property="Height" Value="36"/>
-        </Style>
-
-        <!-- Green Play Button -->
-        <Style x:Key="Style.Transport.Play" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
-            <Setter Property="BorderBrush" Value="#69F0AE"/> <!-- Green Accent -->
-            <Setter Property="Foreground" Value="#69F0AE"/>
-            <Setter Property="Width" Value="48"/>
-            <Setter Property="Height" Value="48"/>
-        </Style>
-
-        <!-- Yellow Pause Button -->
-        <Style x:Key="Style.Transport.Pause" TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
-            <Setter Property="BorderBrush" Value="#FFD740"/> <!-- Yellow Accent -->
-            <Setter Property="Foreground" Value="#FFD740"/>
-            <Setter Property="Width" Value="36"/>
-            <Setter Property="Height" Value="36"/>
-        </Style>
+        <!-- ========================================================================= -->
+        <!-- Transport styles now in Theme.Pro.xaml                                    -->
+        <!-- ========================================================================= -->
 
     </UserControl.Resources>
 

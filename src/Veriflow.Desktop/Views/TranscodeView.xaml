@@ -43,82 +43,10 @@
                 <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
             </ControlTemplate>
 
-            <!-- Dark DataGrid Header Style (Replaces GridViewColumnHeader) -->
-            <Style TargetType="DataGridColumnHeader">
-                <Setter Property="Background" Value="{StaticResource Brush.Control}"/>
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="Padding" Value="6,8"/>
-                <Setter Property="BorderThickness" Value="0,0,1,0"/>
-                <Setter Property="BorderBrush" Value="{StaticResource Brush.Control.Hover}"/>
-                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Height" Value="35"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="DataGridColumnHeader">
-                            <Grid>
-                                <Border Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        Padding="{TemplateBinding Padding}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                        <Path x:Name="SortArrow"
-                                              Grid.Column="1"
-                                              Data="M0,0 L10,0 L5,5 z"
-                                              Fill="#AAA"
-                                              Margin="5,0,0,0"
-                                              VerticalAlignment="Center"
-                                              Visibility="Collapsed"
-                                              Stretch="Fill" 
-                                              Width="8" Height="6"/>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="SortDirection" Value="Ascending">
-                                    <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
-                                    <Setter TargetName="SortArrow" Property="LayoutTransform">
-                                        <Setter.Value>
-                                            <RotateTransform Angle="180" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                                <Trigger Property="SortDirection" Value="Descending">
-                                    <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
 
-            <!-- DataGrid Cell Style to avoid default selection colors -->
-            <Style TargetType="DataGridCell">
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="DataGridCell">
-                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
-                                <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="{StaticResource Brush.Control.Hover}"/>
-                        <Setter Property="Foreground" Value="White"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
+            <!-- ========================================================================= -->
+            <!-- DataGrid styles now in Theme.Pro.xaml                                    -->
+            <!-- ========================================================================= -->
 
             <!-- Dark DataGrid Row Style (Fixes white background) -->
             <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
