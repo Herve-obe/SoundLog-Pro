@@ -6,9 +6,23 @@
         WindowStyle="ToolWindow"
         ResizeMode="CanResize"
         Topmost="True"
-        Background="{StaticResource Brush.Background}"
-        ShowInTaskbar="False"
-        Style="{StaticResource {x:Type Window}}">
+        ShowInTaskbar="False">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Theme.Pro.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Window.Style>
+        <Style TargetType="Window">
+            <Setter Property="Background" Value="{StaticResource Brush.Background}"/>
+            <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+        </Style>
+    </Window.Style>
+    
     <Grid Background="{StaticResource Brush.Panel}">
         <vlc:VideoView MediaPlayer="{Binding PreviewPlayer}"/>
     </Grid>

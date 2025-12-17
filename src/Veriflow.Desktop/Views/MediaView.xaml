@@ -334,7 +334,7 @@
                     </ListBox>
                     
                     <!-- Right: Large Preview + Metadata -->
-                    <Grid Grid.Column="1" Margin="10" DataContext="{Binding SelectedMedia}">
+                    <Grid Grid.Column="1" Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="3*"/>
                             <RowDefinition Height="2*"/>
@@ -355,7 +355,7 @@
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                 </DataTrigger>
                                                 <!-- Hide if no media selected -->
-                                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                <DataTrigger Binding="{Binding DataContext.SelectedMedia, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -373,7 +373,7 @@
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding="{Binding DataContext.IsVideoMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
-                                                        <Condition Binding="{Binding Converter={StaticResource NullToBoolConverter}}" Value="False"/>
+                                                        <Condition Binding="{Binding DataContext.SelectedMedia, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToBoolConverter}}" Value="False"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                 </MultiDataTrigger>
@@ -393,7 +393,7 @@
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                <DataTrigger Binding="{Binding DataContext.SelectedMedia, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -406,7 +406,7 @@
                         <!-- Metadata Summary -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
                             <StackPanel>
-                                <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" 
+                                <TextBlock Text="{Binding DataContext.SelectedMedia.Name, RelativeSource={RelativeSource AncestorType=UserControl}}" FontSize="14" FontWeight="Bold" 
                                            Foreground="White" TextWrapping="Wrap" Margin="0,0,0,10"/>
                                 
                                 <Grid>
@@ -422,16 +422,16 @@
                                     </Grid.RowDefinitions>
                                     
                                     <TextBlock Text="Duration:" Foreground="{StaticResource Brush.Text.Secondary}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Duration}" Foreground="White"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding DataContext.SelectedMedia.Duration, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="White"/>
                                     
                                     <TextBlock Grid.Row="1" Text="Format:" Foreground="{StaticResource Brush.Text.Secondary}" Margin="0,5,0,0"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Format}" Foreground="White" Margin="0,5,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DataContext.SelectedMedia.Format, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="White" Margin="0,5,0,0"/>
                                     
                                     <TextBlock Grid.Row="2" Text="Size:" Foreground="{StaticResource Brush.Text.Secondary}" Margin="0,5,0,0"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Length}" Foreground="White" Margin="0,5,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DataContext.SelectedMedia.Length, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="White" Margin="0,5,0,0"/>
                                     
                                     <TextBlock Grid.Row="3" Text="Date:" Foreground="{StaticResource Brush.Text.Secondary}" Margin="0,5,0,0"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CreationTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Foreground="White" Margin="0,5,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DataContext.SelectedMedia.CreationTime, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Foreground="White" Margin="0,5,0,0"/>
                                 </Grid>
                             </StackPanel>
                         </ScrollViewer>
