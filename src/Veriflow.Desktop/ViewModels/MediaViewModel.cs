@@ -62,6 +62,12 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         private MediaViewMode _currentViewMode = MediaViewMode.Grid; // Default to Grid view
 
+        partial void OnCurrentViewModeChanged(MediaViewMode value)
+        {
+            // Stop preview when switching modes to avoid confusion
+            StopPreview();
+        }
+
         public void SetAppMode(AppMode mode)
         {
             // Immediate clean slate to avoid ghost files from previous mode
@@ -432,19 +438,24 @@ namespace Veriflow.Desktop.ViewModels
                      media.AddOption(":avcodec-hw=d3d11va"); 
                      PreviewPlayer.Play(media);
 
-                     // Manage Window
-                     if (_previewWindow == null || !_previewWindow.IsLoaded)
+                     // Only show popup window if NOT in Filmstrip mode
+                     if (CurrentViewMode != MediaViewMode.Filmstrip)
                      {
-                         _previewWindow = new VideoPreviewWindow();
-                         _previewWindow.DataContext = this; // Bind to VM for Player property
-                         _previewWindow.Closed += (s, e) => StopPreview(); // Handle manual close
-                         _previewWindow.Show();
+                         // Manage Window
+                         if (_previewWindow == null || !_previewWindow.IsLoaded)
+                         {
+                             _previewWindow = new VideoPreviewWindow();
+                             _previewWindow.DataContext = this; // Bind to VM for Player property
+                             _previewWindow.Closed += (s, e) => StopPreview(); // Handle manual close
+                             _previewWindow.Show();
+                         }
+                         
+                         if (_previewWindow.WindowState == WindowState.Minimized)
+                             _previewWindow.WindowState = WindowState.Normal;
+                             
+                         _previewWindow.Activate();
                      }
-                     
-                     if (_previewWindow.WindowState == WindowState.Minimized)
-                        _previewWindow.WindowState = WindowState.Normal;
-                        
-                     _previewWindow.Activate();
+                     // In Filmstrip mode, video plays in integrated viewer (no popup)
                  }
              }
              else

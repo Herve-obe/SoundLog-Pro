@@ -16,6 +16,7 @@
         <!-- Add Converters for View Mode Switching -->
         <local:EnumToBoolConverter x:Key="EnumToBoolConverter" xmlns:local="clr-namespace:Veriflow.Desktop.Converters"/>
         <local:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" xmlns:local="clr-namespace:Veriflow.Desktop.Converters"/>
+        <local:NullToBoolConverter x:Key="NullToBoolConverter" xmlns:local="clr-namespace:Veriflow.Desktop.Converters"/>
 
         <!-- View Mode Toggle Button Style -->
         <Style x:Key="ViewModeToggleStyle" TargetType="RadioButton">
@@ -339,15 +340,66 @@
                             <RowDefinition Height="2*"/>
                         </Grid.RowDefinitions>
                         
-                        <!-- Large Preview -->
+                        <!-- Large Preview with Integrated VLC Viewer -->
                         <Border Grid.Row="0" Background="{StaticResource Brush.Panel.Darker}" 
                                 BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
                             <Grid>
-                                <!-- Placeholder Icon -->
-                                <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V13H13V18H15M11,18V13H9V18H11M7,18V13H5V18H7" 
-                                      Fill="{StaticResource Brush.Border.Light}" Stretch="Uniform" Margin="80"/>
-                                <!-- Large Thumbnail -->
-                                <Image Source="{Binding ThumbnailPath}" Stretch="Uniform"/>
+                                <!-- VLC Video Viewer (for video files) -->
+                                <vlc:VideoView MediaPlayer="{Binding DataContext.PreviewPlayer, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                    <vlc:VideoView.Style>
+                                        <Style TargetType="vlc:VideoView">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <!-- Hide if not video mode -->
+                                                <DataTrigger Binding="{Binding DataContext.IsVideoMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <!-- Hide if no media selected -->
+                                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </vlc:VideoView.Style>
+                                </vlc:VideoView>
+                                
+                                <!-- Audio Waveform Placeholder (for audio files) -->
+                                <Grid>
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <!-- Show if audio mode and file selected -->
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding DataContext.IsVideoMode, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False"/>
+                                                        <Condition Binding="{Binding Converter={StaticResource NullToBoolConverter}}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V13H13V18H15M11,18V13H9V18H11M7,18V13H5V18H7" 
+                                          Fill="{StaticResource Brush.Border.Light}" Stretch="Uniform" Margin="80"/>
+                                </Grid>
+                                
+                                <!-- Fallback when no file selected -->
+                                <TextBlock Text="Select a file to preview" 
+                                           Foreground="{StaticResource Brush.Text.Disabled}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="16">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </Grid>
                         </Border>
                         
