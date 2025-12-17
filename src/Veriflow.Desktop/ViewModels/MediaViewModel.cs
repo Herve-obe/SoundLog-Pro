@@ -81,6 +81,12 @@ namespace Veriflow.Desktop.ViewModels
 
             IsVideoMode = (mode == AppMode.Video);
 
+            // Initialize PreviewPlayer for video mode (needed for Filmstrip viewer binding)
+            if (IsVideoMode)
+            {
+                InitializePreviewPlayer();
+            }
+
             // Restore path
             string? targetPath = IsVideoMode ? _lastVideoPath : _lastAudioPath;
             
