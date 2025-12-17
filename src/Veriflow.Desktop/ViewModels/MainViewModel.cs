@@ -13,7 +13,7 @@ namespace Veriflow.Desktop.ViewModels
     public enum AppMode { Audio, Video }
     public enum PageType { Media, Player, Sync, SecureCopy, Transcode, Reports }
 
-    public partial class MainViewModel : ObservableObject
+    public partial class MainViewModel : ObservableObject, IDisposable
     {
         [ObservableProperty]
         private string _title = "Veriflow Pro";
@@ -328,5 +328,18 @@ namespace Veriflow.Desktop.ViewModels
 
         public bool IsAudioActive => CurrentAppMode == AppMode.Audio;
         public bool IsVideoActive => CurrentAppMode == AppMode.Video;
+
+        public void Dispose()
+        {
+            // Dispose ViewModels with IDisposable (those with timers and media resources)
+            _audioViewModel?.Dispose();
+            _videoPlayerViewModel?.Dispose();
+            _playerViewModel?.Dispose();
+            
+            // Note: Other ViewModels (MediaViewModel, SecureCopyViewModel, etc.) 
+            // don't implement IDisposable as they don't have timers or unmanaged resources
+            
+            GC.SuppressFinalize(this);
+        }
     }
 }

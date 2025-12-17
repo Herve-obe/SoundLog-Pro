@@ -37,4 +37,16 @@ public partial class MainWindow : Window
             }
         }
     }
+
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        
+        // Dispose MainViewModel and all its child ViewModels
+        // This stops all timers and releases media resources
+        if (DataContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
 }
