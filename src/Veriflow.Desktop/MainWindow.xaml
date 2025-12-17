@@ -51,10 +51,7 @@
             </Setter>
         </Style>
 
-        <!-- View mappings -->
-        <DataTemplate DataType="{x:Type vm:MediaViewModel}">
-            <local:MediaView/>
-        </DataTemplate>
+        <!-- View mappings (Player-specific only, others in App.xaml) -->
         <DataTemplate DataType="{x:Type vm:AudioPlayerViewModel}">
             <local:PlayerView/>
         </DataTemplate>
@@ -63,15 +60,6 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:VideoPlayerViewModel}">
             <local:PlayerView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:SecureCopyViewModel}">
-            <local:SecureCopyView/>
-        </DataTemplate>
-         <DataTemplate DataType="{x:Type vm:TranscodeViewModel}">
-            <local:TranscodeView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:SyncViewModel}">
-            <local:SyncView/>
         </DataTemplate>
     </Window.Resources>
 
