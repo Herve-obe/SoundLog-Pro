@@ -45,7 +45,7 @@ namespace Veriflow.Desktop.ViewModels
             // Auto-stop playback when selecting a new file in Filmstrip mode
             if (CurrentViewMode == MediaViewMode.Filmstrip && IsVideoPlaying)
             {
-                StopFilmstrip();
+                _ = StopFilmstrip(); // Fire and forget
             }
         }
 
@@ -565,7 +565,7 @@ namespace Veriflow.Desktop.ViewModels
         }
 
         [RelayCommand]
-        private async void StopFilmstrip()
+        private async Task StopFilmstrip()
         {
             try
             {
@@ -590,7 +590,7 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (IsVideoPlaying)
             {
-                StopFilmstrip();
+                _ = StopFilmstrip(); // Fire and forget
             }
             else
             {
