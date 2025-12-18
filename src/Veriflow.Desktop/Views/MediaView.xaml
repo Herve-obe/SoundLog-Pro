@@ -8,7 +8,14 @@
              xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1024">
+             d:DesignHeight="600" d:DesignWidth="1024"
+             Focusable="True"
+             Loaded="UserControl_Loaded"
+             PreviewMouseDown="UserControl_PreviewMouseDown">
+    
+    <UserControl.InputBindings>
+        <KeyBinding Key="Space" Command="{Binding ToggleFilmstripPlaybackCommand}"/>
+    </UserControl.InputBindings>
     
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -344,8 +351,13 @@
                         <Border Grid.Row="0" Background="{StaticResource Brush.Panel.Darker}" 
                                 BorderBrush="{StaticResource Brush.Border}" BorderThickness="1">
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>     <!-- Video viewer -->
+                                    <RowDefinition Height="Auto"/>  <!-- Control buttons -->
+                                </Grid.RowDefinitions>
+                                
                                 <!-- VLC Video Viewer (for video files) -->
-                                <vlc:VideoView MediaPlayer="{Binding DataContext.PreviewPlayer, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                <vlc:VideoView Grid.Row="0" MediaPlayer="{Binding DataContext.PreviewPlayer, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <vlc:VideoView.Style>
                                         <Style TargetType="vlc:VideoView">
                                             <Setter Property="Visibility" Value="Visible"/>
@@ -364,7 +376,7 @@
                                 </vlc:VideoView>
                                 
                                 <!-- Audio Waveform Placeholder (for audio files) -->
-                                <Grid>
+                                <Grid Grid.Row="0">
                                     <Grid.Style>
                                         <Style TargetType="Grid">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -385,7 +397,7 @@
                                 </Grid>
                                 
                                 <!-- Fallback when no file selected -->
-                                <TextBlock Text="Select a file to preview" 
+                                <TextBlock Grid.Row="0" Text="Select a file to preview" 
                                            Foreground="{StaticResource Brush.Text.Disabled}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="16">
@@ -400,6 +412,41 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
+                                
+                                <!-- Playback Control Buttons (Below Video) -->
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,15">
+                                    <!-- PLAY Button (Green, Round, 40x40) -->
+                                    <Button Command="{Binding DataContext.PlayFilmstripCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Tag="{Binding DataContext.IsVideoPlaying, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            ToolTip="Play (Space)"
+                                            Width="40" Height="40" Margin="0,0,15,0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Play}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Play}"/>
+                                            </Style>
+                                        </Button.Style>
+                                        <Path Data="M8,5.14V19.14L19,12.14L8,5.14Z" 
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" 
+                                              Height="16" Width="16" Stretch="Uniform" Margin="2,0,0,0"/>
+                                    </Button>
+                                    
+                                    <!-- STOP Button (Red, Round, 40x40) with PlayerView-style feedback -->
+                                    <Button Command="{Binding DataContext.StopFilmstripCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Tag="{Binding DataContext.IsStopPressed, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            ToolTip="Stop"
+                                            Width="40" Height="40">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource Style.Transport.Base}">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Transport.Stop}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource Brush.Transport.Stop}"/>
+                                            </Style>
+                                        </Button.Style>
+                                        <Path Data="M6,6H18V18H6V6Z" 
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" 
+                                              Height="14" Width="14" Stretch="Uniform"/>
+                                    </Button>
+                                </StackPanel>
                             </Grid>
                         </Border>
                         

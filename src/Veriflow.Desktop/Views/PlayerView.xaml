@@ -8,7 +8,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Focusable="True"
-             MouseDown="UserControl_MouseDown">
+             Loaded="UserControl_Loaded"
+             PreviewMouseDown="UserControl_PreviewMouseDown">
     <UserControl.InputBindings>
         <KeyBinding Key="Space" Command="{Binding TogglePlayPauseCommand}"/>
         <KeyBinding Key="Return" Command="{Binding StopCommand}"/>

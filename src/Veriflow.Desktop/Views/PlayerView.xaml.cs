@@ -11,17 +11,18 @@ namespace Veriflow.Desktop.Views
             InitializeComponent();
         }
 
-        // Ensure the UserControl takes focus when clicked (fixes shortcut issues)
-        private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
+        // Set initial focus when page loads
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Only take focus if not clicking a focusable child (like a TextBox)
-            // But since KeyBindings are on this dedicated UC, forcing focus here is usually safe 
-            // as long as we don't steal from specific input fields.
-            // Check original source?
-            if (!(e.OriginalSource is TextBox || e.OriginalSource is PasswordBox))
-            {
-                 Focus();
-            }
+            Focus();
+        }
+
+        // Ensure the UserControl always has focus for keyboard shortcuts
+        private void UserControl_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Always restore focus to ensure keyboard shortcuts work
+            // PreviewMouseDown captures events before child controls
+            Focus();
         }
 
         // --- SLIDER INTERACTION LOGIC (Migrated from TransportControls) ---

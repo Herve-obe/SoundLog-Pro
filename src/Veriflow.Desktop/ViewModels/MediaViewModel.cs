@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CSCore;
 using CSCore.Codecs;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Veriflow.Desktop.Services;
@@ -40,10 +41,19 @@ namespace Veriflow.Desktop.ViewModels
         partial void OnSelectedMediaChanged(MediaItemViewModel? value)
         {
             value?.LoadMetadata(); // Fire and forget OK here for UI responsiveness
+            
+            // Auto-stop playback when selecting a new file in Filmstrip mode
+            if (CurrentViewMode == MediaViewMode.Filmstrip && IsVideoPlaying)
+            {
+                StopFilmstrip();
+            }
         }
 
         [ObservableProperty]
         private bool _isPreviewing;
+        
+        [ObservableProperty]
+        private bool _isStopPressed;
         
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SendToSecureCopyCommand))]
@@ -528,6 +538,64 @@ namespace Veriflow.Desktop.ViewModels
             }
             
             if (SelectedMedia != null) SelectedMedia.IsPlaying = false;
+        }
+
+        [RelayCommand]
+        private void PlayFilmstrip()
+        {
+            if (SelectedMedia == null || !IsVideoMode || CurrentViewMode != MediaViewMode.Filmstrip)
+                return;
+
+            try
+            {
+                InitializePreviewPlayer();
+                if (PreviewPlayer != null && VideoEngineService.Instance.LibVLC != null)
+                {
+                    IsVideoPlaying = true;
+                    SelectedMedia.IsPlaying = true;
+                    using var media = new Media(VideoEngineService.Instance.LibVLC, SelectedMedia.FullName, FromType.FromPath);
+                    media.AddOption(":avcodec-hw=d3d11va");
+                    PreviewPlayer.Play(media);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to play in filmstrip: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async void StopFilmstrip()
+        {
+            try
+            {
+                IsStopPressed = true;
+                PreviewPlayer?.Stop();
+                IsVideoPlaying = false;
+                if (SelectedMedia != null) SelectedMedia.IsPlaying = false;
+                
+                // Reset stop pressed state after a short delay (visual feedback)
+                await Task.Delay(200);
+                IsStopPressed = false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to stop filmstrip: {ex.Message}");
+                IsStopPressed = false;
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleFilmstripPlayback()
+        {
+            if (IsVideoPlaying)
+            {
+                StopFilmstrip();
+            }
+            else
+            {
+                PlayFilmstrip();
+            }
         }
 
         private bool CanUnloadMedia() => SelectedMedia != null;
