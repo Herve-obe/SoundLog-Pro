@@ -512,7 +512,17 @@
                                   IsReadOnly="False"
                                   AllowDrop="True"
                                   ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                  RowStyle="{StaticResource DataGridRowStyle}">
+                                  RowStyle="{StaticResource DataGridRowStyle}"
+                                  SelectionMode="Single"
+                                  Focusable="False">
+                            <DataGrid.Visibility>
+                                <Binding Path="CurrentViewMode">
+                                    <Binding.Converter>
+                                        <conv:EnumToBoolConverter/>
+                                    </Binding.Converter>
+                                    <Binding.ConverterParameter>CameraReport</Binding.ConverterParameter>
+                                </Binding>
+                            </DataGrid.Visibility>
                              <DataGrid.Style>
                                 <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -827,6 +837,62 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+
+                        <!-- EDL LOGGING VIEW -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding CurrentViewMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=EDLLogging}">
+                            <ItemsControl ItemsSource="{Binding CurrentReportItems}" Margin="10">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <!-- Rush Container -->
+                                        <Border Background="#1A1A1A" BorderBrush="#333" BorderThickness="1" CornerRadius="4" Margin="0,0,0,10" Padding="10">
+                                            <StackPanel>
+                                                <!-- Rush Header -->
+                                                <Grid Margin="0,0,0,10">
+                                                    <TextBlock Text="{Binding Filename}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource Brush.Accent}"/>
+                                                    <TextBlock HorizontalAlignment="Right" Foreground="#888" FontSize="11">
+                                                        <Run Text="{Binding Clips.Count, Mode=OneWay}"/>
+                                                        <Run Text=" clips"/>
+                                                    </TextBlock>
+                                                </Grid>
+                                                
+                                                <!-- Clips List -->
+                                                <ItemsControl ItemsSource="{Binding Clips}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="#222" BorderBrush="#444" BorderThickness="0,0,0,1" Padding="8,5" Margin="0,0,0,2">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    
+                                                                    <!-- Timecode Info -->
+                                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,15,0">
+                                                                        <TextBlock Text="IN:" Foreground="#888" FontSize="10" Margin="0,0,5,0"/>
+                                                                        <TextBlock Text="{Binding InPoint}" Foreground="White" FontFamily="Consolas" FontSize="10" Margin="0,0,10,0"/>
+                                                                        <TextBlock Text="OUT:" Foreground="#888" FontSize="10" Margin="0,0,5,0"/>
+                                                                        <TextBlock Text="{Binding OutPoint}" Foreground="White" FontFamily="Consolas" FontSize="10"/>
+                                                                    </StackPanel>
+                                                                    
+                                                                    <!-- Notes -->
+                                                                    <TextBlock Grid.Column="1" Text="{Binding Notes}" Foreground="#CCC" FontSize="11" VerticalAlignment="Center"/>
+                                                                    
+                                                                    <!-- Duration -->
+                                                                    <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="{DynamicResource Brush.Accent}" FontFamily="Consolas" FontSize="10" VerticalAlignment="Center"/>
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                
+                                                <!-- No Clips Message (removed converter) -->
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
             </Grid>
