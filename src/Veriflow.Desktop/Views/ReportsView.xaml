@@ -475,12 +475,10 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
                             <Button Content="📷 REPORT" 
                                     Command="{Binding SwitchToReportViewCommand}"
-                                    IsEnabled="{Binding CurrentViewMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=CameraReport}"
                                     Style="{StaticResource ContextualActionButtonStyle}" 
                                     Width="100" Height="26" FontSize="11" Margin="0,0,5,0"/>
                             <Button Content="🎬 EDL" 
                                     Command="{Binding SwitchToEDLViewCommand}"
-                                    IsEnabled="{Binding CurrentViewMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=EDLLogging}"
                                     Style="{StaticResource ContextualActionButtonStyle}" 
                                     Width="80" Height="26" FontSize="11"/>
                         </StackPanel>
