@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -468,7 +469,6 @@ namespace Veriflow.Desktop.ViewModels
 
                 // Try to find best audio match using waveform correlation
                 SyncPair? bestPair = null;
-                double bestCorrelationScore = 0;
 
                 foreach (var aud in AudioPool)
                 {
