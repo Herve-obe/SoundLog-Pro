@@ -109,6 +109,18 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void SwitchToReportView()
+        {
+            CurrentViewMode = ReportViewMode.CameraReport;
+        }
+
+        [RelayCommand]
+        private void SwitchToEDLView()
+        {
+            CurrentViewMode = ReportViewMode.EDLLogging;
+        }
+
         // --- ACTIONS ---
 
         public void CreateReport(IEnumerable<MediaItemViewModel> items, ReportType type)

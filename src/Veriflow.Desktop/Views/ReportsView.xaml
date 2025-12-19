@@ -475,10 +475,12 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
                             <Button Content="📷 REPORT" 
                                     Command="{Binding SwitchToReportViewCommand}"
+                                    IsEnabled="{Binding CurrentViewMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=EDLLogging}"
                                     Style="{StaticResource ContextualActionButtonStyle}" 
                                     Width="100" Height="26" FontSize="11" Margin="0,0,5,0"/>
                             <Button Content="🎬 EDL" 
                                     Command="{Binding SwitchToEDLViewCommand}"
+                                    IsEnabled="{Binding CurrentViewMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=CameraReport}"
                                     Style="{StaticResource ContextualActionButtonStyle}" 
                                     Width="80" Height="26" FontSize="11"/>
                         </StackPanel>
@@ -1052,8 +1054,8 @@
                     </Grid>
                 </ScrollViewer>
 
-                <!-- EXPORT BUTTONS (Vertical like Player) -->
-                <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <!-- EXPORT BUTTONS (Vertical like Player, Full Width) -->
+                <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,10,0,0">
                     <Button Content="EXPORT SESSION EDL/ALE" Command="{Binding ExportSessionEDLCommand}" 
                             Style="{StaticResource ContextualActionButtonStyle}" Height="30" Margin="0,0,0,5"/>
                     <Button Content="EXPORT TO PDF" Command="{Binding ExportPdfCommand}" 
