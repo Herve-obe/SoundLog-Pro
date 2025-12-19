@@ -383,7 +383,8 @@ namespace Veriflow.Desktop.ViewModels
                 : "Auto-Matching by Waveform...";
             ProgressValue = 0;
             
-            Application.Current.Dispatcher.Invoke(() => Matches.Clear());
+            // Don't clear matches - we'll add to existing ones
+            // Application.Current.Dispatcher.Invoke(() => Matches.Clear());
 
             if (SelectedSyncMethod == SyncMethod.Timecode)
             {
@@ -403,11 +404,26 @@ namespace Veriflow.Desktop.ViewModels
         {
             await Task.Run(() =>
             {
+                // Get list of videos already matched by other methods
+                var alreadyMatchedVideos = Matches
+                    .Where(m => m.Status == "Synced" && m.SyncMethod != SyncMethod.Timecode)
+                    .Select(m => m.Video)
+                    .ToHashSet();
+
+                // Filter to only unmatched videos
+                var videosToProcess = VideoPool.Where(v => !alreadyMatchedVideos.Contains(v)).ToList();
+
+                if (videosToProcess.Count == 0)
+                {
+                    return; // All videos already matched
+                }
+
+
                 // Algorithm:
                 // Iterate Videos. Find matching Audios.
                 int processed = 0;
                 
-                foreach (var vid in VideoPool)
+                foreach (var vid in videosToProcess)
                 {
                     // Find audio that overlaps
                     // AudioStart < VideoEnd AND AudioEnd > VideoStart
@@ -448,17 +464,32 @@ namespace Veriflow.Desktop.ViewModels
                     }
                     
                     processed++;
-                    ProgressValue = (double)processed / VideoPool.Count * 100;
+                    ProgressValue = (double)processed / videosToProcess.Count * 100;
                 }
             });
         }
 
         private async Task AutoSyncByWaveform()
         {
-            int processed = 0;
-            int total = VideoPool.Count;
+            // Get list of videos already matched by other methods
+            var alreadyMatchedVideos = Matches
+                .Where(m => m.Status == "Synced" && m.SyncMethod != SyncMethod.Waveform)
+                .Select(m => m.Video)
+                .ToHashSet();
 
-            foreach (var vid in VideoPool)
+            // Filter to only unmatched videos
+            var videosToProcess = VideoPool.Where(v => !alreadyMatchedVideos.Contains(v)).ToList();
+
+            if (videosToProcess.Count == 0)
+            {
+                IsBusy = false;
+                return; // All videos already matched
+            }
+
+            int processed = 0;
+            int total = videosToProcess.Count;
+
+            foreach (var vid in videosToProcess)
             {
                 processed++;
                 BusyMessage = $"Analyzing waveform {processed}/{total}: {vid.Filename}";
