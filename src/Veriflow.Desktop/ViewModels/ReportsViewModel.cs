@@ -108,12 +108,9 @@ namespace Veriflow.Desktop.ViewModels
                 var fileInfo = new System.IO.FileInfo(clip.SourceFile);
                 if (fileInfo.Exists)
                 {
-                    reportItem = new ReportItem
-                    {
-                        OriginalMedia = fileInfo,
-                        Filename = fileInfo.Name,
-                        Clips = new System.Collections.ObjectModel.ObservableCollection<ClipLogItem>()
-                    };
+                    // Create a minimal MediaItemViewModel for the ReportItem
+                    var mediaItem = new MediaItemViewModel(fileInfo);
+                    reportItem = new ReportItem(mediaItem);
                     CurrentReportItems.Add(reportItem);
                 }
             }
