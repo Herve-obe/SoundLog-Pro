@@ -315,16 +315,29 @@
             <Grid Grid.Column="4">
                 <Grid.RowDefinitions>
                      <RowDefinition Height="Auto"/>
+                     <RowDefinition Height="Auto"/>
                      <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
                 <!-- HEADER: Unified Grey -->
                 <TextBlock Text="MATCHED PAIRS" Foreground="#CCCCCC" FontWeight="Bold" Margin="0,0,0,10" VerticalAlignment="Top"/>
                 
+                <!-- SYNC METHOD BUTTONS -->
+                <Grid Grid.Row="1" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="0" Command="{Binding AutoMatchByTimecodeCommand}" Content="🕐 SYNC BY TIMECODE" Style="{StaticResource ContextualActionButtonStyle}"/>
+                    <Button Grid.Column="2" Command="{Binding AutoMatchByWaveformCommand}" Content="🎵 SYNC BY WAVEFORM" Style="{StaticResource ContextualActionButtonStyle}"/>
+                </Grid>
+                
                 <!-- Pushing List down to align with others approximately (Header + Button hole) 
                      Actually, Matches takes full height. -->
 
-                <DataGrid Grid.Row="1" ItemsSource="{Binding Matches}" AutoGenerateColumns="False" 
+                <DataGrid Grid.Row="2" ItemsSource="{Binding Matches}" AutoGenerateColumns="False" 
                           Background="{StaticResource Brush.Panel.Darker}" RowBackground="Transparent" 
                           BorderThickness="1" BorderBrush="{StaticResource Brush.Border}"
                           GridLinesVisibility="None" HorizontalGridLinesBrush="{StaticResource Brush.Border}"
@@ -478,7 +491,15 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="120" Foreground="#888888" HeaderStyle="{StaticResource CenteredHeaderStyle}">
+                        <DataGridTextColumn Header="STATUS" Binding="{Binding Status}" Width="100" Foreground="#888888" HeaderStyle="{StaticResource CenteredHeaderStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="SYNC METHOD" Binding="{Binding SyncMethodDisplay}" Width="130" Foreground="#AAAAAA" HeaderStyle="{StaticResource CenteredHeaderStyle}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
