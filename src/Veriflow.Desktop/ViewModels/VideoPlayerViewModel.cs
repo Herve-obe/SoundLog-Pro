@@ -351,6 +351,21 @@ namespace Veriflow.Desktop.ViewModels
                 FilePath = path;
                 FileName = System.IO.Path.GetFileName(path);
 
+                // Load metadata first to check for ProRes RAW
+                await LoadMetadataWithFFprobe(path);
+
+                // ProRes RAW Detection - Prevent playback
+                if (CurrentVideoMetadata.IsProResRAW)
+                {
+                    IsVideoLoaded = false;
+                    System.Windows.MessageBox.Show(
+                        CurrentVideoMetadata.ProResRAWMessage,
+                        "ProRes RAW Not Supported",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
                 var libVLC = VideoEngineService.Instance.LibVLC;
 
                 if (libVLC != null && _mediaPlayer != null)
