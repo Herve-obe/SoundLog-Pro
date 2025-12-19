@@ -321,10 +321,18 @@ namespace Veriflow.Desktop.Services
             Log($"Starting FFmpeg process...");
             process.Start();
             
-            string output = await process.StandardOutput.ReadToEndAsync();
-            string error = await process.StandardError.ReadToEndAsync();
+            // CRITICAL FIX: Read streams asynchronously DURING execution to prevent deadlock
+            // If we wait for exit before reading, FFmpeg can hang if buffers fill up
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
             
+            Log($"Waiting for FFmpeg to complete...");
             await process.WaitForExitAsync();
+            
+            string output = await outputTask;
+            string error = await errorTask;
+            
+            Log($"FFmpeg exited with code: {process.ExitCode}");
 
             if (process.ExitCode != 0)
             {
