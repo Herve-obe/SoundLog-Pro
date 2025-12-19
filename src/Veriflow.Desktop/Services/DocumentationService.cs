@@ -716,7 +716,363 @@ PLAYBACK OPTIONS:
 • Loop playback
 • Playback speed control
 • Audio track selection");
+
+            column.Item().PageBreak();
+            
+            AddSection(column, "8.5 Video Profile - Detailed Interface", @"
+LAYOUT OVERVIEW:
+The Video Profile PLAYER page is divided into three main areas:
+
+LEFT PANEL: Video Viewport
+• Large playback area (main focus)
+• Black letterboxing for aspect ratio preservation
+• Overlay controls (appear on mouse hover)
+• Fullscreen toggle button
+
+CENTER PANEL: Transport Controls
+• Play/Pause button (large, centered)
+• Stop button
+• Timeline scrubber with timecode
+• Frame counter
+• Playback speed selector
+
+RIGHT PANEL: Metadata & Logged Clips
+• File information section
+• Technical specifications
+• Logged clips list (scrollable)
+• EDL export button
+
+VIEWPORT FEATURES:
+• Automatic aspect ratio detection
+• Pillarbox/letterbox as needed
+• Hardware-accelerated rendering
+• Smooth playback up to 60fps
+• Support for various resolutions (SD to 4K+)");
+
+            AddSection(column, "8.6 Video Profile - Logged Clips & EDL", @"
+LOGGED CLIPS FUNCTIONALITY:
+The Logged Clips feature allows you to mark and manage specific segments of your video for editing or review.
+
+CREATING LOGGED CLIPS:
+1. Play video to desired IN point
+2. Press 'I' key or click 'Mark IN' button
+3. Play to desired OUT point
+4. Press 'O' key or click 'Mark OUT' button
+5. Clip is added to Logged Clips list
+
+LOGGED CLIPS LIST:
+• Displays all marked clips
+• Shows IN/OUT timecodes
+• Duration of each clip
+• Clip number/name
+• Thumbnail preview (future)
+
+MANAGING CLIPS:
+• Click clip to jump to IN point
+• Right-click for options:
+  - Edit IN/OUT points
+  - Delete clip
+  - Rename clip
+  - Add notes/comments
+
+EDL EXPORT:
+• Supports multiple EDL formats:
+  - CMX 3600
+  - Final Cut Pro XML
+  - Avid Log Exchange (ALE)
+• Export button in Logged Clips panel
+• Choose format and destination
+• Compatible with major editing systems");
+
+            AddSection(column, "8.7 Audio Profile - Detailed Interface", @"
+LAYOUT OVERVIEW:
+The Audio Profile PLAYER page emphasizes waveform visualization and multi-track control:
+
+TOP SECTION: Waveform Display
+• Full-file waveform visualization
+• Horizontal zoom controls
+• Vertical zoom (amplitude)
+• Playhead indicator (red line)
+• Time ruler with markers
+
+MIDDLE SECTION: Multi-Track Console
+• Dynamic track display (shows only present tracks)
+• Up to 32 tracks supported
+• Each track has dedicated controls
+• Compact, professional layout
+• Color-coded track indicators
+
+BOTTOM SECTION: Transport Controls
+• Play/Pause button
+• Stop button
+• Timeline position
+• Timecode display
+• Playback controls
+
+WAVEFORM FEATURES:
+• Real-time rendering
+• Zoom in/out for detail
+• Pan left/right
+• Amplitude scaling
+• Peak indicators
+• Selection regions (future)");
+
+            AddSection(column, "8.8 Audio Profile - Track Controls Detail", @"
+TRACK CONTROL STRIP (per track):
+Each audio track has its own control strip with the following elements:
+
+TRACK NUMBER/NAME:
+• Track identifier (1-32)
+• Track name (if available in file)
+• Channel configuration (Mono, Stereo, 5.1, etc.)
+
+MUTE BUTTON:
+• Click to mute/unmute track
+• Red when active
+• Priority over Solo (muted tracks stay muted even if soloed)
+• Keyboard shortcut: M (with track selected)
+
+SOLO BUTTON:
+• Click to solo track (mutes all others)
+• Yellow when active
+• Multiple tracks can be soloed simultaneously
+• Keyboard shortcut: S (with track selected)
+
+VOLUME FADER:
+• Vertical fader (-∞ to +6dB)
+• Default position: 0dB (unity gain)
+• Double-click to reset to 0dB
+• Real-time adjustment during playback
+• dB scale displayed
+• Fine control: Shift+drag for precise adjustment
+
+PAN FADER:
+• Horizontal fader (Left 100% to Right 100%)
+• Default position: Center
+• Double-click to reset to center
+• Stereo positioning control
+• Visual indicator shows pan position
+
+VU METER:
+• Real-time level display
+• Peak hold indicator
+• Color-coded:
+  - Green: Normal levels (-20dB to -6dB)
+  - Yellow: Approaching peak (-6dB to 0dB)
+  - Red: Clipping (0dB+)
+• Peak hold time: 2 seconds
+• Accurate to ±0.5dB");
+
+            AddSection(column, "8.9 Loading Media to Player", @"
+METHODS TO LOAD MEDIA:
+
+METHOD 1: From MEDIA Page
+1. Navigate to MEDIA page (F2)
+2. Browse to your file
+3. Double-click file
+4. File loads automatically to PLAYER
+5. PLAYER page becomes active
+
+METHOD 2: Drag and Drop
+1. Open Windows Explorer
+2. Locate media file
+3. Drag file to Veriflow window
+4. Drop on PLAYER page or navigation button
+5. File loads automatically
+
+METHOD 3: Recent Files (future)
+1. File menu > Recent Files
+2. Select file from list
+3. File loads to PLAYER
+
+METHOD 4: Command Line (advanced)
+1. Launch Veriflow with file path argument
+2. File loads on startup
+
+SUPPORTED FORMATS:
+• Video: MP4, MOV, MXF, AVI, MKV, WebM, FLV, and more
+• Audio: WAV, MP3, AAC, FLAC, OGG, WMA, and more
+• Containers: Most formats supported by FFmpeg/LibVLC");
+
+            AddSection(column, "8.10 Playback Workflows", @"
+BASIC PLAYBACK WORKFLOW:
+1. Load media file (see section 8.9)
+2. File appears in viewport/waveform
+3. Press Space to play
+4. Use transport controls as needed
+5. Press Enter to stop
+
+REVIEW WORKFLOW (Video):
+1. Load video file
+2. Play through once for overview
+3. Use J/K/L for shuttle review
+4. Mark IN/OUT points for clips of interest
+5. Log clips to list
+6. Export EDL for editing
+
+QUALITY CONTROL WORKFLOW:
+1. Load file to check
+2. Play at normal speed
+3. Check for:
+   - Visual artifacts
+   - Audio sync issues
+   - Dropouts or glitches
+   - Technical specifications
+4. Use frame stepping for detailed inspection
+5. Document issues in notes
+
+AUDIO MIXING WORKFLOW (Audio Profile):
+1. Load multi-track audio file
+2. Solo each track individually to check
+3. Adjust volume levels as needed
+4. Set pan positions
+5. Monitor VU meters for clipping
+6. Play full mix
+7. Make final adjustments");
+
+            AddSection(column, "8.11 Advanced Playback Features", @"
+FRAME-ACCURATE NAVIGATION:
+• Left/Right arrows: Step one frame
+• Shift+Left/Right: Step 10 frames
+• Ctrl+Left/Right: Jump to previous/next marker
+• Home: Jump to start
+• End: Jump to end
+
+SHUTTLE CONTROL (J/K/L):
+• J: Play reverse (press multiple times for faster)
+• K: Pause
+• L: Play forward (press multiple times for faster)
+• JJ: 2x reverse speed
+• JJJ: 4x reverse speed
+• LL: 2x forward speed
+• LLL: 4x forward speed
+
+PLAYBACK SPEED CONTROL:
+• Available speeds: 0.25x, 0.5x, 1x, 1.5x, 2x
+• Select from dropdown menu
+• Maintains audio pitch (future)
+• Useful for detailed review or quick scanning
+
+LOOP PLAYBACK:
+• Enable loop mode
+• Set IN/OUT points
+• Playback repeats between points
+• Useful for detailed analysis
+• Disable to return to normal playback");
+
+            AddSection(column, "8.12 Metadata Display", @"
+The metadata panel shows comprehensive information about the loaded file:
+
+FILE INFORMATION:
+• File name and path
+• File size
+• Creation date
+• Modification date
+• Container format
+
+VIDEO INFORMATION (Video files):
+• Resolution (e.g., 1920x1080)
+• Frame rate (e.g., 23.976 fps, 29.97 fps)
+• Aspect ratio (e.g., 16:9, 4:3)
+• Duration
+• Total frames
+• Video codec (e.g., H.264, ProRes, DNxHD)
+• Bit rate
+• Color space (e.g., YUV 4:2:0, RGB)
+• Pixel format
+
+AUDIO INFORMATION:
+• Number of audio tracks
+• Sample rate (e.g., 48kHz, 96kHz)
+• Bit depth (e.g., 16-bit, 24-bit)
+• Channels per track (Mono, Stereo, 5.1, etc.)
+• Audio codec (e.g., AAC, PCM, AC3)
+• Bit rate
+• Duration
+
+TIMECODE INFORMATION:
+• Start timecode
+• Current timecode
+• End timecode
+• Timecode format (SMPTE, frames)
+• Drop/non-drop frame");
+
+            AddSection(column, "8.13 Troubleshooting Playback Issues", @"
+COMMON ISSUES AND SOLUTIONS:
+
+VIDEO WON'T PLAY:
+• Check file format is supported
+• Verify file is not corrupted
+• Try reloading file
+• Check codec compatibility
+• Update graphics drivers
+
+AUDIO OUT OF SYNC:
+• Check source file (may be file issue)
+• Restart playback
+• Try different playback speed
+• Check audio track selection
+
+STUTTERING PLAYBACK:
+• Close other applications
+• Check system resources (CPU, RAM)
+• Reduce playback quality (future)
+• Use local files instead of network
+• Upgrade hardware if needed
+
+NO AUDIO:
+• Check volume levels
+• Verify track not muted
+• Check system audio settings
+• Try different audio track
+• Check audio codec support
+
+POOR VIDEO QUALITY:
+• Check source file quality
+• Verify correct resolution
+• Check scaling settings
+• Disable hardware acceleration (if issues)
+• Try different renderer (future)");
+
+            AddSection(column, "8.14 Tips and Best Practices", @"
+PERFORMANCE TIPS:
+• Use local SSD drives for best performance
+• Close unnecessary applications
+• Keep media files organized
+• Use appropriate file formats
+• Regular system maintenance
+
+WORKFLOW TIPS:
+• Learn keyboard shortcuts for efficiency
+• Use profiles appropriately (Audio vs Video)
+• Save sessions to preserve logged clips
+• Export EDLs regularly
+• Document issues as you find them
+
+KEYBOARD MASTERY:
+• Space: Your most-used key (Play/Pause)
+• J/K/L: Master shuttle control
+• Arrows: Frame-accurate navigation
+• I/O: Quick clip logging
+• Home/End: Fast navigation
+
+QUALITY CONTROL:
+• Always check at 100% playback speed first
+• Use frame stepping for detailed inspection
+• Check audio sync carefully
+• Verify metadata accuracy
+• Document all findings
+
+AUDIO MIXING:
+• Solo tracks individually first
+• Check for phase issues
+• Monitor levels carefully
+• Avoid clipping (red VU meters)
+• Use headphones for critical listening
+• Double-click faders to reset");
+
         }
+
 
         private static void AddPartIV_AdvancedTopics(ColumnDescriptor column)
         {
