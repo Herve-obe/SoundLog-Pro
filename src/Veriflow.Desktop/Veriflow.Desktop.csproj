@@ -25,6 +25,12 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\UCSCategories.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>

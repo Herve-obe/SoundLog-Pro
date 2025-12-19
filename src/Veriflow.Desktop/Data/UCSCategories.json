@@ -1,0 +1,98 @@
+{
+  "version": "8.2.1",
+  "categories": [
+    {
+      "name": "AMBIENCES",
+      "subCategories": [
+        { "name": "URBAN", "catId": "AMBUrban" },
+        { "name": "NATURE", "catId": "AMBNature" },
+        { "name": "INDOOR", "catId": "AMBIndoor" },
+        { "name": "ROOMTONE", "catId": "AMBRoom" },
+        { "name": "WEATHER", "catId": "AMBWeather" }
+      ]
+    },
+    {
+      "name": "ANIMALS",
+      "subCategories": [
+        { "name": "BIRD", "catId": "ANMBird" },
+        { "name": "DOG", "catId": "ANMDog" },
+        { "name": "CAT", "catId": "ANMCat" },
+        { "name": "HORSE", "catId": "ANMHorse" },
+        { "name": "INSECT", "catId": "ANMInsect" },
+        { "name": "REPTILE", "catId": "ANMReptile" }
+      ]
+    },
+    {
+      "name": "FOLEY",
+      "subCategories": [
+        { "name": "FOOTSTEPS", "catId": "FLYFootsteps" },
+        { "name": "CLOTH", "catId": "FLYCloth" },
+        { "name": "PROPS", "catId": "FLYProps" },
+        { "name": "BODY", "catId": "FLYBody" }
+      ]
+    },
+    {
+      "name": "HUMAN",
+      "subCategories": [
+        { "name": "VOICE", "catId": "HMNVoice" },
+        { "name": "BREATH", "catId": "HMNBreath" },
+        { "name": "CROWD", "catId": "HMNCrowd" },
+        { "name": "EFFORT", "catId": "HMNEffort" }
+      ]
+    },
+    {
+      "name": "IMPACTS",
+      "subCategories": [
+        { "name": "HIT", "catId": "IMPHit" },
+        { "name": "CRASH", "catId": "IMPCrash" },
+        { "name": "BREAK", "catId": "IMPBreak" },
+        { "name": "DROP", "catId": "IMPDrop" }
+      ]
+    },
+    {
+      "name": "MECHANICAL",
+      "subCategories": [
+        { "name": "ENGINE", "catId": "MECEngine" },
+        { "name": "MOTOR", "catId": "MECMotor" },
+        { "name": "TOOL", "catId": "MECTool" },
+        { "name": "MACHINE", "catId": "MECMachine" }
+      ]
+    },
+    {
+      "name": "MOVEMENT",
+      "subCategories": [
+        { "name": "SWISH", "catId": "MVTSwish" },
+        { "name": "WHOOSH", "catId": "MVTWhoosh" },
+        { "name": "RUSTLE", "catId": "MVTRustle" }
+      ]
+    },
+    {
+      "name": "TECHNOLOGY",
+      "subCategories": [
+        { "name": "COMPUTER", "catId": "TECComputer" },
+        { "name": "ELECTRONIC", "catId": "TECElectronic" },
+        { "name": "BEEP", "catId": "TECBeep" },
+        { "name": "INTERFACE", "catId": "TECInterface" }
+      ]
+    },
+    {
+      "name": "TRANSPORT",
+      "subCategories": [
+        { "name": "CAR", "catId": "TRNCar" },
+        { "name": "TRUCK", "catId": "TRNTruck" },
+        { "name": "AIRCRAFT", "catId": "TRNAircraft" },
+        { "name": "TRAIN", "catId": "TRNTrain" },
+        { "name": "BOAT", "catId": "TRNBoat" }
+      ]
+    },
+    {
+      "name": "WEAPONS",
+      "subCategories": [
+        { "name": "GUN", "catId": "WPNGun" },
+        { "name": "EXPLOSION", "catId": "WPNExplosion" },
+        { "name": "SWORD", "catId": "WPNSword" },
+        { "name": "ARROW", "catId": "WPNArrow" }
+      ]
+    }
+  ]
+}

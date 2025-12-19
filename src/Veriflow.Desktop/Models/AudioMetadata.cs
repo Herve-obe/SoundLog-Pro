@@ -46,6 +46,14 @@ namespace Veriflow.Desktop.Models
         public string ContainerFormat { get; set; } = string.Empty; // e.g. "wav"
         public string EncodingLibrary { get; set; } = string.Empty; // e.g. "LAME3.100"
 
+        // --- UCS (Universal Category System) ---
+        public string UCSCategory { get; set; } = string.Empty;      // e.g. "AMBIENCES"
+        public string UCSSubCategory { get; set; } = string.Empty;   // e.g. "URBAN"
+        public string UCSCatID { get; set; } = string.Empty;         // e.g. "AMBUrban"
+        public string UCSFullPath => string.IsNullOrEmpty(UCSSubCategory)
+            ? UCSCategory
+            : string.IsNullOrEmpty(UCSCategory) ? string.Empty : $"{UCSCategory} > {UCSSubCategory}";
+
         // Backwards compatibility helper if needed (though UI should bind to Tracks)
         public List<string> TrackNames => Tracks.Select(t => t.Name).ToList();
     }
