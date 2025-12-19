@@ -17,12 +17,34 @@ namespace Veriflow.Desktop.Services
     {
         private readonly string _ffmpegPath;
         private readonly string _tempDir;
+        private readonly string _logFile;
 
         public WaveformSyncService()
         {
             _ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg.exe");
             _tempDir = Path.Combine(Path.GetTempPath(), "Veriflow_WaveformSync");
             Directory.CreateDirectory(_tempDir);
+            
+            // Log file on Desktop for easy access
+            _logFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Veriflow_WaveformSync_Log.txt");
+            
+            // Clear previous log
+            try { File.Delete(_logFile); } catch { }
+            
+            Log("=== Veriflow Waveform Sync Service Started ===");
+            Log($"FFmpeg path: {_ffmpegPath}");
+            Log($"FFmpeg exists: {File.Exists(_ffmpegPath)}");
+            Log($"Temp dir: {_tempDir}");
+        }
+
+        private void Log(string message)
+        {
+            try
+            {
+                string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+                File.AppendAllText(_logFile, $"[{timestamp}] {message}\n");
+            }
+            catch { }
         }
 
         /// <summary>
@@ -38,46 +60,54 @@ namespace Veriflow.Desktop.Services
         {
             try
             {
+                Log($"=== Starting analysis ===");
+                Log($"Video: {Path.GetFileName(videoPath)}");
+                Log($"Audio: {Path.GetFileName(audioPath)}");
+                Log($"Max duration: {maxDurationSeconds}s");
+                
                 progress?.Report(0.1);
-                Console.WriteLine($"[WaveformSync] Starting analysis: {Path.GetFileName(videoPath)} + {Path.GetFileName(audioPath)}");
 
                 // Extract audio from video (optimized - low quality for speed)
-                Console.WriteLine("[WaveformSync] Step 1/4: Extracting audio from video...");
+                Log("Step 1/4: Extracting audio from video...");
                 string videoAudioPath = await ExtractAudioFromVideoAsync(videoPath, maxDurationSeconds);
+                Log($"✓ Video audio extracted: {Path.GetFileName(videoAudioPath)}");
                 progress?.Report(0.3);
 
                 // Extract audio (normalize to same format)
-                Console.WriteLine("[WaveformSync] Step 2/4: Normalizing audio...");
+                Log("Step 2/4: Normalizing audio...");
                 string normalizedAudioPath = await NormalizeAudioAsync(audioPath, maxDurationSeconds);
+                Log($"✓ Audio normalized: {Path.GetFileName(normalizedAudioPath)}");
                 progress?.Report(0.5);
 
                 // Perform cross-correlation (optimized)
-                Console.WriteLine("[WaveformSync] Step 3/4: Performing FFT correlation...");
+                Log("Step 3/4: Performing FFT correlation...");
                 double? offset = await PerformCrossCorrelationAsync(videoAudioPath, normalizedAudioPath);
+                Log($"✓ FFT correlation complete");
                 progress?.Report(0.9);
 
                 // Cleanup temp files
-                Console.WriteLine("[WaveformSync] Step 4/4: Cleaning up...");
+                Log("Step 4/4: Cleaning up...");
                 CleanupTempFile(videoAudioPath);
                 CleanupTempFile(normalizedAudioPath);
+                Log("✓ Cleanup complete");
 
                 progress?.Report(1.0);
                 
                 if (offset.HasValue)
                 {
-                    Console.WriteLine($"[WaveformSync] ✓ SUCCESS: Offset = {offset.Value:F3}s");
+                    Log($"✓✓✓ SUCCESS: Offset = {offset.Value:F3}s");
                 }
                 else
                 {
-                    Console.WriteLine($"[WaveformSync] ✗ FAILED: No correlation found");
+                    Log($"✗✗✗ FAILED: No correlation found");
                 }
                 
                 return offset;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[WaveformSync] ✗ ERROR: {ex.Message}");
-                Console.WriteLine($"[WaveformSync] Stack: {ex.StackTrace}");
+                Log($"✗✗✗ ERROR: {ex.Message}");
+                Log($"Stack trace: {ex.StackTrace}");
                 return null;
             }
         }
@@ -93,12 +123,12 @@ namespace Veriflow.Desktop.Services
             // -ac 1 = mono, -ar 16000 = 16kHz (vs 48kHz), -t = duration limit
             string args = $"-i \"{videoPath}\" -vn -acodec pcm_s16le -ar 16000 -ac 1 -t {maxDuration} -y \"{outputPath}\"";
 
-            Console.WriteLine($"[WaveformSync] Extracting video audio: {Path.GetFileName(videoPath)}");
-            Console.WriteLine($"[WaveformSync] FFmpeg args: {args}");
+            Log($"Extracting video audio: {Path.GetFileName(videoPath)}");
+            Log($"FFmpeg args: {args}");
             
             await RunFFmpegAsync(args);
             
-            Console.WriteLine($"[WaveformSync] ✓ Video audio extracted: {Path.GetFileName(outputPath)}");
+            Log($"✓ Video audio extracted: {Path.GetFileName(outputPath)}");
             
             return outputPath;
         }
@@ -113,12 +143,12 @@ namespace Veriflow.Desktop.Services
             // FFmpeg: Convert to mono 16kHz 16-bit PCM (lower quality = faster)
             string args = $"-i \"{audioPath}\" -acodec pcm_s16le -ar 16000 -ac 1 -t {maxDuration} -y \"{outputPath}\"";
 
-            Console.WriteLine($"[WaveformSync] Normalizing audio: {Path.GetFileName(audioPath)}");
-            Console.WriteLine($"[WaveformSync] FFmpeg args: {args}");
+            Log($"Normalizing audio: {Path.GetFileName(audioPath)}");
+            Log($"FFmpeg args: {args}");
             
             await RunFFmpegAsync(args);
             
-            Console.WriteLine($"[WaveformSync] ✓ Audio normalized: {Path.GetFileName(outputPath)}");
+            Log($"✓ Audio normalized: {Path.GetFileName(outputPath)}");
             
             return outputPath;
         }
@@ -133,7 +163,7 @@ namespace Veriflow.Desktop.Services
             {
                 try
                 {
-                    Console.WriteLine("[WaveformSync] Reading WAV samples...");
+                    Log("Reading WAV samples...");
                     
                     // Read WAV files
                     var samples1 = ReadWavSamples(wavFile1);
@@ -141,11 +171,11 @@ namespace Veriflow.Desktop.Services
 
                     if (samples1 == null || samples2 == null || samples1.Length == 0 || samples2.Length == 0)
                     {
-                        Console.WriteLine("[WaveformSync] ✗ Failed to read samples");
+                        Log("✗ Failed to read samples");
                         return null;
                     }
 
-                    Console.WriteLine($"[WaveformSync] ✓ Samples read: {samples1.Length} vs {samples2.Length}");
+                    Log($"✓ Samples read: {samples1.Length} vs {samples2.Length}");
 
                     // Ensure both signals have the same length (pad with zeros if needed)
                     int maxLength = Math.Max(samples1.Length, samples2.Length);
@@ -153,7 +183,7 @@ namespace Veriflow.Desktop.Services
                     // Use power of 2 for FFT efficiency
                     int fftSize = (int)Math.Pow(2, Math.Ceiling(Math.Log(maxLength * 2) / Math.Log(2)));
                     
-                    Console.WriteLine($"[WaveformSync] FFT size: {fftSize}");
+                    Log($"FFT size: {fftSize}");
 
                     // Convert to complex arrays and pad
                     var complex1 = new System.Numerics.Complex[fftSize];
@@ -165,7 +195,7 @@ namespace Veriflow.Desktop.Services
                     for (int i = 0; i < samples2.Length; i++)
                         complex2[i] = new System.Numerics.Complex(samples2[i], 0);
 
-                    Console.WriteLine("[WaveformSync] Performing forward FFT...");
+                    Log("Performing forward FFT...");
 
                     // Perform FFT on both signals
                     Fourier.Forward(complex1, FourierOptions.Matlab);
@@ -179,12 +209,12 @@ namespace Veriflow.Desktop.Services
                         crossPower[i] = complex1[i] * System.Numerics.Complex.Conjugate(complex2[i]);
                     }
 
-                    Console.WriteLine("[WaveformSync] Performing inverse FFT...");
+                    Log("Performing inverse FFT...");
 
                     // Inverse FFT to get cross-correlation
                     Fourier.Inverse(crossPower, FourierOptions.Matlab);
 
-                    Console.WriteLine("[WaveformSync] Finding correlation peak...");
+                    Log("Finding correlation peak...");
 
                     // Find the peak in the cross-correlation
                     double maxCorr = double.MinValue;
@@ -218,14 +248,14 @@ namespace Veriflow.Desktop.Services
                     double sampleRate = 16000; // 16kHz
                     double offsetSeconds = (double)maxLag / sampleRate;
 
-                    Console.WriteLine($"[WaveformSync] ✓ Correlation complete: maxCorr={maxCorr:F2}, maxLag={maxLag}, offset={offsetSeconds:F3}s");
+                    Log($"✓ Correlation complete: maxCorr={maxCorr:F2}, maxLag={maxLag}, offset={offsetSeconds:F3}s");
                     
                     return (double?)offsetSeconds;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[WaveformSync] ✗ Correlation error: {ex.Message}");
-                    Console.WriteLine($"[WaveformSync] Stack: {ex.StackTrace}");
+                    Log($"✗ Correlation error: {ex.Message}");
+                    Log($"Stack: {ex.StackTrace}");
                     return null;
                 }
             });
@@ -267,9 +297,9 @@ namespace Veriflow.Desktop.Services
         /// </summary>
         private async Task RunFFmpegAsync(string arguments)
         {
-            Console.WriteLine($"[WaveformSync] Running FFmpeg...");
-            Console.WriteLine($"[WaveformSync] FFmpeg path: {_ffmpegPath}");
-            Console.WriteLine($"[WaveformSync] FFmpeg exists: {File.Exists(_ffmpegPath)}");
+            Log($"Running FFmpeg...");
+            Log($"FFmpeg path: {_ffmpegPath}");
+            Log($"FFmpeg exists: {File.Exists(_ffmpegPath)}");
             
             if (!File.Exists(_ffmpegPath))
             {
@@ -288,7 +318,7 @@ namespace Veriflow.Desktop.Services
 
             using var process = new Process { StartInfo = startInfo };
             
-            Console.WriteLine($"[WaveformSync] Starting FFmpeg process...");
+            Log($"Starting FFmpeg process...");
             process.Start();
             
             string output = await process.StandardOutput.ReadToEndAsync();
@@ -298,12 +328,12 @@ namespace Veriflow.Desktop.Services
 
             if (process.ExitCode != 0)
             {
-                Console.WriteLine($"[WaveformSync] ✗ FFmpeg failed with exit code: {process.ExitCode}");
-                Console.WriteLine($"[WaveformSync] Error output: {error}");
+                Log($"✗ FFmpeg failed with exit code: {process.ExitCode}");
+                Log($"Error output: {error}");
                 throw new Exception($"FFmpeg error (exit code {process.ExitCode}): {error}");
             }
             
-            Console.WriteLine($"[WaveformSync] ✓ FFmpeg completed successfully");
+            Log($"✓ FFmpeg completed successfully");
         }
 
         /// <summary>
