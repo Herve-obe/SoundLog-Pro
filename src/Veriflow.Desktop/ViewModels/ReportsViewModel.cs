@@ -102,6 +102,22 @@ namespace Veriflow.Desktop.ViewModels
             var reportItem = CurrentReportItems.FirstOrDefault(r => 
                 r.OriginalMedia.FullName.Equals(clip.SourceFile, System.StringComparison.OrdinalIgnoreCase));
             
+            // If not found, auto-create a ReportItem for EDL logging workflow
+            if (reportItem == null && !string.IsNullOrEmpty(clip.SourceFile))
+            {
+                var fileInfo = new System.IO.FileInfo(clip.SourceFile);
+                if (fileInfo.Exists)
+                {
+                    reportItem = new ReportItem
+                    {
+                        OriginalMedia = fileInfo,
+                        Filename = fileInfo.Name,
+                        Clips = new System.Collections.ObjectModel.ObservableCollection<ClipLogItem>()
+                    };
+                    CurrentReportItems.Add(reportItem);
+                }
+            }
+            
             if (reportItem != null)
             {
                 clip.SourceFile = reportItem.OriginalMedia.FullName; // Ensure full path
