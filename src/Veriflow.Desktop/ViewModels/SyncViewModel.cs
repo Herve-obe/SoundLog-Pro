@@ -17,16 +17,31 @@ namespace Veriflow.Desktop.ViewModels
         LTC
     }
 
+    public enum SyncMethod
+    {
+        Timecode,   // Synced via timecode comparison
+        Waveform,   // Synced via audio waveform correlation
+        Manual      // Manually paired by user
+    }
+
     public partial class SyncViewModel : ObservableObject
     {
         private readonly FFprobeMetadataProvider _metadataProvider;
+        private readonly WaveformSyncService _waveformService;
 
         public SyncViewModel()
         {
             _metadataProvider = new FFprobeMetadataProvider();
+            _waveformService = new WaveformSyncService();
         }
 
         public static IEnumerable<TimecodeSource> TimecodeSources => Enum.GetValues(typeof(TimecodeSource)).Cast<TimecodeSource>();
+
+        // ==========================================
+        // SYNC METHOD SELECTION
+        // ==========================================
+        [ObservableProperty]
+        private SyncMethod _selectedSyncMethod = SyncMethod.Timecode;
 
         // ==========================================
         // COLLECTIONS
@@ -348,14 +363,46 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
+        [RelayCommand]
+        private async Task AutoMatchByTimecode()
+        {
+            SelectedSyncMethod = SyncMethod.Timecode;
+            await AutoSync();
+        }
+
+        [RelayCommand]
+        private async Task AutoMatchByWaveform()
+        {
+            SelectedSyncMethod = SyncMethod.Waveform;
+            await AutoSync();
+        }
+
         private async Task AutoSync()
         {
             IsBusy = true;
-            BusyMessage = "Auto-Matching...";
+            BusyMessage = SelectedSyncMethod == SyncMethod.Timecode 
+                ? "Auto-Matching by Timecode..." 
+                : "Auto-Matching by Waveform...";
             ProgressValue = 0;
             
             Application.Current.Dispatcher.Invoke(() => Matches.Clear());
 
+            if (SelectedSyncMethod == SyncMethod.Timecode)
+            {
+                await AutoSyncByTimecode();
+            }
+            else if (SelectedSyncMethod == SyncMethod.Waveform)
+            {
+                await AutoSyncByWaveform();
+            }
+
+            IsBusy = false;
+            OnPropertyChanged(nameof(HasMatches));
+            ExportBatchCommand.NotifyCanExecuteChanged();
+        }
+
+        private async Task AutoSyncByTimecode()
+        {
             await Task.Run(() =>
             {
                 // Algorithm:
@@ -374,12 +421,6 @@ namespace Veriflow.Desktop.ViewModels
 
                     if (candidates.Any())
                     {
-                        // Pick best match? Or add all?
-                        // Usually 1 audio file per video file in simple rushes.
-                        // Or multiple audio files (split).
-                        // Let's add all valid overlaps as candidates.
-                        // Or Just the one with the closest Start time? 
-                        
                         // Strategy: Add pairwise.
                         foreach (var aud in candidates)
                         {
@@ -387,7 +428,8 @@ namespace Veriflow.Desktop.ViewModels
                             {
                                 Video = vid,
                                 Audio = aud,
-                                Status = "Synced"
+                                Status = "Synced",
+                                SyncMethod = SyncMethod.Timecode
                             };
                             
                             // Calculate Offset
@@ -411,10 +453,74 @@ namespace Veriflow.Desktop.ViewModels
                     ProgressValue = (double)processed / VideoPool.Count * 100;
                 }
             });
+        }
 
-            IsBusy = false;
-            OnPropertyChanged(nameof(HasMatches));
-            ExportBatchCommand.NotifyCanExecuteChanged();
+        private async Task AutoSyncByWaveform()
+        {
+            int processed = 0;
+            int total = VideoPool.Count;
+
+            foreach (var vid in VideoPool)
+            {
+                processed++;
+                BusyMessage = $"Analyzing waveform {processed}/{total}: {vid.Filename}";
+                ProgressValue = (double)processed / total * 100;
+
+                // Try to find best audio match using waveform correlation
+                SyncPair? bestPair = null;
+                double bestCorrelationScore = 0;
+
+                foreach (var aud in AudioPool)
+                {
+                    try
+                    {
+                        var progress = new Progress<double>(p => 
+                        {
+                            // Sub-progress for this specific pair
+                            double overallProgress = ((processed - 1) + p) / total * 100;
+                            ProgressValue = overallProgress;
+                        });
+
+                        double? offset = await _waveformService.FindOffsetAsync(vid.FullPath, aud.FullPath, 30, progress);
+
+                        if (offset.HasValue)
+                        {
+                            // Create pair
+                            var pair = new SyncPair
+                            {
+                                Video = vid,
+                                Audio = aud,
+                                Status = "Synced",
+                                SyncMethod = SyncMethod.Waveform,
+                                OffsetSeconds = offset.Value
+                            };
+
+                            pair.OffsetDisplay = FormatTimecode(TimeSpan.FromSeconds(Math.Abs(offset.Value)), vid.Fps);
+                            if (offset.Value > 0) pair.OffsetDisplay = "+ " + pair.OffsetDisplay;
+                            else pair.OffsetDisplay = "- " + pair.OffsetDisplay;
+
+                            // For now, take first successful match
+                            // In future, could compare correlation scores
+                            bestPair = pair;
+                            break; // Found a match, stop searching
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[Sync] Waveform sync error for {vid.Filename} + {aud.Filename}: {ex.Message}");
+                    }
+                }
+
+                if (bestPair != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() => Matches.Add(bestPair));
+                }
+                else
+                {
+                    // No match found
+                    Application.Current.Dispatcher.Invoke(() => Matches.Add(new SyncPair { Video = vid, Status = "No Match" }));
+                }
+            }
         }
         
         private async Task RunExport(SyncPair match, string outPath, string ffmpegPath)
@@ -509,7 +615,15 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty] public MediaFile? _audio; // Can be null if no match
         [ObservableProperty] public string _status = "Pending";
         [ObservableProperty] public string _offsetDisplay = "";
+        [ObservableProperty] public SyncMethod _syncMethod = SyncMethod.Manual;
         
         public double OffsetSeconds { get; set; }
+        public string SyncMethodDisplay => SyncMethod switch
+        {
+            SyncMethod.Timecode => "🕐 Timecode",
+            SyncMethod.Waveform => "🎵 Waveform",
+            SyncMethod.Manual => "✋ Manual",
+            _ => "Unknown"
+        };
     }
 }
