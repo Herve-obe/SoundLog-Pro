@@ -1465,13 +1465,447 @@ SHUTTLE CONTROL:
 • L: Forward play
 • JJ: Faster reverse
 • LL: Faster forward");
+
+            // CHAPTER 13: FILE FORMATS AND CODECS
+            column.Item().PageBreak();
+            AddChapterTitle(column, "Chapter 13: File Formats and Codecs");
+            
+            AddSection(column, "13.1 Supported Video Formats", @"
+CONTAINER FORMATS:
+• MP4: Universal compatibility, web-friendly
+• MOV: Apple QuickTime, professional editing
+• MXF: Broadcast standard, professional workflows
+• AVI: Legacy format, wide compatibility
+• MKV: Open source, supports many codecs
+• WebM: Web delivery, VP8/VP9 codecs
+• FLV: Flash video (legacy)
+
+VIDEO CODECS:
+• H.264/AVC: Most common, excellent compatibility
+• H.265/HEVC: Better compression, 4K/8K support
+• ProRes: Apple professional codec, editing-friendly
+• DNxHD/DNxHR: Avid professional codec
+• MPEG-2: Broadcast standard, DVD
+• VP8/VP9: Open source, web delivery
+• AV1: Next-gen codec, excellent compression
+
+RECOMMENDATIONS:
+• Archiving: ProRes or DNxHD (lossless)
+• Editing: ProRes, DNxHD, or H.264 high bitrate
+• Delivery: H.264 or H.265
+• Web: H.264 or VP9
+• Broadcast: MPEG-2 or H.264");
+
+            AddSection(column, "13.2 Supported Audio Formats", @"
+CONTAINER FORMATS:
+• WAV: Uncompressed, professional standard
+• MP3: Universal compatibility, lossy
+• AAC: Modern compression, good quality
+• FLAC: Lossless compression
+• OGG: Open source, Vorbis codec
+• WMA: Windows Media Audio
+• M4A: AAC in MP4 container
+
+AUDIO CODECS:
+• PCM: Uncompressed, highest quality
+• AAC: Modern lossy codec, excellent quality
+• MP3: Universal lossy codec
+• FLAC: Lossless compression
+• Vorbis: Open source lossy codec
+• AC3: Dolby Digital, surround sound
+• DTS: Surround sound codec
+
+SAMPLE RATES:
+• 44.1 kHz: CD quality, music
+• 48 kHz: Professional video, broadcast
+• 96 kHz: High-resolution audio
+• 192 kHz: Audiophile, archiving
+
+BIT DEPTHS:
+• 16-bit: CD quality, standard
+• 24-bit: Professional recording
+• 32-bit float: Maximum dynamic range");
+
+            AddSection(column, "13.3 Format Selection Guide", @"
+FOR ARCHIVING:
+• Video: ProRes 422 HQ or DNxHD
+• Audio: WAV 24-bit 48kHz or FLAC
+• Container: MOV or MXF
+• Priority: Quality over file size
+
+FOR EDITING:
+• Video: ProRes, DNxHD, or H.264 high bitrate
+• Audio: WAV or AAC
+• Container: MOV or MXF
+• Priority: Performance and compatibility
+
+FOR DELIVERY:
+• Video: H.264 or H.265
+• Audio: AAC
+• Container: MP4
+• Priority: Compatibility and file size
+
+FOR WEB:
+• Video: H.264 or VP9
+• Audio: AAC or Opus
+• Container: MP4 or WebM
+• Priority: Streaming performance
+
+FOR BROADCAST:
+• Video: MPEG-2 or H.264
+• Audio: PCM or AC3
+• Container: MXF
+• Priority: Compliance with standards");
+
+            // CHAPTER 14: PERFORMANCE OPTIMIZATION
+            column.Item().PageBreak();
+            AddChapterTitle(column, "Chapter 14: Performance Optimization");
+            
+            AddSection(column, "14.1 System Requirements Optimization", @"
+HARDWARE RECOMMENDATIONS:
+• CPU: Multi-core processor (8+ cores recommended)
+• RAM: 16GB minimum, 32GB+ for 4K
+• Storage: NVMe SSD for media files
+• GPU: Dedicated GPU with 4GB+ VRAM
+• Network: Gigabit Ethernet for network storage
+
+OPERATING SYSTEM:
+• Windows 11 recommended
+• Keep OS updated
+• Disable unnecessary startup programs
+• Regular disk cleanup
+• Defragment HDDs (not SSDs)
+
+STORAGE OPTIMIZATION:
+• Use SSD for application and cache
+• Separate drive for media files
+• RAID configuration for redundancy (optional)
+• Regular backup strategy
+• Monitor free space (20%+ recommended)");
+
+            AddSection(column, "14.2 Application Settings", @"
+PLAYBACK OPTIMIZATION:
+• Enable hardware acceleration
+• Adjust cache size based on RAM
+• Close unused pages
+• Reduce preview quality if needed
+• Disable effects during playback
+
+TRANSCODE OPTIMIZATION:
+• Use appropriate thread count
+• Monitor CPU temperature
+• Close other applications
+• Use local drives
+• Batch similar files together
+
+MEMORY MANAGEMENT:
+• Close unused sessions
+• Clear cache periodically
+• Restart application for long sessions
+• Monitor RAM usage
+• Adjust cache settings if needed");
+
+            AddSection(column, "14.3 Workflow Optimization", @"
+FILE ORGANIZATION:
+• Consistent folder structure
+• Descriptive file naming
+• Separate projects
+• Regular cleanup
+• Archive completed projects
+
+NETWORK CONSIDERATIONS:
+• Use local copies for editing
+• Gigabit network minimum
+• Avoid WiFi for large files
+• Copy to local before processing
+• Upload results after completion
+
+BEST PRACTICES:
+• Save sessions regularly
+• Use keyboard shortcuts
+• Learn efficient workflows
+• Batch similar operations
+• Plan before executing");
+
+            // CHAPTER 15: BEST PRACTICES
+            column.Item().PageBreak();
+            AddChapterTitle(column, "Chapter 15: Best Practices and Workflows");
+            
+            AddSection(column, "15.1 Project Setup", @"
+INITIAL SETUP:
+1. Create project folder structure
+2. Copy media to local drive
+3. Create new session
+4. Configure preferences
+5. Test with sample file
+
+FOLDER STRUCTURE EXAMPLE:
+Project_Name/
+  ├── Media/
+  │   ├── Video/
+  │   └── Audio/
+  ├── Sessions/
+  ├── Reports/
+  ├── Exports/
+  └── Documentation/
+
+SESSION MANAGEMENT:
+• One session per project
+• Save frequently (Ctrl+S)
+• Use descriptive names
+• Version sessions (v1, v2, etc.)
+• Archive with project files");
+
+            AddSection(column, "15.2 Quality Control Workflow", @"
+QC PROCESS:
+1. Load file to PLAYER
+2. Play through at normal speed
+3. Check technical specifications
+4. Use frame stepping for details
+5. Document any issues
+6. Generate QC report
+7. Archive report with file
+
+WHAT TO CHECK:
+• Video quality and artifacts
+• Audio sync
+• Color accuracy
+• Metadata correctness
+• File integrity
+• Format compliance
+• Timecode accuracy
+
+DOCUMENTATION:
+• Use REPORTS page
+• Include screenshots
+• Note timecodes of issues
+• Export PDF reports
+• Archive with media");
+
+            AddSection(column, "15.3 Collaboration Best Practices", @"
+TEAM WORKFLOWS:
+• Share session files
+• Use consistent naming
+• Document workflows
+• Maintain templates
+• Regular communication
+
+FILE SHARING:
+• Use network storage
+• Maintain folder structure
+• Document file locations
+• Version control for sessions
+• Regular backups
+
+STANDARDS:
+• Establish naming conventions
+• Define quality standards
+• Create workflow templates
+• Document procedures
+• Train team members");
+
         }
+
 
         private static void AddPartV_Appendices(ColumnDescriptor column)
         {
-            // APPENDIX C: LEGAL INFORMATION
+            // APPENDIX A: MENU REFERENCE
             column.Item().PageBreak();
             AddChapterTitle(column, "PART V: APPENDICES");
+            AddChapterTitle(column, "Appendix A: Complete Menu Reference");
+            
+            AddSection(column, "File Menu", @"
+• New Session (Ctrl+N)
+  Creates new empty workspace
+  
+• Open Session (Ctrl+O)
+  Loads saved .vfsession file
+  
+• Save Session (Ctrl+S)
+  Saves current workspace
+  
+• Settings
+  Opens application preferences
+  
+• Exit (Alt+F4)
+  Closes application");
+
+            AddSection(column, "Edit Menu", @"
+• Undo (Ctrl+Z) - Placeholder
+  Future: Undo last action
+  
+• Redo (Ctrl+Y) - Placeholder
+  Future: Redo undone action
+  
+• Cut (Ctrl+X)
+  Context-aware cut operation
+  
+• Copy (Ctrl+C)
+  Context-aware copy operation
+  
+• Paste (Ctrl+V)
+  Context-aware paste operation
+  
+• Clear Current Page
+  Resets active page to default");
+
+            AddSection(column, "View Menu", @"
+• SECURE COPY (F1)
+• MEDIA (F2)
+• PLAYER (F3)
+• SYNC (F4)
+• TRANSCODE (F5)
+• REPORTS (F6)");
+
+            AddSection(column, "Help Menu", @"
+• View Help (F12)
+  Opens this user guide
+  
+• Open Log Folder
+  Opens application logs directory
+  
+• About Veriflow
+  Version and license information");
+
+            // APPENDIX B: TROUBLESHOOTING GUIDE
+            column.Item().PageBreak();
+            AddChapterTitle(column, "Appendix B: Troubleshooting Guide");
+            
+            AddSection(column, "Application Won't Start", @"
+SYMPTOMS:
+• Application crashes on launch
+• Error messages during startup
+• Application freezes at splash screen
+
+SOLUTIONS:
+1. Check system requirements
+2. Update .NET 8.0 Runtime
+3. Check antivirus/firewall settings
+4. Run as administrator
+5. Reinstall application
+6. Check event logs for errors");
+
+            AddSection(column, "Playback Issues", @"
+VIDEO WON'T PLAY:
+• Verify file format supported
+• Check file not corrupted
+• Update graphics drivers
+• Try different renderer
+• Check codec compatibility
+
+STUTTERING/DROPPING FRAMES:
+• Close other applications
+• Check CPU/RAM usage
+• Use local files (not network)
+• Reduce playback quality
+• Upgrade hardware
+
+AUDIO/VIDEO OUT OF SYNC:
+• Check source file
+• Restart playback
+• Try different audio track
+• Check system audio settings");
+
+            AddSection(column, "File Operation Issues", @"
+CAN'T LOAD FILE:
+• Check file permissions
+• Verify file not in use
+• Check file path length
+• Try copying to local drive
+• Check file not corrupted
+
+TRANSCODE FAILS:
+• Check output directory writable
+• Verify enough disk space
+• Check FFmpeg installation
+• Try different codec/format
+• Check source file valid
+
+COPY OPERATION FAILS:
+• Verify destination writable
+• Check sufficient disk space
+• Verify source file accessible
+• Check network connection
+• Try different destination");
+
+            AddSection(column, "Performance Issues", @"
+APPLICATION SLOW:
+• Close unused pages
+• Clear application cache
+• Restart application
+• Check system resources
+• Update graphics drivers
+• Disable hardware acceleration
+
+HIGH MEMORY USAGE:
+• Close unused sessions
+• Restart application
+• Check for memory leaks
+• Update to latest version
+• Increase system RAM");
+
+            AddSection(column, "Getting Help", @"
+IF PROBLEMS PERSIST:
+1. Check log files (Help > Open Log Folder)
+2. Note exact error messages
+3. Document steps to reproduce
+4. Check for application updates
+5. Contact support with:
+   - Application version
+   - Operating system version
+   - Error messages
+   - Log files
+   - Steps to reproduce");
+
+            // APPENDIX D: GLOSSARY
+            column.Item().PageBreak();
+            AddChapterTitle(column, "Appendix D: Glossary");
+            
+            AddSection(column, "A-C", @"
+AAC: Advanced Audio Coding, modern audio codec
+ALE: Avid Log Exchange, EDL format
+Aspect Ratio: Width-to-height ratio of video
+Bit Depth: Number of bits per audio sample
+Bit Rate: Data rate of compressed media
+Codec: Compression/decompression algorithm
+Container: File format wrapping media streams
+CMX 3600: Standard EDL format");
+
+            AddSection(column, "D-H", @"
+DNxHD: Avid's professional video codec
+Drop Frame: Timecode format compensating for NTSC
+EDL: Edit Decision List
+FFmpeg: Open-source media processing library
+Frame Rate: Frames per second (fps)
+GOP: Group of Pictures, keyframe interval
+H.264: Common video codec (AVC)
+H.265: Advanced video codec (HEVC)");
+
+            AddSection(column, "I-P", @"
+I-Frame: Intra-frame, keyframe
+Keyframe: Complete frame, not referencing others
+LibVLC: Video playback library
+Lossless: Compression without quality loss
+Lossy: Compression with quality loss
+LUFS: Loudness Units Full Scale
+Metadata: Data about media file
+MXF: Material Exchange Format
+PCM: Pulse Code Modulation, uncompressed audio
+ProRes: Apple's professional video codec");
+
+            AddSection(column, "Q-Z", @"
+QC: Quality Control
+Resolution: Video dimensions (width x height)
+Sample Rate: Audio samples per second
+SMPTE: Society of Motion Picture & Television Engineers
+Timecode: Time reference in media
+Transcode: Convert between formats/codecs
+VU Meter: Volume Unit meter
+Waveform: Visual representation of audio
+xxHash: Fast hash algorithm for verification");
+
+            // APPENDIX C: LEGAL INFORMATION (existing)
+            column.Item().PageBreak();
             AddChapterTitle(column, "Appendix C: Legal Information");
             
             AddSection(column, "Third-Party Software", @"
