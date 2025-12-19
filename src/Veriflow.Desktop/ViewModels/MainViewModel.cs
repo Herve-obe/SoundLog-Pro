@@ -89,6 +89,7 @@ namespace Veriflow.Desktop.ViewModels
         public ICommand ShowReportsCommand { get; }
         public ICommand SwitchToAudioCommand { get; }
         public ICommand SwitchToVideoCommand { get; }
+        public ICommand ToggleAudioVideoModeCommand { get; }
         public ICommand OpenAboutCommand { get; }
         public ICommand ExitCommand { get; }
 
@@ -124,6 +125,7 @@ namespace Veriflow.Desktop.ViewModels
 
             SwitchToAudioCommand = new RelayCommand(() => SetMode(AppMode.Audio));
             SwitchToVideoCommand = new RelayCommand(() => SetMode(AppMode.Video));
+            ToggleAudioVideoModeCommand = new RelayCommand(ToggleAudioVideoMode);
             OpenAboutCommand = new RelayCommand(OpenAbout);
             ExitCommand = new RelayCommand(() => Application.Current.Shutdown());
 
@@ -283,14 +285,24 @@ namespace Veriflow.Desktop.ViewModels
 
         private void SetMode(AppMode mode)
         {
+            CurrentAppMode = mode;
+            UpdateTheme();
+        }
+
+        private void ToggleAudioVideoMode()
+        {
+            CurrentAppMode = CurrentAppMode == AppMode.Audio ? AppMode.Video : AppMode.Audio;
+            UpdateTheme();
+        }
+
+        private void UpdateTheme()
+        {
             try
             {
-                CurrentAppMode = mode;
-
                 // Dynamic Branding (Audio = Red, Video = Blue)
                 string accentHex, hoverHex, pressedHex;
 
-                if (mode == AppMode.Audio)
+                if (CurrentAppMode == AppMode.Audio)
                 {
                     accentHex = "#E64B3D";
                     hoverHex = "#FF6E60";
@@ -308,13 +320,19 @@ namespace Veriflow.Desktop.ViewModels
                     Application.Current.Resources["Brush.Accent"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(accentHex));
                     Application.Current.Resources["Brush.Accent.Hover"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hoverHex));
                     Application.Current.Resources["Brush.Accent.Pressed"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(pressedHex));
+
+                    // Update Primary Accent Brush (used in some views)
+                    Application.Current.Resources["PrimaryAccentBrush"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(accentHex));
+
+                    // Play button is always green in both modes
+                    Application.Current.Resources["Brush.Transport.Play"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
                 }
 
-                _mediaViewModel.SetAppMode(mode);
-                _transcodeViewModel.SetAppMode(mode);
+                _mediaViewModel.SetAppMode(CurrentAppMode);
+                _transcodeViewModel.SetAppMode(CurrentAppMode);
                 
                 // Push Report Context for the new mode immediately
-                if (mode == AppMode.Video)
+                if (CurrentAppMode == AppMode.Video)
                 {
                      var paths = _reportsViewModel.VideoReportItems.Select(x => x.OriginalMedia.FullName).ToList();
                      _mediaViewModel.UpdateReportContext(paths, _reportsViewModel.VideoReportItems.Any());

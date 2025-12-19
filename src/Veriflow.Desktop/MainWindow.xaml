@@ -25,6 +25,9 @@
         <KeyBinding Key="F4" Command="{Binding ShowSyncCommand}"/>
         <KeyBinding Key="F5" Command="{Binding ShowTranscodeCommand}"/>
         <KeyBinding Key="F6" Command="{Binding ShowReportsCommand}"/>
+        
+        <!-- Profile Toggle -->
+        <KeyBinding Key="Tab" Modifiers="Ctrl" Command="{Binding ToggleAudioVideoModeCommand}"/>
     </Window.InputBindings>
 
     <Window.Resources>

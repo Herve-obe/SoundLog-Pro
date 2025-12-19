@@ -13,8 +13,20 @@ namespace Veriflow.Desktop.Views
         public VideoPreviewWindow(int videoWidth = 1920, int videoHeight = 1080)
         {
             InitializeComponent();
+            
+            // ESC to close
+            PreviewKeyDown += Window_PreviewKeyDown;
+
             _videoWidth = videoWidth > 0 ? videoWidth : 1920;
             _videoHeight = videoHeight > 0 ? videoHeight : 1080;
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
