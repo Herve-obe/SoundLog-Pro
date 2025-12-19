@@ -17,6 +17,16 @@
         <vm:MainViewModel/>
     </Window.DataContext>
 
+    <Window.InputBindings>
+        <!-- F-Key Navigation Shortcuts -->
+        <KeyBinding Key="F1" Command="{Binding ShowSecureCopyCommand}"/>
+        <KeyBinding Key="F2" Command="{Binding ShowMediaCommand}"/>
+        <KeyBinding Key="F3" Command="{Binding ShowPlayerCommand}"/>
+        <KeyBinding Key="F4" Command="{Binding ShowSyncCommand}"/>
+        <KeyBinding Key="F5" Command="{Binding ShowTranscodeCommand}"/>
+        <KeyBinding Key="F6" Command="{Binding ShowReportsCommand}"/>
+    </Window.InputBindings>
+
     <Window.Resources>
         <!-- A/V SEGMENTED SWITCH (Local Style) -->
         <Style x:Key="SegmentedToggleStyle" TargetType="RadioButton">

@@ -55,7 +55,11 @@
         <!-- Notes -->
         <StackPanel Grid.Row="3" Margin="0,0,0,20">
             <TextBlock Text="NOTES" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=PropertyChanged}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top"/>
+            <TextBox x:Name="NotesTextBox"
+                     Text="{Binding ItemNotes, UpdateSourceTrigger=PropertyChanged}" 
+                     Height="80" TextWrapping="Wrap" AcceptsReturn="True" 
+                     VerticalContentAlignment="Top"
+                     PreviewKeyDown="NotesTextBox_PreviewKeyDown"/>
         </StackPanel>
 
         <!-- Buttons -->

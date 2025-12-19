@@ -539,10 +539,10 @@ namespace Veriflow.Desktop.ViewModels
             IsStopPressed = false;
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanPause))]
         private void Pause()
         {
-            if (_outputDevice != null)
+            if (_outputDevice != null && _outputDevice.PlaybackState == PlaybackState.Playing)
             {
                 _playbackTimer.Stop(); 
                 _stopwatch.Stop();
@@ -552,6 +552,7 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
+        private bool CanPause() => IsAudioLoaded && _outputDevice?.PlaybackState == PlaybackState.Playing;
         private bool CanPlay() => IsAudioLoaded && !IsPlaying;
         private bool CanStop() => IsAudioLoaded;
 

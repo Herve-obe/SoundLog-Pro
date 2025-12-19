@@ -48,7 +48,11 @@
         <StackPanel Grid.Row="2" Margin="0,0,0,20">
             <TextBlock Text="NOTES" Margin="0,0,0,5"/>
             <!-- Notes field expands to fill remaining space, with min height -->
-            <TextBox Text="{Binding ItemNotes, UpdateSourceTrigger=PropertyChanged}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top"/>
+            <TextBox x:Name="NotesTextBox" 
+                     Text="{Binding ItemNotes, UpdateSourceTrigger=PropertyChanged}" 
+                     Height="80" TextWrapping="Wrap" AcceptsReturn="True" 
+                     VerticalContentAlignment="Top"
+                     PreviewKeyDown="NotesTextBox_PreviewKeyDown"/>
         </StackPanel>
 
         <!-- Buttons -->

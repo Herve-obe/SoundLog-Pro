@@ -88,7 +88,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Description"/>
-                <TextBox Grid.Column="1" x:Name="CommentBox" Height="60" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top"/>
+                <TextBox Grid.Column="1" x:Name="CommentBox" 
+                         Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                         VerticalContentAlignment="Top"
+                         PreviewKeyDown="CommentBox_PreviewKeyDown"/>
             </Grid>
         </StackPanel>
 

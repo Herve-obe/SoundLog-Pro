@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 
 namespace Veriflow.Desktop.Views
 {
@@ -19,6 +20,22 @@ namespace Veriflow.Desktop.Views
         {
             DialogResult = true;
             Close();
+        }
+
+        private void CommentBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                // Shift+Enter = newline (default behavior)
+                if (Keyboard.Modifiers == ModifierKeys.Shift)
+                {
+                    return;
+                }
+                
+                // ENTER alone = Apply
+                e.Handled = true;
+                Apply_Click(sender, e);
+            }
         }
     }
 }
