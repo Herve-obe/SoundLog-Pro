@@ -232,6 +232,9 @@ namespace Veriflow.Desktop.ViewModels
             
             // Connect Player callback for Button Enability
             _videoPlayerViewModel.GetReportItemCallback = (path) => _reportsViewModel.GetReportItem(path);
+            
+            // ← NEW: Connect Player to Report for multi-rush clip logging
+            _videoPlayerViewModel.AddClipToReportCallback = (clip) => _reportsViewModel.AddClipToCurrentReport(clip);
 
             // Real-time Feedback Loop
             // Real-time Feedback Loop

@@ -22,5 +22,8 @@ namespace Veriflow.Desktop.Models
 
         [ObservableProperty]
         private bool _isEditing = false;
+
+        [ObservableProperty]
+        private string _sourceFile = ""; // Track which rush this clip belongs to
     }
 }

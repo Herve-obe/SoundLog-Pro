@@ -164,12 +164,13 @@ namespace Veriflow.Desktop.ViewModels
 
         public event Action<IEnumerable<string>>? RequestTranscode;
 
-        // Events for button flash animations
+        // Callbacks / Events
+        public Action<ClipLogItem>? AddClipToReportCallback { get; set; }
         public event Action? FlashMarkInButton;
         public event Action? FlashMarkOutButton;
         public event Action? FlashTagClipButton;
 
-        // --- FILE NAVIGATION ---
+        // File Navigation
         private List<string> _siblingFiles = new();
         private int _currentFileIndex = -1;
 
@@ -846,14 +847,21 @@ namespace Veriflow.Desktop.ViewModels
 
              var duration = outTime - inTime;
 
-             // Commit to List
-             TaggedClips.Add(new ClipLogItem 
+             // Create clip
+             var clip = new ClipLogItem 
              {
                  InPoint = FormatTimecode(inTime),
                  OutPoint = FormatTimecode(outTime),
                  Duration = duration.ToString(@"hh\:mm\:ss"),
-                 Notes = $"Clip {TaggedClips.Count + 1}"
-             });
+                 Notes = $"Clip {TaggedClips.Count + 1}",
+                 SourceFile = FilePath ?? "" // Track which rush this clip belongs to
+             };
+
+             // Add to local list (for current session display)
+             TaggedClips.Add(clip);
+
+             // ← NEW: Send to Report for multi-rush logging
+             AddClipToReportCallback?.Invoke(clip);
 
              // Reset / Cleanup
              _currentInPoint = null;

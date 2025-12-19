@@ -83,6 +83,9 @@ namespace Veriflow.Desktop.Models
         [ObservableProperty] private string _sampleRate = "";
         [ObservableProperty] private string _bitDepth = "";
 
+        // EDL Logging - Clips logged from Player
+        public System.Collections.ObjectModel.ObservableCollection<ClipLogItem> Clips { get; } = new();
+
         public ReportItem(MediaItemViewModel media)
         {
             OriginalMedia = media;

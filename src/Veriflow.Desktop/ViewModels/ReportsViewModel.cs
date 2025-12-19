@@ -9,6 +9,12 @@ using Veriflow.Desktop.Services;
 
 namespace Veriflow.Desktop.ViewModels
 {
+    public enum ReportViewMode
+    {
+        CameraReport,  // PDF Report view
+        EDLLogging     // EDL/Logging view
+    }
+
     public partial class ReportsViewModel : ObservableObject
     {
         // --- DATA ---
@@ -26,6 +32,9 @@ namespace Veriflow.Desktop.ViewModels
         [NotifyPropertyChangedFor(nameof(HasMedia))]
         [NotifyPropertyChangedFor(nameof(HasAnyData))]
         private ReportType _currentReportType = ReportType.Video;
+
+        [ObservableProperty]
+        private ReportViewMode _currentViewMode = ReportViewMode.CameraReport;
 
         partial void OnCurrentReportTypeChanged(ReportType value)
         {
@@ -85,6 +94,19 @@ namespace Veriflow.Desktop.ViewModels
         public void SetAppMode(AppMode mode)
         {
             CurrentReportType = mode == AppMode.Audio ? ReportType.Audio : ReportType.Video;
+        }
+
+        public void AddClipToCurrentReport(ClipLogItem clip)
+        {
+            // Find the ReportItem corresponding to the source file
+            var reportItem = CurrentReportItems.FirstOrDefault(r => 
+                r.OriginalMedia.FullName.Equals(clip.SourceFile, System.StringComparison.OrdinalIgnoreCase));
+            
+            if (reportItem != null)
+            {
+                clip.SourceFile = reportItem.OriginalMedia.FullName; // Ensure full path
+                reportItem.Clips.Add(clip);
+            }
         }
 
         // --- ACTIONS ---
@@ -418,11 +440,118 @@ namespace Veriflow.Desktop.ViewModels
                  {
                      MessageBox.Show($"The file '{dlg.FileName}' is currently open in another application.\n\nPlease close the file and try again.", "File Access Error", MessageBoxButton.OK, MessageBoxImage.Error);
                  }
-                 catch (System.Exception ex)
-                 {
-                     MessageBox.Show($"An error occurred while saving the report:\n{ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                 }
-             }
+                  catch (Exception ex)
+                  {
+                      MessageBox.Show($"An error occurred while saving the report:\n{ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                  }
+              }
+         }
+
+        [RelayCommand]
+        private void ExportSessionEDL()
+        {
+            // Collect all clips from all ReportItems
+            var allClips = CurrentReportItems
+                .Where(item => item.Clips.Any())
+                .SelectMany(item => item.Clips)
+                .ToList();
+
+            if (allClips.Count == 0)
+            {
+                MessageBox.Show("No clips logged in this session.", "Veriflow Export", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Edit Decision List (*.edl)|*.edl",
+                Title = "Export Session EDL/ALE",
+                FileName = $"Session_{System.DateTime.Now:yyyyMMdd_HHmmss}"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string edlPath = dialog.FileName;
+                    string alePath = System.IO.Path.ChangeExtension(edlPath, ".ale");
+
+                    // Generate EDL
+                    var edlContent = GenerateSessionEdl(allClips);
+                    System.IO.File.WriteAllText(edlPath, edlContent);
+
+                    // Generate ALE
+                    var aleContent = GenerateSessionAle(allClips);
+                    System.IO.File.WriteAllText(alePath, aleContent);
+
+                    MessageBox.Show($"Export Successful!\n\nEDL: {edlPath}\nALE: {alePath}\n\nTotal clips: {allClips.Count}", 
+                        "Veriflow Export", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Export Failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private string GenerateSessionEdl(List<ClipLogItem> clips)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("TITLE: VERIFLOW_SESSION_EXPORT");
+            sb.AppendLine("FCM: NON-DROP FRAME");
+            sb.AppendLine();
+
+            TimeSpan destTime = new TimeSpan(1, 0, 0);
+            int index = 1;
+
+            foreach (var clip in clips)
+            {
+                var fileName = System.IO.Path.GetFileNameWithoutExtension(clip.SourceFile);
+                var reelName = fileName.Length > 8 ? fileName.Substring(0, 8) : fileName.PadRight(8);
+
+                // Parse times (format: hh:mm:ss:ff)
+                var inParts = clip.InPoint.Split(':');
+                var outParts = clip.OutPoint.Split(':');
+                
+                string srcIn = clip.InPoint;
+                string srcOut = clip.OutPoint;
+                string dstIn = $"{destTime.Hours:D2}:{destTime.Minutes:D2}:{destTime.Seconds:D2}:00";
+                
+                // Calculate duration
+                var duration = TimeSpan.Parse(clip.Duration);
+                destTime += duration;
+                string dstOut = $"{destTime.Hours:D2}:{destTime.Minutes:D2}:{destTime.Seconds:D2}:00";
+
+                sb.AppendLine($"{index:D3}  {reelName,-8} V     C        {srcIn} {srcOut} {dstIn} {dstOut}");
+                sb.AppendLine($"* FROM CLIP: {fileName}");
+                if (!string.IsNullOrEmpty(clip.Notes))
+                    sb.AppendLine($"* NOTES: {clip.Notes}");
+                sb.AppendLine();
+
+                index++;
+            }
+
+            return sb.ToString();
+        }
+
+        private string GenerateSessionAle(List<ClipLogItem> clips)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Heading");
+            sb.AppendLine("FIELD_DELIM:\tTABS");
+            sb.AppendLine("VIDEO_FORMAT:\t1080");
+            sb.AppendLine("FPS:\t25.00");
+            sb.AppendLine();
+            sb.AppendLine("Name\tSource\tStart\tEnd\tDuration\tNotes");
+            sb.AppendLine("Data");
+
+            foreach (var clip in clips)
+            {
+                var fileName = System.IO.Path.GetFileNameWithoutExtension(clip.SourceFile);
+                sb.AppendLine($"{clip.Notes}\t{fileName}\t{clip.InPoint}\t{clip.OutPoint}\t{clip.Duration}\t{clip.Notes}");
+            }
+
+            return sb.ToString();
         }
     }
 }
