@@ -35,6 +35,7 @@
         
         <!-- Help Menu -->
         <KeyBinding Key="F12" Command="{Binding ViewHelpCommand}"/>
+        <KeyBinding Key="OemQuestion" Modifiers="Ctrl" Command="{Binding ShowKeyboardShortcutsCommand}"/>
     </Window.InputBindings>
 
     <Window.Resources>
@@ -97,6 +98,8 @@
 
             <!-- HELP -->
             <MenuItem Header="Help">
+                <MenuItem Header="Keyboard Shortcuts" InputGestureText="Ctrl+?" Command="{Binding ShowKeyboardShortcutsCommand}"/>
+                <Separator/>
                 <MenuItem Header="View Help" InputGestureText="F12" Command="{Binding ViewHelpCommand}"/>
                 <MenuItem Header="Open Log Folder" Command="{Binding OpenLogFolderCommand}"/>
                 <Separator/>

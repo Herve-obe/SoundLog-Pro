@@ -111,6 +111,7 @@ namespace Veriflow.Desktop.ViewModels
         
         // Help Menu Commands
         public ICommand ViewHelpCommand { get; }
+        public ICommand ShowKeyboardShortcutsCommand { get; }
         public ICommand OpenLogFolderCommand { get; }
 
         public MainViewModel()
@@ -171,6 +172,7 @@ namespace Veriflow.Desktop.ViewModels
             
             // Help Commands
             ViewHelpCommand = new RelayCommand(ViewHelp);
+            ShowKeyboardShortcutsCommand = new RelayCommand(ShowKeyboardShortcuts);
             OpenLogFolderCommand = new RelayCommand(OpenLogFolder);
 
             // Default
@@ -923,6 +925,26 @@ namespace Veriflow.Desktop.ViewModels
             {
                 MessageBox.Show(
                     $"Error opening help window:\n{ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void ShowKeyboardShortcuts()
+        {
+            try
+            {
+                var shortcutsWindow = new Views.ShortcutsWindow
+                {
+                    Owner = Application.Current.MainWindow
+                };
+                shortcutsWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening shortcuts window:\n{ex.Message}",
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
