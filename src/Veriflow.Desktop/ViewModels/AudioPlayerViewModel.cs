@@ -695,7 +695,7 @@ namespace Veriflow.Desktop.ViewModels
             if (_inputStream != null && IsAudioLoaded)
             {
                 var currentTime = _inputStream.GetPosition();
-                var targetTime = currentTime.Subtract(TimeSpan.FromSeconds(5)); // 5 second jump
+                var targetTime = currentTime.Subtract(TimeSpan.FromSeconds(1)); // 1 second jump
                 
                 // Clamp to 0
                 if (targetTime < TimeSpan.Zero) targetTime = TimeSpan.Zero;
@@ -712,7 +712,7 @@ namespace Veriflow.Desktop.ViewModels
             if (_inputStream != null && IsAudioLoaded)
             {
                 var currentTime = _inputStream.GetPosition();
-                var targetTime = currentTime.Add(TimeSpan.FromSeconds(5)); // 5 second jump
+                var targetTime = currentTime.Add(TimeSpan.FromSeconds(1)); // 1 second jump
                 
                 // Clamp to length
                 var length = _inputStream.GetLength();

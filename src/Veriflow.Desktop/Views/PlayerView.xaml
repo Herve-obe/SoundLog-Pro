@@ -105,7 +105,7 @@
                     <!-- Stop Button (Right-aligned in Left box) -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
                         <!-- Previous Button -->
-                        <Button Command="{Binding NavigatePreviousCommand}" ToolTip="Previous File (Ctrl+Shift+Left)" 
+                        <Button Command="{Binding NavigatePreviousCommand}" ToolTip="Previous File (B)" 
                                 Style="{StaticResource Style.Transport.Base}" Foreground="White" 
                                 Width="36" Height="36" Margin="0,0,10,0">
                             <!-- Skip Previous Icon: |◀ -->
@@ -129,7 +129,7 @@
                         </Button>
                         
                         <!-- Next Button -->
-                        <Button Command="{Binding NavigateNextCommand}" ToolTip="Next File (Ctrl+Shift+Right)" 
+                        <Button Command="{Binding NavigateNextCommand}" ToolTip="Next File (N)" 
                                 Style="{StaticResource Style.Transport.Base}" Foreground="White" 
                                 Width="36" Height="36" Margin="0,0,20,0">
                             <!-- Skip Next Icon: ▶| -->

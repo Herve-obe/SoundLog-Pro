@@ -28,16 +28,15 @@
         <KeyBinding Key="Space" Command="{Binding TogglePlayPauseCommand}"/>
         <KeyBinding Key="Return" Command="{Binding StopCommand}"/>
         
-        <!-- Frame Navigation handled by PreviewKeyDown/KeyUp jog system -->
-        <!-- Left/Right: Frame-by-frame with jog support -->
+        <!-- Frame Navigation: Left/Right handled by PreviewKeyDown/KeyUp jog system -->
         
-        <!-- Large Jumps (5 seconds) -->
-        <KeyBinding Key="Left" Modifiers="Shift" Command="{Binding RewindCommand}"/>
-        <KeyBinding Key="Right" Modifiers="Shift" Command="{Binding ForwardCommand}"/>
+        <!-- 1-Second Jumps: Up/Down -->
+        <KeyBinding Key="Up" Command="{Binding ForwardCommand}"/>
+        <KeyBinding Key="Down" Command="{Binding RewindCommand}"/>
         
-        <!-- File Navigation (Previous/Next) - NEW: Ctrl+Shift+Arrow -->
-        <KeyBinding Key="Left" Modifiers="Ctrl+Shift" Command="{Binding NavigatePreviousCommand}"/>
-        <KeyBinding Key="Right" Modifiers="Ctrl+Shift" Command="{Binding NavigateNextCommand}"/>
+        <!-- File Navigation: B/N for Previous/Next -->
+        <KeyBinding Key="B" Command="{Binding NavigatePreviousCommand}"/>
+        <KeyBinding Key="N" Command="{Binding NavigateNextCommand}"/>
         
         <!-- Logging Shortcuts -->
         <KeyBinding Key="I" Command="{Binding SetInCommand}"/>

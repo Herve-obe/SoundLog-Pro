@@ -546,7 +546,7 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (_mediaPlayer != null && IsVideoLoaded)
             {
-                var time = _mediaPlayer.Time - 5000;
+                var time = _mediaPlayer.Time - 1000; // 1 second jump
                 if (time < 0) time = 0;
                 _mediaPlayer.Time = time;
                 CurrentTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(time));
@@ -558,7 +558,7 @@ namespace Veriflow.Desktop.ViewModels
         {
             if (_mediaPlayer != null && IsVideoLoaded)
             {
-                var time = _mediaPlayer.Time + 5000;
+                var time = _mediaPlayer.Time + 1000; // 1 second jump
                 if (time > _mediaPlayer.Length) time = _mediaPlayer.Length;
                 _mediaPlayer.Time = time;
                 CurrentTimeDisplay = FormatTimecode(TimeSpan.FromMilliseconds(time));
@@ -622,6 +622,8 @@ namespace Veriflow.Desktop.ViewModels
              }
              
              IsVideoLoaded = false;
+             IsPlaying = false;
+             IsPaused = false; // Reset pause state
              FileName = "";
              FilePath = "";
              CurrentTimeDisplay = FormatTimecode(TimeSpan.Zero);
@@ -677,54 +679,6 @@ namespace Veriflow.Desktop.ViewModels
                 return;
             }
 
-            // Handle Ctrl+Shift+Arrow for Previous/Next navigation (NEW SHORTCUT)
-            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control &&
-                (e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-            {
-                if (e.Key == Key.Left)
-                {
-                    if (NavigatePreviousCommand.CanExecute(null))
-                    {
-                        _ = NavigatePreviousCommand.ExecuteAsync(null);
-                    }
-                    e.Handled = true;
-                    return;
-                }
-                else if (e.Key == Key.Right)
-                {
-                    if (NavigateNextCommand.CanExecute(null))
-                    {
-                        _ = NavigateNextCommand.ExecuteAsync(null);
-                    }
-                    e.Handled = true;
-                    return;
-                }
-            }
-
-            // Handle Shift+Arrow for Rewind/Forward (5-second jumps)
-            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift &&
-                (e.KeyboardDevice.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
-            {
-                if (e.Key == Key.Left)
-                {
-                    if (RewindCommand.CanExecute(null))
-                    {
-                        RewindCommand.Execute(null);
-                    }
-                    e.Handled = true;
-                    return;
-                }
-                else if (e.Key == Key.Right)
-                {
-                    if (ForwardCommand.CanExecute(null))
-                    {
-                        ForwardCommand.Execute(null);
-                    }
-                    e.Handled = true;
-                    return;
-                }
-            }
-
             // Handle plain arrow keys for jog (frame-by-frame)
             if (e.Key == Key.Right)
             {
@@ -741,13 +695,6 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand]
         private void KeyUp(KeyEventArgs e)
         {
-            // Don't stop jog if any modifier is pressed
-            if (e.KeyboardDevice.Modifiers != ModifierKeys.None)
-            {
-                e.Handled = true;
-                return;
-            }
-
             // Only stop jog for plain arrow keys
             if (e.Key == Key.Right || e.Key == Key.Left)
             {
