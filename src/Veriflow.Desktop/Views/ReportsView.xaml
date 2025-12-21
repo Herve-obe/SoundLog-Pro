@@ -109,15 +109,6 @@
         </Style>
 
 
-        <!-- Explicit Clear Button Styles -->
-        <Style x:Key="Style.Button.Clear.Video" TargetType="Button" BasedOn="{StaticResource ContextualActionButtonStyle}">
-            <!-- Background handled by Base Style Triggers -->
-        </Style>
-
-        <Style x:Key="Style.Button.Clear.Audio" TargetType="Button" BasedOn="{StaticResource AudioActionButtonStyle}">
-            <!-- Background handled by Base Style Triggers -->
-        </Style>
-
         <!-- Explicit Calendar Toggle Styles -->
         <Style x:Key="Style.Toggle.Calendar.Base" TargetType="ToggleButton">
             <Setter Property="Background" Value="{StaticResource Brush.Control}"/>
@@ -475,11 +466,17 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         
                         <!-- CONFIG BUTTON (Moved) -->
-                         <Button Content="⚙ CONFIG" 
-                                 Command="{Binding OpenTemplatesWindowCommand}"
+                         <Button Command="{Binding OpenTemplatesWindowCommand}"
                                  Style="{StaticResource ContextualActionButtonStyle}"
                                  Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}"
-                                 Margin="0,0,10,0"/>
+                                 Margin="0,0,10,0">
+                             <StackPanel Orientation="Horizontal">
+                                 <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.35 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.97 19.05,5.05L16.56,6.05C16.04,5.66 15.47,5.34 14.87,5.08L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.08C8.53,5.34 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.97 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.53,11.35 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.95C7.96,18.34 8.53,18.66 9.13,18.92L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.92C15.47,18.66 16.04,18.34 16.56,17.95L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
+                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                       Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0"/>
+                                 <TextBlock Text="Config"/>
+                             </StackPanel>
+                         </Button>
 
                         <!-- View Mode Toggle (Simplified) - VIDEO MODE ONLY -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
@@ -493,41 +490,65 @@
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-                            <Button Content="📷 REPORT" 
-                                    Command="{Binding SwitchToReportViewCommand}"
-                                    Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}" Margin="0,0,10,0">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ViewModeToggleStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding CurrentViewMode}" Value="CameraReport">
-                                                <Setter Property="Opacity" Value="1.0"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
+                            <Button Command="{Binding SwitchToReportViewCommand}"
+                                     Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}" Margin="0,0,10,0">
+                                 <Button.Style>
+                                     <Style TargetType="Button" BasedOn="{StaticResource ViewModeToggleStyle}">
+                                         <Style.Triggers>
+                                             <DataTrigger Binding="{Binding CurrentViewMode}" Value="CameraReport">
+                                                 <Setter Property="Opacity" Value="1.0"/>
+                                             </DataTrigger>
+                                         </Style.Triggers>
+                                     </Style>
+                                 </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="M19,4H14.82C14.41,2.84 13.3,2 12,2C10.7,2 9.59,2.84 9.18,4H5C3.9,4 3,4.9 3,6V20C3,21.1 3.9,22 5,22H19C20.1,22 21,21.1 21,20V6C21,4.9 20.1,4 19,4M12,4C12.55,4 13,4.45 13,5C13,5.55 12.55,6 12,6C11.45,6 11,5.55 11,5C11,4.45 11.45,4 12,4M19,20H5V6H19V20Z"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                          Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Report"/>
+                                </StackPanel>
                             </Button>
-                            <Button Content="🎬 EDL" 
-                                    Command="{Binding SwitchToEDLViewCommand}"
-                                    Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ViewModeToggleStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding CurrentViewMode}" Value="EDLLogging">
-                                                <Setter Property="Opacity" Value="1.0"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
+                            <Button Command="{Binding SwitchToEDLViewCommand}"
+                                     Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}">
+                                 <Button.Style>
+                                     <Style TargetType="Button" BasedOn="{StaticResource ViewModeToggleStyle}">
+                                         <Style.Triggers>
+                                             <DataTrigger Binding="{Binding CurrentViewMode}" Value="EDLLogging">
+                                                 <Setter Property="Opacity" Value="1.0"/>
+                                             </DataTrigger>
+                                         </Style.Triggers>
+                                     </Style>
+                                 </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="M18,4L20,8H17L15,4H13L15,8H12L10,4H8L10,8H5L3,4H1V18A2,2 0 0,0 3,20H21A2,2 0 0,0 23,18V4H18M11,15H9V13H11V15M15,15H13V13H15V15M19,15H17V13H19V15Z"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                          Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0"/>
+                                    <TextBlock Text="EDL"/>
+                                </StackPanel>
                             </Button>
                         </StackPanel>
                         
-                        <Button Content="ADD FILE(S)" Command="{Binding AddFilesCommand}" 
+                        <Button Command="{Binding AddFilesCommand}" 
                                 Style="{StaticResource ContextualActionButtonStyle}" 
                                 Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}" 
-                                Margin="0,0,10,0"/>
-                        <Button Content="CLEAR LIST" Command="{Binding ClearListCommand}" 
+                                Margin="0,0,10,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15H13V12H16V10H13V7H11V10H8V12H11V15Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0"/>
+                                <TextBlock Text="Add Files"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ClearListCommand}" 
                                 Style="{StaticResource ContextualActionButtonStyle}" 
-                                Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}"/>
+                                Width="120" Height="26" FontSize="{StaticResource Font.Size.Mini}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0"/>
+                                <TextBlock Text="Clear List"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
                 
@@ -991,7 +1012,8 @@
 
                 <!-- Video Report Form -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,-5,0,0">
-                    <Grid>
+                    <StackPanel>
+                        <Grid>
                         <!-- VIDEO FORM -->
                         <StackPanel Margin="5" KeyboardNavigation.TabNavigation="Cycle">
                             <StackPanel.Style>
@@ -1093,8 +1115,7 @@
                             <TextBlock Text="LENS INFO"/>
                             <TextBox Text="{Binding Header.LensInfo, UpdateSourceTrigger=PropertyChanged}"/>
 
-                            <!-- CLEAR BUTTON -->
-                            <Button Content="CLEAR INFOS" Command="{Binding ClearInfosCommand}" Margin="0,20,0,0" Style="{StaticResource Style.Button.Clear.Video}"/>
+
 
                         </StackPanel>
 
@@ -1197,18 +1218,30 @@
                                 </StackPanel>
                             </Grid>
 
-                            <!-- CLEAR BUTTON -->
-                            <Button Content="CLEAR INFOS" Command="{Binding ClearInfosCommand}" Margin="0,20,0,0" Style="{StaticResource Style.Button.Clear.Audio}"/>
+
 
                         </StackPanel>
-                    </Grid>
+                        </Grid>
+                        
+                        <!-- CLEAR BUTTON (Moved inside ScrollViewer, below forms) -->
+                        <Button Command="{Binding ClearInfosCommand}" Height="30" Margin="5,0,5,20" Style="{StaticResource ContextualActionButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                                <TextBlock Text="Clear Infos" Margin="0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </ScrollViewer>
 
-                <!-- EXPORT BUTTONS (Vertical like Player, Full Width) -->
+                <!-- EXPORT BUTTONS & CLEAR (Vertical like Player, Full Width) -->
                 <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,10,0,0">
-                    <Button Content="EXPORT SESSION EDL/ALE" Command="{Binding ExportSessionEDLCommand}" 
+
+
+                    <Button Command="{Binding ExportSessionEDLCommand}" 
                             Height="30" Margin="0,0,0,5">
-                        <Button.Style>
+                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource ContextualActionButtonStyle}">
                                 <Setter Property="Visibility" Value="Visible"/>
                                 <Style.Triggers>
@@ -1218,9 +1251,22 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M12,1L8,5H11V14H13V5H16M18,23H6C4.89,23 4,22.1 4,21V9A2,2 0 0,1 6,7H9V9H6V21H18V9H15V7H18A2,2 0 0,1 20,9V21A2,2 0 0,1 18,23Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Export Session EDL/ALE"/>
+                        </StackPanel>
                     </Button>
-                    <Button Content="EXPORT TO PDF" Command="{Binding ExportPdfCommand}" 
-                            Style="{StaticResource ContextualActionButtonStyle}" Height="30"/>
+                    <Button Command="{Binding ExportPdfCommand}" 
+                            Style="{StaticResource ContextualActionButtonStyle}" Height="30">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.5,16C15.5,16.8 14.3,18.5 12,18.5C9.7,18.5 8.5,16.8 8.5,16H10C10,16 10,17 12,17C14,17 14,16 14,16C14,15.2 13.5,14.8 12.3,14.5C10.9,14.1 9.5,13.5 9.5,11.5C9.5,9.4 11.5,9 12,9C12.5,9 14.5,9.1 14.5,11.5H13C13,11.5 13,10.5 12,10.5C11,10.5 11,11 11,11.5C11,12.3 11.5,12.7 12.7,13C14.1,13.4 15.5,14 15.5,16M13,3.5L17.5,8H13V3.5Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Export PDF"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

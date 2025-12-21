@@ -446,6 +446,14 @@ namespace Veriflow.Desktop.ViewModels
                                !string.IsNullOrEmpty(Header.Director) ||
                                !string.IsNullOrEmpty(Header.Dop) ||
                                !string.IsNullOrEmpty(Header.SoundMixer) ||
+                               !string.IsNullOrEmpty(Header.BoomOperator) ||
+                               !string.IsNullOrEmpty(Header.Location) ||
+                               !string.IsNullOrEmpty(Header.TimecodeRate) ||
+                               !string.IsNullOrEmpty(Header.FilesType) ||
+                               !string.IsNullOrEmpty(Header.DataManager) ||
+                               !string.IsNullOrEmpty(Header.CameraId) ||
+                               !string.IsNullOrEmpty(Header.ReelName) ||
+                               !string.IsNullOrEmpty(Header.LensInfo) ||
                                !string.IsNullOrEmpty(Header.Episode) ||
                                !string.IsNullOrEmpty(Header.Scene) ||
                                !string.IsNullOrEmpty(Header.Take) ||

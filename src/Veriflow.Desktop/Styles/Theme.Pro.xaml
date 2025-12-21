@@ -147,6 +147,9 @@
         <Setter Property="Padding" Value="10,0"/>
         <Setter Property="Background" Value="{StaticResource Brush.Control}"/>
         <Setter Property="Foreground" Value="White"/>
+        <!-- Force button content (TextBlock, Run, etc.) to follow the button Foreground/FontSize -->
+        <Setter Property="TextElement.Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="TextElement.FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="#555555"/>
         <Setter Property="Template">
@@ -155,7 +158,9 @@
                     <Border x:Name="border" Background="{TemplateBinding Background}" 
                             BorderBrush="{TemplateBinding BorderBrush}" 
                             BorderThickness="{TemplateBinding BorderThickness}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -166,7 +171,7 @@
                             <Setter TargetName="border" Property="Background" Value="{StaticResource Brush.Control.Pressed}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            <Setter Property="Foreground" Value="#666666"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -319,19 +324,26 @@
     </Style>
 
     <!-- VIEW MODE TOGGLE BASE (For REPORT/EDL buttons - uses contextual accent color) -->
-    <Style x:Key="ViewModeToggleStyle" TargetType="Button">
+    <Style x:Key="ViewModeToggleStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
         <Setter Property="Foreground" Value="White"/>
-        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Opacity" Value="0.2"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="0">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                    <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="0">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="#666666"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -382,11 +394,15 @@
     <Style x:Key="BlueActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Height" Value="26"/>
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+        <Setter Property="TextElement.Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="TextElement.FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border x:Name="border" Background="#333333" BorderBrush="#555555" BorderThickness="1">
-                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                           Margin="{TemplateBinding Padding}"
+                                           TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <!-- Enabled = Blue -->
@@ -423,11 +439,15 @@
     <Style x:Key="AudioActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Height" Value="26"/>
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+        <Setter Property="TextElement.Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="TextElement.FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border x:Name="border" Background="#333333" BorderBrush="#555555" BorderThickness="1">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <!-- Enabled = Red -->
@@ -436,14 +456,20 @@
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush.Accent.Audio}"/>
                             <Setter Property="Foreground" Value="White"/>
                         </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <!-- Hover (only when enabled) -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsEnabled" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="border" Property="Background" Value="#C62828"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="#C62828"/>
-                        </Trigger>
+                        </MultiTrigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush.Accent.Audio.Pressed}"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush.Accent.Audio.Pressed}"/>
                         </Trigger>
+                        <!-- Disabled = Gray -->
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="border" Property="Background" Value="#333333"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="#555555"/>
@@ -459,11 +485,15 @@
     <Style x:Key="ContextualActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Height" Value="26"/>
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+        <Setter Property="TextElement.Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="TextElement.FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border x:Name="border" Background="#333333" BorderBrush="#555555" BorderThickness="1">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <!-- Default Enabled State = Blue (Video Mode) -->
@@ -482,6 +512,7 @@
                         <!-- Hover State - Video Mode -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding DataContext.IsVideoActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
                             </MultiDataTrigger.Conditions>
@@ -492,6 +523,7 @@
                         <!-- Hover State - Audio Mode -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding DataContext.IsVideoActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
                             </MultiDataTrigger.Conditions>
@@ -502,6 +534,7 @@
                         <!-- Pressed State - Video Mode -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding IsPressed, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding DataContext.IsVideoActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="True"/>
                             </MultiDataTrigger.Conditions>
@@ -512,6 +545,7 @@
                         <!-- Pressed State - Audio Mode -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding IsPressed, RelativeSource={RelativeSource Self}}" Value="True"/>
                                 <Condition Binding="{Binding DataContext.IsVideoActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="False"/>
                             </MultiDataTrigger.Conditions>
@@ -544,7 +578,8 @@
                 <ControlTemplate TargetType="Button">
                     <Grid>
                         <Ellipse x:Name="circle" Fill="Transparent" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="2"/>
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -588,6 +623,75 @@
         <Setter Property="Height" Value="36"/>
     </Style>
 
+
+    <!-- PRIMARY ACTION BUTTON (Large, for main actions like START COPY) -->
+    <Style x:Key="PrimaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource ContextualActionButtonStyle}">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Padding" Value="20,0"/>
+        <Setter Property="MinWidth" Value="200"/>
+    </Style>
+
+    <!-- TEXT LINK BUTTON (Transparent background, accent color, for Reset All, etc.) -->
+    <Style x:Key="TextLinkButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Micro}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="TextElement.Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="TextElement.FontSize" Value="{Binding FontSize, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="#666666"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- CLEAR BUTTON (Small X button for clearing TextBox fields) -->
+    <Style x:Key="ClearFieldButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Micro}"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
     <Style x:Key="Style.Button.Primary" TargetType="Button" BasedOn="{StaticResource BlueActionButtonStyle}"/>
     <Style x:Key="Style.Button.Secondary" TargetType="Button" BasedOn="{StaticResource PrimaryActionStyle}"/>
@@ -1331,7 +1435,7 @@
                         </MultiTrigger>
                         
                         <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Setter Property="Foreground" Value="#666666"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

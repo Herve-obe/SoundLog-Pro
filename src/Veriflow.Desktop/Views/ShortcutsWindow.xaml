@@ -139,15 +139,20 @@
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
                     Margin="0,20,0,0">
-            <Button Content="VIEW FULL MANUAL" 
-                    Command="{Binding OpenFullManualCommand}"
-                    Style="{StaticResource Style.Button.Primary}"
+            <Button Command="{Binding OpenFullManualCommand}"
+                    Style="{StaticResource ContextualActionButtonStyle}"
                     Width="180" 
                     Height="36"
-                    Margin="0,0,10,0"/>
-            <Button Content="CLOSE" 
-                    IsCancel="True"
-                    Style="{StaticResource Style.Button.Secondary}"
+                    Margin="0,0,10,0">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M14,2H6C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          Width="16" Height="16" Stretch="Uniform" Margin="0,0,6,0"/>
+                    <TextBlock Text="View Full Manual"/>
+                </StackPanel>
+            </Button>
+            <Button IsCancel="True"
+                    Style="{StaticResource ContextualActionButtonStyle}"
                     Width="100" 
                     Height="36"/>
         </StackPanel>

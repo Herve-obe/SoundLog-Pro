@@ -97,38 +97,16 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="CANCEL" IsCancel="True"
+            <Button IsCancel="True"
                     Width="100" Height="30" Margin="0,0,10,0"
-                    Background="#333" Foreground="#CCC" BorderThickness="0">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="3">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#444"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+                    Style="{StaticResource ContextualActionButtonStyle}">
+                <TextBlock Text="Cancel"/>
             </Button>
             
-            <Button Content="APPLY" Click="Apply_Click" IsDefault="True"
-                    Width="100" Height="30"
-                    Background="{DynamicResource Brush.Accent}" Foreground="White" BorderThickness="0" FontWeight="Bold">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="3">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource Brush.Accent.Hover}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+            <Button Click="Apply_Click" IsDefault="True"
+                    Style="{StaticResource ContextualActionButtonStyle}"
+                    Width="100" Height="30">
+                <TextBlock Text="Apply"/>
             </Button>
         </StackPanel>
     </Grid>

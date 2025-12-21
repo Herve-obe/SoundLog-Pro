@@ -59,8 +59,12 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="CANCEL" Click="CancelButton_Click" Style="{StaticResource Style.Button.Secondary}" Width="80" Height="30" Margin="0,0,10,0"/>
-            <Button Content="SAVE" Click="SaveButton_Click" Style="{StaticResource Style.Button.Primary}" Width="80" Height="30"/>
+            <Button Click="CancelButton_Click" Style="{StaticResource ContextualActionButtonStyle}" Width="80" Height="30" Margin="0,0,10,0">
+                <TextBlock Text="Cancel"/>
+            </Button>
+            <Button Click="SaveButton_Click" Style="{StaticResource ContextualActionButtonStyle}" Width="80" Height="30">
+                <TextBlock Text="Save"/>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

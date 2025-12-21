@@ -52,9 +52,12 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="CANCEL" Click="Cancel_Click" Style="{StaticResource Style.Button.Secondary}" Width="80" Height="30" Margin="0,0,10,0"/>
-            <!-- Uses Style.Button.Primary which links to DynamicResource Brush.Accent (Blue in Video Mode) -->
-            <Button Content="SAVE" Click="Save_Click" Style="{StaticResource Style.Button.Primary}" Width="80" Height="30" IsDefault="True"/>
+            <Button Click="Cancel_Click" Style="{StaticResource ContextualActionButtonStyle}" Width="80" Height="30" Margin="0,0,10,0">
+                <TextBlock Text="Cancel"/>
+            </Button>
+            <Button Click="Save_Click" Style="{StaticResource ContextualActionButtonStyle}" Width="80" Height="30" IsDefault="True">
+                <TextBlock Text="Save"/>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

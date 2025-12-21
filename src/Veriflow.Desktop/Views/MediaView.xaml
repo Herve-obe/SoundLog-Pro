@@ -872,33 +872,82 @@
                 <!-- Action Buttons Area (Bottom) -->
                 <StackPanel Grid.Row="2" Margin="0,10,0,0">
                     <Button Command="{Binding DataContext.CreateReportCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="CREATE REPORT" Height="26" ToolTip="Start a new report with listed files" Margin="0,0,0,5"
-                            Style="{StaticResource ContextualActionButtonStyle}"/>
+                            Height="26" ToolTip="Start a new report with listed files" Margin="0,0,0,5"
+                            Style="{StaticResource ContextualActionButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Create Report"/>
+                        </StackPanel>
+                    </Button>
                     
                     <Button Command="{Binding DataContext.AddToReportCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="ADD TO REPORT" Height="26" ToolTip="Add listed files to current report" Margin="0,0,0,5"
+                            Height="26" ToolTip="Add listed files to current report" Margin="0,0,0,5"
                             Style="{StaticResource ContextualActionButtonStyle}"
-                            IsEnabled="{Binding DataContext.HasActiveReport, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            IsEnabled="{Binding DataContext.HasActiveReport, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15H13V12H16V10H13V7H11V10H8V12H11V15Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Add to Report"/>
+                        </StackPanel>
+                    </Button>
 
                     <Button Command="{Binding DataContext.OpenInPlayerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="OPEN FILE IN PLAYER" Height="26" ToolTip="Open selected file in Player" Margin="0,0,0,5"
-                            Style="{StaticResource ContextualActionButtonStyle}"/>
+                            Height="26" ToolTip="Open selected file in Player" Margin="0,0,0,5"
+                            Style="{StaticResource ContextualActionButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M10,16V8L15,12L10,16Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Open in Player"/>
+                        </StackPanel>
+                    </Button>
                     
                     <Button Command="{Binding DataContext.SendToSecureCopyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="SEND TO SECURE COPY" Height="26" ToolTip="Send selected folder to Secure Copy" Margin="0,0,0,5"
-                            Style="{StaticResource ContextualActionButtonStyle}"/>
+                            Height="26" ToolTip="Send selected folder to Secure Copy" Margin="0,0,0,5"
+                            Style="{StaticResource ContextualActionButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Secure Copy"/>
+                        </StackPanel>
+                    </Button>
 
                     <Button Command="{Binding DataContext.SendFileToTranscodeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="SEND FILE TO TRANSCODE" Height="26" ToolTip="Send selected file to Transcode" Margin="0,0,0,5"
-                            Style="{StaticResource ContextualActionButtonStyle}"/>
+                            Height="26" ToolTip="Send selected file to Transcode" Margin="0,0,0,5"
+                            Style="{StaticResource ContextualActionButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C16.42,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C16.42,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Transcode File"/>
+                        </StackPanel>
+                    </Button>
 
                     <Button Command="{Binding DataContext.SendToTranscodeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="SEND FOLDER TO TRANSCODE" Height="26" ToolTip="Send all files in folder to Transcode" Margin="0,0,0,5"
-                            Style="{StaticResource ContextualActionButtonStyle}"/>
+                            Height="26" ToolTip="Send all files in folder to Transcode" Margin="0,0,0,5"
+                            Style="{StaticResource ContextualActionButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M20,6H12L10,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8A2,2 0 0,0 20,6M14,16L10,12.5V15H8V10H13V12H10.5L14,15.5V16Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Transcode Folder"/>
+                        </StackPanel>
+                    </Button>
                             
                     <Button Command="{Binding DataContext.EditMetadataCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Content="EDIT METADATA" Height="26" ToolTip="Edit metadata for selected media" Margin="0,0,0,0"
-                            Style="{StaticResource ContextualActionButtonStyle}"/>
+                            Height="26" ToolTip="Edit metadata for selected media" Margin="0,0,0,0"
+                            Style="{StaticResource ContextualActionButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Edit Metadata"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

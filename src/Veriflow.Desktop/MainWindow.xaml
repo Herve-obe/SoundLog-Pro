@@ -145,7 +145,7 @@
 
                 <!-- Tools: A/V Switch -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="20,0,0,0">
-                    <RadioButton Content="VIDEO" GroupName="AV" IsChecked="{Binding IsVideoActive, Mode=OneWay}" Style="{StaticResource VideoToggleStyle}"
+                    <RadioButton Content="Video" GroupName="AV" IsChecked="{Binding IsVideoActive, Mode=OneWay}" Style="{StaticResource VideoToggleStyle}"
                                  Command="{Binding SwitchToVideoCommand}">
                          <RadioButton.Tag>
                             <!-- Clapboard Icon -->
@@ -154,7 +154,7 @@
                                   Height="14" Width="14" Stretch="Uniform"/>
                         </RadioButton.Tag>
                     </RadioButton>
-                    <RadioButton Content="AUDIO" GroupName="AV" IsChecked="{Binding IsAudioActive, Mode=OneWay}" Style="{StaticResource AudioToggleStyle}" Margin="1,0,0,0"
+                    <RadioButton Content="Audio" GroupName="AV" IsChecked="{Binding IsAudioActive, Mode=OneWay}" Style="{StaticResource AudioToggleStyle}" Margin="1,0,0,0"
                                  Command="{Binding SwitchToAudioCommand}">
                         <RadioButton.Tag>
                             <!-- Waveform Icon -->
