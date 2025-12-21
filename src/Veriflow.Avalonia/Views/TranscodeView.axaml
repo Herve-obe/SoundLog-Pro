@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="Veriflow.Avalonia.Views.TranscodeView"
+             x:DataType="vm:TranscodeViewModel"
+             Background="{StaticResource Brush.Background.Panel}">
+    
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,20">
+            <TextBlock Classes="Title" Text="TRANSCODE"/>
+            <TextBlock Classes="Subtitle" Text="Convert media files to different formats"/>
+        </StackPanel>
+        
+        <!-- Preset Selection -->
+        <Border Grid.Row="1"
+                Background="{StaticResource Brush.Background.Elevated}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16"
+                Margin="0,0,0,16">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" 
+                           Classes="Label" 
+                           Text="PRESET:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+                <ComboBox Grid.Column="1"
+                          SelectedIndex="0"
+                          HorizontalAlignment="Stretch">
+                    <ComboBoxItem Content="ProRes 422 HQ"/>
+                    <ComboBoxItem Content="ProRes 422"/>
+                    <ComboBoxItem Content="H.264 High Quality"/>
+                    <ComboBoxItem Content="DNxHD 185"/>
+                    <ComboBoxItem Content="WAV 48kHz 24-bit"/>
+                </ComboBox>
+                <Button Grid.Column="2" 
+                        Content="ADD FILES" 
+                        Classes="Primary"
+                        Margin="12,0,0,0"/>
+            </Grid>
+        </Border>
+        
+        <!-- File Queue -->
+        <Border Grid.Row="2"
+                Background="{StaticResource Brush.Background.Elevated}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16"
+                Margin="0,0,0,16">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" Classes="Label" Text="QUEUE" Margin="0,0,0,12"/>
+                
+                <ListBox Grid.Row="1"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                <TextBlock Grid.Column="0" 
+                                           Text="Sample_File.mov"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" 
+                                           Text="Ready"
+                                           Foreground="{StaticResource Brush.Text.Tertiary}"
+                                           Margin="8,0"
+                                           VerticalAlignment="Center"/>
+                                <ProgressBar Grid.Column="2"
+                                             Width="100"
+                                             Value="0"
+                                             Margin="8,0"
+                                             VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="3" 
+                                           Text="0%"
+                                           Width="40"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+        
+        <!-- Action Bar -->
+        <Border Grid.Row="3"
+                Background="{StaticResource Brush.Background.Deep}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <TextBlock Grid.Column="0" 
+                           Classes="Label"
+                           Text="0 files in queue"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Content="CLEAR QUEUE" Margin="0,0,8,0"/>
+                <Button Grid.Column="2" Content="START TRANSCODE" Classes="Primary" Margin="0,0,8,0"/>
+                <Button Grid.Column="3" Content="CANCEL"/>
+            </Grid>
+        </Border>
+        
+    </Grid>
+    
+</UserControl>

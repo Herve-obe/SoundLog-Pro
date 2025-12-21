@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="Veriflow.Avalonia.Views.SyncView"
+             x:DataType="vm:SyncViewModel"
+             Background="{StaticResource Brush.Background.Panel}">
+    
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,20">
+            <TextBlock Classes="Title" Text="SYNC"/>
+            <TextBlock Classes="Subtitle" Text="Synchronize audio and video files"/>
+        </StackPanel>
+        
+        <!-- File Selection -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,0,0,16">
+            
+            <!-- Video File -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="0,0,8,0">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="Label" Text="VIDEO FILE"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" 
+                                 Watermark="Select video file or drag here..."
+                                 IsReadOnly="True"/>
+                        <Button Grid.Column="1" 
+                                Content="BROWSE" 
+                                Classes="Primary"
+                                Margin="8,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Audio File -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="8,0,0,0">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="Label" Text="AUDIO FILE"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" 
+                                 Watermark="Select audio file or drag here..."
+                                 IsReadOnly="True"/>
+                        <Button Grid.Column="1" 
+                                Content="BROWSE" 
+                                Classes="Primary"
+                                Margin="8,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+        </Grid>
+        
+        <!-- Waveform Comparison Area -->
+        <Border Grid.Row="2"
+                Background="{StaticResource Brush.Background.Deep}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16"
+                Margin="0,0,0,16">
+            <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Classes="Header" 
+                           Text="Waveform Comparison" 
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource Brush.Text.Secondary}"/>
+                <TextBlock Classes="Subtitle" 
+                           Text="Load files to analyze and sync" 
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource Brush.Text.Tertiary}"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Sync Controls -->
+        <Border Grid.Row="3"
+                Background="{StaticResource Brush.Background.Elevated}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                <TextBlock Grid.Column="0" 
+                           Classes="Label" 
+                           Text="OFFSET:" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+                <Slider Grid.Column="1" 
+                        Minimum="-1000" 
+                        Maximum="1000"
+                        Value="0"
+                        VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" 
+                           Text="0 ms"
+                           Width="60"
+                           Margin="12,0"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="3" Content="AUTO SYNC" Classes="Primary" Margin="0,0,8,0"/>
+                <Button Grid.Column="4" Content="APPLY SYNC"/>
+            </Grid>
+        </Border>
+        
+    </Grid>
+    
+</UserControl>

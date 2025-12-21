@@ -1,0 +1,116 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="Veriflow.Avalonia.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Veriflow [BETA] - v1.0 (Avalonia)"
+        Width="1400" Height="900"
+        MinWidth="1200" MinHeight="700"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="40"
+        Background="{StaticResource Brush.Background.Primary}">
+    
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid RowDefinitions="40,*,60">
+        
+        <!-- Custom Title Bar -->
+        <Grid Grid.Row="0" Background="{StaticResource Brush.Background.Secondary}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Column="0"
+                       Text="Veriflow [BETA] - v1.0 (Avalonia)"
+                       Foreground="{StaticResource Brush.Text.Primary}"
+                       FontSize="12"
+                       VerticalAlignment="Center"
+                       Margin="12,0"/>
+            
+            <!-- Close Button -->
+            <Button Grid.Column="1"
+                    Content="✕"
+                    Width="40"
+                    Height="40"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Foreground="{StaticResource Brush.Text.Secondary}"
+                    FontSize="16"
+                    Click="CloseButton_Click">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="#C42B1C"/>
+                        <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                </Button.Styles>
+            </Button>
+        </Grid>
+        
+        <!-- Content Area -->
+        <ContentControl Grid.Row="1" 
+                        Content="{Binding CurrentViewModel}"
+                        Background="{StaticResource Brush.Background.Primary}"/>
+        
+        <!-- Bottom Navigation Bar -->
+        <Border Grid.Row="2" 
+                Background="{StaticResource Brush.Background.Secondary}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="0,1,0,0">
+            
+            <UniformGrid Rows="1" Columns="6">
+                
+                <!-- F1 - Offload (Secure Copy) -->
+                <RadioButton Classes="NavButton"
+                             GroupName="Navigation"
+                             Content="OFFLOAD (F1)"
+                             IsChecked="{Binding IsOffloadPage}"
+                             Command="{Binding NavigateToOffloadCommand}"/>
+                
+                <!-- F2 - Media -->
+                <RadioButton Classes="NavButton"
+                             GroupName="Navigation"
+                             Content="MEDIA (F2)"
+                             IsChecked="{Binding IsMediaPage}"
+                             Command="{Binding NavigateToMediaCommand}"/>
+                
+                <!-- F3 - Player -->
+                <RadioButton Classes="NavButton"
+                             GroupName="Navigation"
+                             Content="PLAYER (F3)"
+                             IsChecked="{Binding IsPlayerPage}"
+                             Command="{Binding NavigateToPlayerCommand}"/>
+                
+                <!-- F4 - Sync -->
+                <RadioButton Classes="NavButton"
+                             GroupName="Navigation"
+                             Content="SYNC (F4)"
+                             IsChecked="{Binding IsSyncPage}"
+                             Command="{Binding NavigateToSyncCommand}"/>
+                
+                <!-- F5 - Transcode -->
+                <RadioButton Classes="NavButton"
+                             GroupName="Navigation"
+                             Content="TRANSCODE (F5)"
+                             IsChecked="{Binding IsTranscodePage}"
+                             Command="{Binding NavigateToTranscodeCommand}"/>
+                
+                <!-- F6 - Reports -->
+                <RadioButton Classes="NavButton"
+                             GroupName="Navigation"
+                             Content="REPORTS (F6)"
+                             IsChecked="{Binding IsReportsPage}"
+                             Command="{Binding NavigateToReportsCommand}"/>
+                
+            </UniformGrid>
+        </Border>
+        
+    </Grid>
+    
+</Window>

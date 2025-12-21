@@ -1,0 +1,38 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             xmlns:views="using:Veriflow.Avalonia.Views"
+             x:Class="Veriflow.Avalonia.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="/Styles/Theme.Pro.axaml"/>
+    </Application.Styles>
+    
+    <Application.DataTemplates>
+        <!-- ViewModel to View mappings -->
+        <DataTemplate DataType="vm:OffloadViewModel">
+            <views:OffloadView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:MediaViewModel">
+            <views:MediaView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:AudioPlayerViewModel">
+            <views:PlayerView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:VideoPlayerViewModel">
+            <views:PlayerView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:SyncViewModel">
+            <views:SyncView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:TranscodeViewModel">
+            <views:TranscodeView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:ReportsViewModel">
+            <views:ReportsView/>
+        </DataTemplate>
+    </Application.DataTemplates>
+    
+</Application>

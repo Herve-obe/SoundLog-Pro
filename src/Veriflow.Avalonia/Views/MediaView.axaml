@@ -1,0 +1,171 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="Veriflow.Avalonia.Views.MediaView"
+             x:DataType="vm:MediaViewModel"
+             Background="{StaticResource Brush.Background.Panel}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,20">
+            <TextBlock Classes="Title" Text="MEDIA"/>
+            <TextBlock Classes="Subtitle" Text="Browse and preview media files"/>
+        </StackPanel>
+        
+        <!-- Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,350" Margin="0,0,0,16">
+            
+            <!-- File List -->
+            <Border Grid.Column="0" 
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="0,0,8,0">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0" Classes="Label" Text="MEDIA FILES" Margin="0,0,0,12"/>
+                    
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding FileList}"
+                             SelectedItem="{Binding SelectedMedia}"
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <!-- Play Icon -->
+                                    <TextBlock Grid.Column="0" 
+                                               Text="▶" 
+                                               FontSize="10"
+                                               Margin="0,0,8,0"
+                                               VerticalAlignment="Center"
+                                               IsVisible="{Binding IsPlaying}"/>
+                                    
+                                    <!-- Filename -->
+                                    <TextBlock Grid.Column="1" 
+                                               Text="{Binding Name}"
+                                               VerticalAlignment="Center"/>
+                                    
+                                    <!-- Duration -->
+                                    <TextBlock Grid.Column="2" 
+                                               Text="{Binding Duration}"
+                                               Foreground="{StaticResource Brush.Text.Tertiary}"
+                                               FontSize="11"
+                                               Margin="8,0"
+                                               VerticalAlignment="Center"/>
+                                    
+                                    <!-- Format -->
+                                    <TextBlock Grid.Column="3" 
+                                               Text="{Binding Format}"
+                                               Foreground="{StaticResource Brush.Text.Tertiary}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+            
+            <!-- Metadata Panel -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="8,0,0,0">
+                <ScrollViewer>
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="Label" Text="METADATA"/>
+                        
+                        <!-- Show when file selected -->
+                        <StackPanel Spacing="8" IsVisible="{Binding SelectedMedia, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <TextBlock Classes="Subtitle" Text="{Binding SelectedMedia.Name}"/>
+                            
+                            <Separator Background="{StaticResource Brush.Divider}" Margin="0,8"/>
+                            
+                            <!-- General Info -->
+                            <TextBlock Classes="Label" Text="GENERAL" FontWeight="SemiBold"/>
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="File:" Classes="Label"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.Name}" TextWrapping="Wrap"/>
+                                
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Size:" Classes="Label" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.FileSizeFormatted}" Margin="0,4,0,0"/>
+                                
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Duration:" Classes="Label" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.Duration}" Margin="0,4,0,0"/>
+                                
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Format:" Classes="Label" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedMedia.Format}" Margin="0,4,0,0"/>
+                            </Grid>
+                            
+                            <Separator Background="{StaticResource Brush.Divider}" Margin="0,8"/>
+                            
+                            <!-- Technical Info -->
+                            <TextBlock Classes="Label" Text="TECHNICAL" FontWeight="SemiBold"/>
+                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Sample Rate:" Classes="Label"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.SampleRate}"/>
+                                
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Bit Depth:" Classes="Label" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.BitDepth}" Margin="0,4,0,0"/>
+                                
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Channels:" Classes="Label" Margin="0,4,0,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.Channels}" Margin="0,4,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <!-- Show when no file selected -->
+                        <TextBlock Classes="Subtitle" 
+                                   Text="Select a file to view details"
+                                   IsVisible="{Binding SelectedMedia, Converter={x:Static ObjectConverters.IsNull}}"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            
+        </Grid>
+        
+        <!-- Action Bar -->
+        <Border Grid.Row="2"
+                Background="{StaticResource Brush.Background.Deep}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <!-- Status -->
+                <TextBlock Grid.Column="0" 
+                           Classes="Label"
+                           VerticalAlignment="Center"
+                           Text="{Binding FileList.Count, StringFormat='{}{0} files'}"/>
+                
+                <!-- Action Buttons -->
+                <Button Grid.Column="1" 
+                        Content="PREVIEW" 
+                        Margin="0,0,8,0"
+                        Command="{Binding PreviewFileCommand}"
+                        CommandParameter="{Binding SelectedMedia}"/>
+                
+                <Button Grid.Column="2" 
+                        Content="OPEN IN PLAYER" 
+                        Classes="Primary"
+                        Margin="0,0,8,0"
+                        Command="{Binding OpenInPlayerCommand}"/>
+                
+                <Button Grid.Column="3" 
+                        Content="SEND TO TRANSCODE"
+                        Command="{Binding SendFileToTranscodeCommand}"/>
+            </Grid>
+        </Border>
+        
+    </Grid>
+    
+</UserControl>
+

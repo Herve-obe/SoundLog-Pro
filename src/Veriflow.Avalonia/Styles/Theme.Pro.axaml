@@ -1,0 +1,294 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- ============================================ -->
+    <!-- COLOR RESOURCES (From WPF Theme.Pro.xaml) -->
+    <!-- ============================================ -->
+    <Style>
+        <Style.Resources>
+            <!-- Primary Colors -->
+            <Color x:Key="Color.Background.Deep">#121212</Color>
+            <Color x:Key="Color.Background.Panel">#1E1E1E</Color>
+            <Color x:Key="Color.Background.Elevated">#252526</Color>
+            <Color x:Key="Color.Background.Hover">#2D2D30</Color>
+            
+            <!-- Accent Colors -->
+            <Color x:Key="Color.Accent.Video">#1A4CB1</Color>
+            <Color x:Key="Color.Accent.Video.Hover">#3565C8</Color>
+            <Color x:Key="Color.Accent.Video.Pressed">#123680</Color>
+            
+            <Color x:Key="Color.Accent.Audio">#E64B3D</Color>
+            <Color x:Key="Color.Accent.Audio.Hover">#FF6E60</Color>
+            <Color x:Key="Color.Accent.Audio.Pressed">#C03025</Color>
+            
+            <!-- Text Colors -->
+            <Color x:Key="Color.Text.Primary">#FFFFFF</Color>
+            <Color x:Key="Color.Text.Secondary">#CCCCCC</Color>
+            <Color x:Key="Color.Text.Tertiary">#999999</Color>
+            <Color x:Key="Color.Text.Disabled">#6E6E6E</Color>
+            
+            <!-- Border & Divider -->
+            <Color x:Key="Color.Border">#3F3F46</Color>
+            <Color x:Key="Color.Divider">#2D2D30</Color>
+            
+            <!-- Status Colors -->
+            <Color x:Key="Color.Success">#4EC9B0</Color>
+            <Color x:Key="Color.Warning">#CE9178</Color>
+            <Color x:Key="Color.Error">#F48771</Color>
+            
+            <!-- Brushes -->
+            <SolidColorBrush x:Key="Brush.Background.Deep" Color="{StaticResource Color.Background.Deep}"/>
+            <SolidColorBrush x:Key="Brush.Background.Panel" Color="{StaticResource Color.Background.Panel}"/>
+            <SolidColorBrush x:Key="Brush.Background.Elevated" Color="{StaticResource Color.Background.Elevated}"/>
+            <SolidColorBrush x:Key="Brush.Background.Hover" Color="{StaticResource Color.Background.Hover}"/>
+            
+            <SolidColorBrush x:Key="Brush.Accent.Video" Color="{StaticResource Color.Accent.Video}"/>
+            <SolidColorBrush x:Key="Brush.Accent.Video.Hover" Color="{StaticResource Color.Accent.Video.Hover}"/>
+            <SolidColorBrush x:Key="Brush.Accent.Video.Pressed" Color="{StaticResource Color.Accent.Video.Pressed}"/>
+            
+            <SolidColorBrush x:Key="Brush.Accent.Audio" Color="{StaticResource Color.Accent.Audio}"/>
+            <SolidColorBrush x:Key="Brush.Accent.Audio.Hover" Color="{StaticResource Color.Accent.Audio.Hover}"/>
+            <SolidColorBrush x:Key="Brush.Accent.Audio.Pressed" Color="{StaticResource Color.Accent.Audio.Pressed}"/>
+            
+            <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Text.Primary}"/>
+            <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Text.Secondary}"/>
+            <SolidColorBrush x:Key="Brush.Text.Tertiary" Color="{StaticResource Color.Text.Tertiary}"/>
+            <SolidColorBrush x:Key="Brush.Text.Disabled" Color="{StaticResource Color.Text.Disabled}"/>
+            
+            <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Border}"/>
+            <SolidColorBrush x:Key="Brush.Divider" Color="{StaticResource Color.Divider}"/>
+            
+            <SolidColorBrush x:Key="Brush.Success" Color="{StaticResource Color.Success}"/>
+            <SolidColorBrush x:Key="Brush.Warning" Color="{StaticResource Color.Warning}"/>
+            <SolidColorBrush x:Key="Brush.Error" Color="{StaticResource Color.Error}"/>
+            
+            <!-- Dynamic Accent Brush (will be set by code) -->
+            <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Accent.Video}"/>
+            <SolidColorBrush x:Key="Brush.Accent.Hover" Color="{StaticResource Color.Accent.Video.Hover}"/>
+            <SolidColorBrush x:Key="Brush.Accent.Pressed" Color="{StaticResource Color.Accent.Video.Pressed}"/>
+            
+            <!-- Font Sizes -->
+            <x:Double x:Key="Font.Size.Small">11</x:Double>
+            <x:Double x:Key="Font.Size.Standard">12</x:Double>
+            <x:Double x:Key="Font.Size.Medium">13</x:Double>
+            <x:Double x:Key="Font.Size.Large">16</x:Double>
+            <x:Double x:Key="Font.Size.Title">20</x:Double>
+        </Style.Resources>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- WINDOW STYLES -->
+    <!-- ============================================ -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Panel}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="FontFamily" Value="Segoe UI, Arial"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- BUTTON STYLES -->
+    <!-- ============================================ -->
+    <Style Selector="Button">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Elevated}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
+    </Style>
+    
+    <Style Selector="Button:pointerover">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Hover}"/>
+    </Style>
+    
+    <Style Selector="Button:pressed">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
+    </Style>
+    
+    <!-- Primary Button Style -->
+    <Style Selector="Button.Primary">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    
+    <Style Selector="Button.Primary:pointerover">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent.Hover}"/>
+    </Style>
+    
+    <Style Selector="Button.Primary:pressed">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent.Pressed}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- NAVIGATION BUTTON STYLE -->
+    <!-- ============================================ -->
+    <Style Selector="RadioButton.NavButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,12"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Small}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style Selector="RadioButton.NavButton:checked">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Hover}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+    </Style>
+    
+    <Style Selector="RadioButton.NavButton:pointerover">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Elevated}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- TEXTBLOCK STYLES -->
+    <!-- ============================================ -->
+    <Style Selector="TextBlock.Title">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Title}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+    </Style>
+    
+    <Style Selector="TextBlock.Header">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Large}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+    </Style>
+    
+    <Style Selector="TextBlock.Subtitle">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Medium}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+    </Style>
+    
+    <Style Selector="TextBlock.Label">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- TEXTBOX STYLES -->
+    <!-- ============================================ -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
+    </Style>
+    
+    <Style Selector="TextBox:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- LISTBOX STYLES -->
+    <!-- ============================================ -->
+    <Style Selector="ListBox">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    
+    <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="8,6"/>
+    </Style>
+    
+    <Style Selector="ListBoxItem:selected">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    
+    <Style Selector="ListBoxItem:pointerover">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Hover}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- COMBOBOX STYLE -->
+    <!-- ============================================ -->
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="MinHeight" Value="32"/>
+    </Style>
+    
+    <Style Selector="ComboBox:pointerover /template/ Border#Background">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Hover}"/>
+    </Style>
+    
+    <Style Selector="ComboBox:focus /template/ Border#Background">
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent.Video}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- TEXTBOX IMPROVEMENTS -->
+    <!-- ============================================ -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="MinHeight" Value="32"/>
+    </Style>
+    
+    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Text.Tertiary}"/>
+    </Style>
+    
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent.Video}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- SLIDER STYLE -->
+    <!-- ============================================ -->
+    <Style Selector="Slider">
+        <Setter Property="Foreground" Value="{StaticResource Brush.Accent.Video}"/>
+    </Style>
+    
+    <Style Selector="Slider /template/ Track">
+        <Setter Property="Height" Value="4"/>
+    </Style>
+    
+    <Style Selector="Slider /template/ Thumb">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent.Video}"/>
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- PROGRESSBAR STYLE -->
+    <!-- ============================================ -->
+    <Style Selector="ProgressBar">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Accent.Video}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="6"/>
+    </Style>
+    
+</Styles>

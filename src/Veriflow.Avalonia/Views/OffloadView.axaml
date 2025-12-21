@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="Veriflow.Avalonia.Views.OffloadView"
+             x:DataType="vm:OffloadViewModel"
+             Background="{StaticResource Brush.Background.Panel}">
+    
+    <Grid RowDefinitions="Auto,*" Margin="20">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,20">
+            <TextBlock Classes="Title" Text="OFFLOAD"/>
+            <TextBlock Classes="Subtitle" Text="Copy files to multiple destinations with verification"/>
+        </StackPanel>
+        
+        <!-- Content -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*">
+            
+            <!-- Source Section -->
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="0,0,0,16">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="Label" Text="SOURCE"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding SourcePath}"
+                                 Watermark="Select source folder or drag files here..."
+                                 IsReadOnly="True"/>
+                        <Button Grid.Column="1" 
+                                Content="BROWSE" 
+                                Classes="Primary"
+                                Margin="8,0,0,0"
+                                Command="{Binding PickSourceCommand}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Destination 1 -->
+            <Border Grid.Row="1" Grid.Column="0"
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="0,0,8,16">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="Label" Text="DESTINATION 1"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding Destination1Path}"
+                                 Watermark="Select destination 1..."
+                                 IsReadOnly="True"/>
+                        <Button Grid.Column="1" 
+                                Content="BROWSE" 
+                                Margin="8,0,0,0"
+                                Command="{Binding PickDest1Command}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Destination 2 -->
+            <Border Grid.Row="1" Grid.Column="1"
+                    Background="{StaticResource Brush.Background.Elevated}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16"
+                    Margin="8,0,0,16">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="Label" Text="DESTINATION 2"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding Destination2Path}"
+                                 Watermark="Select destination 2..."
+                                 IsReadOnly="True"/>
+                        <Button Grid.Column="1" 
+                                Content="BROWSE" 
+                                Margin="8,0,0,0"
+                                Command="{Binding PickDest2Command}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Action Bar -->
+            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                    Background="{StaticResource Brush.Background.Deep}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="16">
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    
+                    <!-- Progress Info -->
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Classes="Label" Text="{Binding LogText}"/>
+                        <ProgressBar Value="{Binding ProgressValue}" 
+                                     Maximum="100"
+                                     Height="6"
+                                     IsVisible="{Binding IsBusy}"/>
+                    </StackPanel>
+                    
+                    <!-- Action Buttons -->
+                    <Button Grid.Column="1" 
+                            Content="START OFFLOAD" 
+                            Classes="Primary"
+                            Margin="0,0,8,0"
+                            Command="{Binding StartOffloadCommand}"/>
+                    
+                    <Button Grid.Column="2" 
+                            Content="CANCEL"
+                            Command="{Binding CancelCommand}"/>
+                </Grid>
+            </Border>
+            
+        </Grid>
+        
+    </Grid>
+    
+</UserControl>
