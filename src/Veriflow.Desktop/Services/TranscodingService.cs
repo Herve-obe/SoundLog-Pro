@@ -29,6 +29,8 @@ namespace Veriflow.Desktop.Services
         // Video Specific
         public string VideoBitDepth { get; set; } = "Same as Source"; // "8-bit", "10-bit"
         public TranscodeEngine Engine { get; set; } = TranscodeEngine.CPU;
+
+        public bool BurnTimecode { get; set; } = false;
     }
 
     public class SourceMetadata
@@ -37,6 +39,7 @@ namespace Veriflow.Desktop.Services
         public long TimeReference { get; set; } // Samples
         public TimeSpan Duration { get; set; }
         public string CodecInfo { get; set; } = "Unknown";
+        public double FrameRate { get; set; } // Added for TC Calc
     }
 
 
@@ -67,7 +70,7 @@ namespace Veriflow.Desktop.Services
             }
 
             // 2. BUILD ARGS
-            string ffmpegArgs = BuildArguments(sourceFile, outputFile, options, newTimeRef);
+            string ffmpegArgs = BuildArguments(sourceFile, outputFile, options, newTimeRef, sourceMeta.FrameRate);
             string ffmpegPath = GetToolPath("ffmpeg");
 
             // 3. ATTEMPT TRANSCODE WITH FALLBACK
@@ -108,7 +111,7 @@ namespace Veriflow.Desktop.Services
                             Engine = TranscodeEngine.CPU
                         };
                         
-                        ffmpegArgs = BuildArguments(sourceFile, outputFile, fallbackOptions, newTimeRef);
+                        ffmpegArgs = BuildArguments(sourceFile, outputFile, fallbackOptions, newTimeRef, sourceMeta.FrameRate);
                         usedFallback = true;
                         continue; // Retry with CPU
                     }
@@ -202,6 +205,16 @@ namespace Veriflow.Desktop.Services
                 meta.Duration = TimeSpan.FromSeconds(durSec);
             }
 
+            // 4. Frame Rate (avg_frame_rate "24000/1001" or "25/1")
+            var fpsMatch = System.Text.RegularExpressions.Regex.Match(jsonOutput, "\"avg_frame_rate\":\\s*\"(\\d+)/(\\d+)\"");
+            if (fpsMatch.Success)
+            {
+                if (double.TryParse(fpsMatch.Groups[1].Value, out double num) && double.TryParse(fpsMatch.Groups[2].Value, out double den) && den > 0)
+                {
+                    meta.FrameRate = num / den;
+                }
+            }
+
             // 4. Codec / Format (Find first codec_name)
             var codecMatch = System.Text.RegularExpressions.Regex.Match(jsonOutput, "\"codec_name\":\\s*\"([^\"]+)\"");
             if (codecMatch.Success)
@@ -229,12 +242,67 @@ namespace Veriflow.Desktop.Services
             return meta;
         }
 
-        private string BuildArguments(string source, string output, TranscodeOptions options, long timeReference)
+        private string BuildArguments(string source, string output, TranscodeOptions options, long timeReference, double frameRate)
         {
             // Base Args: Input, Map Metadata
             var args = $"-y -i \"{source}\" -map_metadata 0";
             
             bool isVideo = options.Format.Contains("H.264") || options.Format.Contains("H.265") || options.Format.Contains("ProRes") || options.Format.Contains("DNxHD");
+
+            // Video Filters
+            // If Timecode Burn-in is requested:
+            List<string> vfFilters = new();
+            
+            if (isVideo && options.BurnTimecode)
+            {
+                // Calculate Start Timecode String (HH:MM:SS:FF)
+                // We use TimeReference (samples relative to 48kHz usually, but let's assume it's audio samples as per standard BEXT)
+                // Wait, GetMediaMetadataAsync reads 'time_reference' from BEXT which is audio samples.
+                // For video files, we should map this to frames if possible or just use 00:00:00:00 if we can't be sure.
+                // Better approach: Calculate seconds from TimeReference / 48000 (standard audio rate for video).
+                // Then convert seconds to Timecode using FrameRate.
+                
+                string startTimecode = "00:00:00:00";
+                
+                if (frameRate > 0)
+                {
+                    // Assume TimeReference is Audio Samples at 48kHz (Standard for Broadcast/Cinema)
+                    // If source audio is different, we might be slightly off if we don't normalize.
+                    // But typically time_reference tags are 48kHz based.
+                    
+                    double totalSeconds = timeReference / 48000.0;
+                    
+                    // Convert to HH:MM:SS:FF
+                    int totalFrames = (int)(totalSeconds * frameRate);
+                    
+                    int frames = totalFrames % (int)Math.Round(frameRate);
+                    int seconds = (totalFrames / (int)Math.Round(frameRate)) % 60;
+                    int minutes = (totalFrames / ((int)Math.Round(frameRate) * 60)) % 60;
+                    int hours = totalFrames / ((int)Math.Round(frameRate) * 3600);
+                    
+                    startTimecode = $"{hours:D2}:{minutes:D2}:{seconds:D2}:{frames:D2}";
+                    
+                    // Rate for filter (use standard rates like 24, 25, 30 if close, to avoid weird fractions in filter arg)
+                    // But filter 'rate' arg accepts rational.
+                }
+
+                // escape colons for filter
+                string escapedTC = startTimecode.Replace(":", "\\:");
+                string rateStr = frameRate > 0 ? frameRate.ToString(System.Globalization.CultureInfo.InvariantCulture) : "25";
+
+                // Drawtext Filter
+                // box=1:boxcolor=black@0.5 (semi-transparent background)
+                // x=(w-text_w)/2 (center horizontally)
+                // y=h-th-50 (bottom with padding)
+                string filter = $"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':timecode='{escapedTC}':rate={rateStr}:box=1:boxcolor=black@0.6:boxborderw=5:fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h-th-50";
+                vfFilters.Add(filter);
+            }
+            
+            // Format filters
+            if (vfFilters.Count > 0)
+            {
+                args += $" -vf \"{string.Join(",", vfFilters)}\"";
+            }
             
             // Timecode injection (Video & Audio mostly same flag, but Video uses -timecode usually for MOV/MXF)
             // Audio uses -write_bext 1 -metadata time_reference

@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Veriflow.Desktop.Services;
+using Veriflow.Desktop.Helpers;
 
 namespace Veriflow.Desktop.ViewModels
 {
@@ -71,16 +72,19 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(StartOffloadCommand))]
         [NotifyCanExecuteChangedFor(nameof(ToggleCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ResetAllCommand))]
         private string? _sourcePath;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(StartOffloadCommand))]
         [NotifyCanExecuteChangedFor(nameof(ToggleCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ResetAllCommand))]
         private string? _destination1Path;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(StartOffloadCommand))]
         [NotifyCanExecuteChangedFor(nameof(ToggleCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ResetAllCommand))]
         private string? _destination2Path;
 
         // --- CONSTRUCTOR ---
@@ -145,7 +149,7 @@ namespace Veriflow.Desktop.ViewModels
                     CurrentHashDisplay = "xxHash64: -";
                     CurrentSpeedDisplay = "0 MB/s";
                     
-                    MessageBox.Show("SECURE COPY annulée par l'utilisateur.\nAttention, suite à l'annulation du processus de copie, certains fichiers copiés sont peut-être partiels ou corrompus.", "Annulation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ProMessageBox.Show("SECURE COPY annulée par l'utilisateur.\nAttention, suite à l'annulation du processus de copie, certains fichiers copiés sont peut-être partiels ou corrompus.", "Annulation", MessageBoxButton.OK, MessageBoxImage.Warning);
                 });
             }
             catch (Exception ex)
@@ -154,7 +158,7 @@ namespace Veriflow.Desktop.ViewModels
                 {
                     LogText = $"Error: {ex.Message}";
                     IsBusy = false;
-                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ProMessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
             }
             finally
@@ -349,15 +353,19 @@ namespace Veriflow.Desktop.ViewModels
             }
             
             // --- GENERATE REPORTS ---
-            UpdateUI(() => LogText = "Generating reports...");
+            UpdateUI(() => LogText = "Generating reports (TXT + MHL)...");
             
-            if (!string.IsNullOrEmpty(Destination1Path) && sessionResults1.Any())
+            if (!string.IsNullOrEmpty(Destination1Path) && sessionResults1.Any(r => r.Success))
             {
                 await _secureCopyService.GenerateOffloadReportAsync(Destination1Path, sessionResults1);
+                var mhlService = new MhlService();
+                await mhlService.GenerateMhlAsync(Destination1Path, sessionResults1);
             }
-            if (!string.IsNullOrEmpty(Destination2Path) && sessionResults2.Any())
+            if (!string.IsNullOrEmpty(Destination2Path) && sessionResults2.Any(r => r.Success))
             {
                 await _secureCopyService.GenerateOffloadReportAsync(Destination2Path, sessionResults2);
+                var mhlService = new MhlService(); // New instance is fine, stateless
+                await mhlService.GenerateMhlAsync(Destination2Path, sessionResults2);
             }
 
             UpdateUI(() => 
@@ -366,7 +374,7 @@ namespace Veriflow.Desktop.ViewModels
                 ProgressValue = 100;
                 TimeRemainingDisplay = "00:00";
                 LogText = "Done.";
-                MessageBox.Show($"Offload complete!\n\nFiles copied: {FilesCopiedCount}\nErrors: {ErrorsCount}\n\nReports generated.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                ProMessageBox.Show($"Offload complete!\n\nFiles copied: {FilesCopiedCount}\nErrors: {ErrorsCount}\n\nReports (TXT & MHL) generated.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             });
         }
 
@@ -411,7 +419,15 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearDest1() => Destination1Path = null;
         [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearDest2() => Destination2Path = null;
 
-        [RelayCommand(CanExecute = nameof(CanInteract))]
+        private bool CanReset()
+        {
+            return CanInteract() && 
+                   (!string.IsNullOrEmpty(SourcePath) || 
+                    !string.IsNullOrEmpty(Destination1Path) || 
+                    !string.IsNullOrEmpty(Destination2Path));
+        }
+
+        [RelayCommand(CanExecute = nameof(CanReset))]
         private void ResetAll()
         {
             SourcePath = null;

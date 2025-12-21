@@ -115,7 +115,11 @@ namespace Veriflow.Desktop.ViewModels
 
         partial void OnSelectedFormatChanged(string? value)
         {
-            if (!string.IsNullOrEmpty(value)) UpdateFormatOptions(value);
+            if (!string.IsNullOrEmpty(value)) 
+            {
+                UpdateFormatOptions(value);
+                UpdateBurnInAllowance();
+            }
         }
 
         partial void OnSelectedCategoryChanged(ExportCategory value)
@@ -143,6 +147,57 @@ namespace Veriflow.Desktop.ViewModels
                 SelectedCategory = ExportCategory.Video;
             else
                 SelectedCategory = ExportCategory.Audio;
+        }
+
+        [ObservableProperty]
+        private bool _isBurnInEnabled;
+
+        [ObservableProperty]
+        private bool _isBurnInAllowed;
+
+        partial void OnSelectedBitrateChanged(string value)
+        {
+            UpdateBurnInAllowance();
+        }
+
+        private void UpdateBurnInAllowance()
+        {
+            if (string.IsNullOrEmpty(SelectedFormat)) 
+            {
+                IsBurnInAllowed = false;
+                IsBurnInEnabled = false;
+                return;
+            }
+
+            bool isProxy = false;
+            string fmt = SelectedFormat;
+            string br = SelectedBitrate ?? "";
+
+            if (fmt.Contains("H.264") || fmt.Equals("MP4") || fmt.Contains("H.265") || fmt.Contains("AV1") || fmt.Contains("VP") || fmt.Contains("MPEG"))
+            {
+                // All Long-GOP / Web formats are considered Proxies/Web Deliverables suitable for burn-in
+                isProxy = true;
+            }
+            else if (fmt.Contains("ProRes"))
+            {
+                // Only Proxy, LT, 422 (Standard)
+                if (br.Contains("Proxy") || br.Contains("LT") || br.Equals("422")) isProxy = true;
+                // HQ, 4444, XQ -> False
+            }
+            else if (fmt.Contains("DNxHD"))
+            {
+                // 36M (Proxy) or 115M (Standard)
+                if (br.Contains("Proxy") || br.Contains("36M")) isProxy = true;
+            }
+            else if (fmt.Contains("DNxHR"))
+            {
+                // LB, SQ
+                if (br.Contains("LB") || br.Contains("SQ")) isProxy = true;
+            }
+            // All others (Uncompressed, Cineform, XAVC Class 300) -> Master Formats -> False
+
+            IsBurnInAllowed = isProxy;
+            if (!isProxy) IsBurnInEnabled = false;
         }
 
         // Removed UpdateAvailableFormats() as it's not needed for Split Dropdowns
@@ -571,7 +626,8 @@ namespace Veriflow.Desktop.ViewModels
                     BitDepth = SelectedBitDepth,
                     Bitrate = SelectedBitrate,
                     VideoBitDepth = SelectedVideoBitDepth,
-                    Engine = SelectedEngine
+                    Engine = SelectedEngine,
+                    BurnTimecode = IsBurnInEnabled
                 };
 
                 foreach (var item in Files)

@@ -456,6 +456,41 @@
                                 </ComboBox.Style>
                             </ComboBox>
                         </StackPanel>
+
+                        <!-- Timecode Burn-in Checkbox -->
+                        <CheckBox Content="Timecode Burn-in"
+                                  IsChecked="{Binding IsBurnInEnabled}"
+                                  IsEnabled="{Binding IsBurnInAllowed}"
+                                  Margin="0,5,0,0">
+                            <CheckBox.Style>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="Foreground" Value="#CCCCCC"/>
+                                    <Setter Property="FontSize" Value="13"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="CheckBox">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border x:Name="border" Width="18" Height="18" CornerRadius="3" BorderThickness="1" BorderBrush="#555" Background="{StaticResource Brush.Input.Dark}" Margin="0,0,8,0">
+                                                        <Path x:Name="check" Data="M3,8 L6,11 L13,4" Stroke="{DynamicResource Brush.Accent}" StrokeThickness="2" Stretch="Uniform" Width="10" Height="8" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True">
+                                                        <Setter TargetName="check" Property="Visibility" Value="Visible"/>
+                                                        <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource Brush.Accent}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="border" Property="Background" Value="#333"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </CheckBox.Style>
+                        </CheckBox>
                     </StackPanel>
                 </StackPanel>
 

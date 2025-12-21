@@ -1,6 +1,6 @@
 # Veriflow User Guide
 
-**Version 1.0.0**
+**Version 1.1.0**
 
 ---
 
@@ -87,6 +87,7 @@ Quality control reporting and EDL generation.
 - Source file selection
 - Dual destination paths (A and B)
 - Hash verification (xxHash64)
+- MHL 1.1 Generation (Automatic Media Hash List)
 - Progress tracking
 - Copy history
 
@@ -151,6 +152,7 @@ Quality control reporting and EDL generation.
 - Batch processing
 - Format presets
 - Custom encoding settings
+- Timecode Burn-in (for Proxy formats)
 - Queue management
 
 **Supported Formats**:
