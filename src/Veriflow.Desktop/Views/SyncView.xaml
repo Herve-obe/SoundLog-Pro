@@ -355,9 +355,9 @@
                         <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource MinimalistScrollBar}"/>
 
                         <!-- FORCE SELECTION COLORS -->
-                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#505050"/> <!-- Lighter Gray for Selection -->
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource Color.Selection}"/> <!-- Selection -->
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#505050"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource Color.Selection}"/>
                         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
 
                         <Style TargetType="DataGridColumnHeader">

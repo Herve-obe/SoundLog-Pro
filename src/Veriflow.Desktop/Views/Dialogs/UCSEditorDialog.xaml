@@ -5,7 +5,7 @@
         Title="Edit UCS Category" 
         Height="350" Width="500"
         WindowStartupLocation="CenterOwner"
-        Background="#1E1E1E"
+        Background="{StaticResource Brush.Panel}"
         ResizeMode="NoResize">
     
     <Window.Resources>
@@ -110,7 +110,7 @@
                 <TextBlock Text="CATEGORY ID (CatID)" Style="{StaticResource LabelStyle}"/>
                 <TextBox Text="{Binding CatID, Mode=OneWay}"
                          IsReadOnly="True"
-                         Background="#252526"
+                         Background="{StaticResource Brush.Panel.Alt}"
                          Foreground="#888"
                          BorderBrush="#3F3F46"
                          BorderThickness="1"
@@ -125,7 +125,7 @@
                 <TextBlock Text="FULL PATH" Style="{StaticResource LabelStyle}"/>
                 <TextBox Text="{Binding FullPath, Mode=OneWay}"
                          IsReadOnly="True"
-                         Background="#252526"
+                         Background="{StaticResource Brush.Panel.Alt}"
                          Foreground="#888"
                          BorderBrush="#3F3F46"
                          BorderThickness="1"

@@ -98,6 +98,20 @@
     <SolidColorBrush x:Key="Brush.Icon.Drive" Color="#90A4AE"/>
     <SolidColorBrush x:Key="Brush.Error" Color="#FF4545"/>
     <SolidColorBrush x:Key="Brush.Error.Dark" Color="#8B0000"/>
+    
+    <!-- Success/Error States (for buttons) -->
+    <SolidColorBrush x:Key="Brush.Success" Color="#2E7D32"/>
+    <SolidColorBrush x:Key="Brush.Error.Button" Color="#C62828"/>
+    
+    <!-- Additional Panel Shades -->
+    <SolidColorBrush x:Key="Brush.Panel.Header" Color="#252525"/>
+    <SolidColorBrush x:Key="Brush.Panel.Alt" Color="#252526"/>
+    
+    <!-- Selection -->
+    <SolidColorBrush x:Key="Brush.Selection" Color="#505050"/>
+    
+    <!-- White (for thumbs, icons, etc) -->
+    <SolidColorBrush x:Key="Brush.White" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="Brush.Menu.Highlight" Color="#2A2A2A"/>
 
     <!-- GLOBAL WINDOW STYLE -->

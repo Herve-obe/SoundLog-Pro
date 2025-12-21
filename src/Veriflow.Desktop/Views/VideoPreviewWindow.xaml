@@ -21,7 +21,7 @@
             </Grid.RowDefinitions>
 
             <!-- Custom Title Bar -->
-            <Grid Grid.Row="0" Background="#252525">
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Panel.Header}">
                 <TextBlock Text="Video Preview" 
                            VerticalAlignment="Center" 
                            Margin="15,0" 
@@ -57,7 +57,7 @@
             </Grid>
 
             <!-- Video Content -->
-            <Grid Grid.Row="1" Background="#1E1E1E">
+            <Grid Grid.Row="1" Background="{StaticResource Brush.Panel}">
                 <vlc:VideoView x:Name="VideoViewControl" MediaPlayer="{Binding PreviewPlayer}"/>
             </Grid>
         </Grid>

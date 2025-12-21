@@ -4,7 +4,7 @@
         Title="Veriflow Pro" 
         WindowStyle="None" AllowsTransparency="True" ResizeMode="NoResize"
         SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner"
-        Background="#1E1E1E"
+        Background="{StaticResource Brush.Panel}"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
     <Window.Resources>
@@ -63,7 +63,7 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Grid Grid.Row="0" Background="#252525">
+            <Grid Grid.Row="0" Background="{StaticResource Brush.Panel.Header}">
                 <TextBlock x:Name="TitleText" Text="{Binding Title}" VerticalAlignment="Center" Margin="15,0" Foreground="#AAAAAA" FontWeight="SemiBold"/>
                 <Button Content="✕" HorizontalAlignment="Right" Width="35" Height="35" 
                         Background="Transparent" Foreground="#888888" BorderThickness="0"

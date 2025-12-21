@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         Title="Quick Edit Report" Height="350" Width="400"
         WindowStyle="None" ResizeMode="NoResize"
-        Background="#1E1E1E" BorderBrush="#444444" BorderThickness="1"
+        Background="{StaticResource Brush.Panel}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False" UseLayoutRounding="True">
     
     <Window.Resources>
