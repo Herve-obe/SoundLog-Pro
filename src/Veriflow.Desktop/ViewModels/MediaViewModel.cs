@@ -651,6 +651,27 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
+        /// <summary>
+        /// Removes selected files from the media list
+        /// </summary>
+        public void RemoveSelectedFiles()
+        {
+            if (SelectedMedia != null)
+            {
+                var itemToRemove = SelectedMedia;
+                SelectedMedia = null;
+                FileList.Remove(itemToRemove);
+            }
+        }
+
+        /// <summary>
+        /// Checks if there are selected files to remove
+        /// </summary>
+        public bool HasSelectedFiles()
+        {
+            return SelectedMedia != null;
+        }
+
         [RelayCommand]
         private Task DropMedia(DragEventArgs e) => HandleDrop(e);
 

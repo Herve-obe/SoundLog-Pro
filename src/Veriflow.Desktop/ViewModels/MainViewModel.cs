@@ -633,19 +633,57 @@ namespace Veriflow.Desktop.ViewModels
         private void Cut()
         {
             Copy(); // Copy first
-            // Then delete based on current view
+            Delete(); // Then delete
+        }
+
+        private void Delete()
+        {
             switch (CurrentPageType)
             {
                 case PageType.Reports:
-                    // TODO: Delete selected report items
+                    if (_reportsViewModel.HasSelectedItems())
+                    {
+                        if (ShowDeleteConfirmation("Delete selected report item?"))
+                        {
+                            _reportsViewModel.DeleteSelectedItems();
+                        }
+                    }
                     break;
                 case PageType.Media:
-                    // TODO: Remove selected media files
+                    if (_mediaViewModel.HasSelectedFiles())
+                    {
+                        if (ShowDeleteConfirmation("Remove selected file from list?"))
+                        {
+                            _mediaViewModel.RemoveSelectedFiles();
+                        }
+                    }
                     break;
                 case PageType.Transcode:
-                    // TODO: Remove selected transcode items
+                    if (_transcodeViewModel.HasSelectedItems())
+                    {
+                        if (ShowDeleteConfirmation("Remove selected item from queue?"))
+                        {
+                            _transcodeViewModel.RemoveSelectedItems();
+                        }
+                    }
                     break;
             }
+        }
+
+        private bool ShowDeleteConfirmation(string message)
+        {
+            var settings = Services.SettingsService.Instance.GetSettings();
+            if (!settings.ShowConfirmationDialogs)
+                return true;
+
+            var dialog = new Views.Shared.ProMessageBox(
+                message,
+                "Confirm Delete",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            dialog.Owner = System.Windows.Application.Current.MainWindow;
+            return dialog.ShowDialog() == true;
         }
 
         private void Copy()

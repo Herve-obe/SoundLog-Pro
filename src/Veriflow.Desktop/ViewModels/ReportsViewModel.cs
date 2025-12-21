@@ -291,6 +291,30 @@ namespace Veriflow.Desktop.ViewModels
 
         private bool CanRemoveFile(ReportItem item) => item != null;
 
+        /// <summary>
+        /// Deletes selected items from the current report
+        /// </summary>
+        public void DeleteSelectedItems()
+        {
+            if (SelectedReportItem != null)
+            {
+                if (CurrentReportType == ReportType.Audio)
+                    AudioReportItems.Remove(SelectedReportItem);
+                else
+                    VideoReportItems.Remove(SelectedReportItem);
+                    
+                SelectedReportItem = null;
+            }
+        }
+
+        /// <summary>
+        /// Checks if there are selected items to delete
+        /// </summary>
+        public bool HasSelectedItems()
+        {
+            return SelectedReportItem != null;
+        }
+
         public void NavigateToItem(MediaItemViewModel item)
         {
              var reportItem = CurrentReportItems.FirstOrDefault(r => r.OriginalMedia == item);
