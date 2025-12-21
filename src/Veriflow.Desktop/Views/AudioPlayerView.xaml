@@ -15,17 +15,17 @@
         <KeyBinding Key="Space" Command="{Binding TogglePlayPauseCommand}"/>
         <KeyBinding Key="Return" Command="{Binding StopCommand}"/>
         
-        <!-- Frame Navigation (Single Step) - Same as Video -->
+        <!-- Frame Navigation (Single Step) -->
         <KeyBinding Key="Left" Command="{Binding PreviousFrameCommand}"/>
         <KeyBinding Key="Right" Command="{Binding NextFrameCommand}"/>
         
-        <!-- Large Jumps -->
+        <!-- Large Jumps (5 seconds) -->
         <KeyBinding Key="Left" Modifiers="Shift" Command="{Binding RewindCommand}"/>
         <KeyBinding Key="Right" Modifiers="Shift" Command="{Binding ForwardCommand}"/>
         
-        <!-- File Navigation (Previous/Next) -->
-        <KeyBinding Key="Left" Modifiers="Ctrl" Command="{Binding NavigatePreviousCommand}"/>
-        <KeyBinding Key="Right" Modifiers="Ctrl" Command="{Binding NavigateNextCommand}"/>
+        <!-- File Navigation (Previous/Next) - NEW: Ctrl+Shift+Arrow -->
+        <KeyBinding Key="Left" Modifiers="Ctrl+Shift" Command="{Binding NavigatePreviousCommand}"/>
+        <KeyBinding Key="Right" Modifiers="Ctrl+Shift" Command="{Binding NavigateNextCommand}"/>
     </UserControl.InputBindings>
 
     <UserControl.Resources>

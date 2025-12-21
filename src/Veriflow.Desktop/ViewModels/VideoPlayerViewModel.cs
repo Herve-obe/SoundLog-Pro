@@ -670,8 +670,6 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand]
         private void KeyDown(KeyEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Key={e.Key}, Modifiers={e.KeyboardDevice.Modifiers}, IsRepeat={e.IsRepeat}");
-            
             // Ignore OS key repeat to maintain our own timer-based cadence
             if (e.IsRepeat)
             {
@@ -679,12 +677,12 @@ namespace Veriflow.Desktop.ViewModels
                 return;
             }
 
-            // Handle Ctrl+Arrow for Previous/Next navigation
-            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            // Handle Ctrl+Shift+Arrow for Previous/Next navigation (NEW SHORTCUT)
+            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control &&
+                (e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
             {
                 if (e.Key == Key.Left)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Ctrl+Left detected, calling NavigatePrevious");
                     if (NavigatePreviousCommand.CanExecute(null))
                     {
                         _ = NavigatePreviousCommand.ExecuteAsync(null);
@@ -694,7 +692,6 @@ namespace Veriflow.Desktop.ViewModels
                 }
                 else if (e.Key == Key.Right)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Ctrl+Right detected, calling NavigateNext");
                     if (NavigateNextCommand.CanExecute(null))
                     {
                         _ = NavigateNextCommand.ExecuteAsync(null);
@@ -704,12 +701,12 @@ namespace Veriflow.Desktop.ViewModels
                 }
             }
 
-            // Handle Shift+Arrow for Rewind/Forward
-            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            // Handle Shift+Arrow for Rewind/Forward (5-second jumps)
+            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift &&
+                (e.KeyboardDevice.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
             {
                 if (e.Key == Key.Left)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Shift+Left detected, calling Rewind");
                     if (RewindCommand.CanExecute(null))
                     {
                         RewindCommand.Execute(null);
@@ -719,7 +716,6 @@ namespace Veriflow.Desktop.ViewModels
                 }
                 else if (e.Key == Key.Right)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Shift+Right detected, calling Forward");
                     if (ForwardCommand.CanExecute(null))
                     {
                         ForwardCommand.Execute(null);
@@ -729,16 +725,14 @@ namespace Veriflow.Desktop.ViewModels
                 }
             }
 
-            // Handle plain arrow keys for jog
+            // Handle plain arrow keys for jog (frame-by-frame)
             if (e.Key == Key.Right)
             {
-                System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Starting jog RIGHT");
                 StartJog(1);
                 e.Handled = true;
             }
             else if (e.Key == Key.Left)
             {
-                System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyDown: Starting jog LEFT");
                 StartJog(-1);
                 e.Handled = true;
             }
@@ -747,19 +741,16 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand]
         private void KeyUp(KeyEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyUp: Key={e.Key}, Modifiers={e.KeyboardDevice.Modifiers}");
-            
-            // Don't stop jog if Ctrl or Shift is pressed (handled in KeyDown)
-            if ((e.KeyboardDevice.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != ModifierKeys.None)
+            // Don't stop jog if any modifier is pressed
+            if (e.KeyboardDevice.Modifiers != ModifierKeys.None)
             {
-                System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyUp: Modifier detected, ignoring");
                 e.Handled = true;
                 return;
             }
 
+            // Only stop jog for plain arrow keys
             if (e.Key == Key.Right || e.Key == Key.Left)
             {
-                System.Diagnostics.Debug.WriteLine($"[VIDEO] KeyUp: Stopping jog");
                 StopJog();
                 e.Handled = true;
             }
