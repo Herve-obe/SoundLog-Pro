@@ -3,12 +3,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Veriflow.Desktop.ViewModels"
         mc:Ignorable="d"
         Title="Settings - Veriflow" 
         Height="500" Width="600"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource Brush.Background}"
         ResizeMode="NoResize">
+
+    <Window.DataContext>
+        <vm:SettingsViewModel/>
+    </Window.DataContext>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -34,7 +39,8 @@
                         BorderBrush="{DynamicResource Brush.Border}" 
                         BorderThickness="1" 
                         CornerRadius="4" 
-                        Padding="15">
+                        Padding="15"
+                        Margin="0,0,0,15">
                     <StackPanel>
                         <TextBlock Text="GENERAL" 
                                    FontWeight="SemiBold" 
@@ -43,11 +49,11 @@
                                    Margin="0,0,0,10"/>
                         
                         <CheckBox Content="Enable auto-save (every 5 minutes)" 
-                                  IsChecked="False" 
+                                  IsChecked="{Binding EnableAutoSave}" 
                                   Margin="0,5"/>
                         
                         <CheckBox Content="Show confirmation dialogs" 
-                                  IsChecked="True" 
+                                  IsChecked="{Binding ShowConfirmationDialogs}" 
                                   Margin="0,5"/>
                     </StackPanel>
                 </Border>
@@ -76,12 +82,12 @@
                             </Grid.ColumnDefinitions>
                             
                             <TextBox Grid.Column="0" 
-                                     Text="C:\Users\Documents\Veriflow\Sessions" 
-                                     IsReadOnly="True"
+                                     Text="{Binding DefaultSessionFolder, UpdateSourceTrigger=PropertyChanged}" 
                                      Margin="0,0,10,0"/>
                             
                             <Button Grid.Column="1" 
                                     Content="Browse..." 
+                                    Command="{Binding BrowseFolderCommand}"
                                     Padding="10,5"/>
                         </Grid>
                     </StackPanel>
