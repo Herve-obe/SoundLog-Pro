@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace Veriflow.Desktop.Views
 {
-    public partial class SecureCopyView : UserControl
+    public partial class OffloadView : UserControl
     {
-        public SecureCopyView()
+        public OffloadView()
         {
             InitializeComponent();
         }

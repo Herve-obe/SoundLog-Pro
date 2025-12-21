@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace Veriflow.Desktop.Services
 {
-    public class SecureCopyService
+    public class OffloadService
     {
         private const int BufferSize = 1024 * 1024 * 4; // 4MB Buffer
+
+        // Events for ViewModel interaction
+        public event EventHandler<string>? LogMessage;
+        public event EventHandler<double>? ProgressChanged;
 
         /// <summary>
         /// Copies a file with strict Read-Back Verification (Silverstack Level).
@@ -296,6 +300,8 @@ namespace Veriflow.Desktop.Services
             using (File.Create(dummyPath, 1, FileOptions.DeleteOnClose)) { }
         }
     }
+
+
 
     public class CopyResult
     {

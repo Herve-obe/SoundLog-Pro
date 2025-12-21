@@ -13,7 +13,7 @@ namespace Veriflow.Desktop.ViewModels
 
 
     public enum AppMode { Audio, Video }
-    public enum PageType { Media, Player, Sync, SecureCopy, Transcode, Reports }
+    public enum PageType { Media, Player, Sync, Offload, Transcode, Reports }
 
     public partial class MainViewModel : ObservableObject, IDisposable
     {
@@ -64,7 +64,7 @@ namespace Veriflow.Desktop.ViewModels
         private PageType _currentPageType = PageType.Media;
 
         // ViewModels - Exposed as public for keyboard routing
-        public SecureCopyViewModel SecureCopyViewModel { get; }
+        public OffloadViewModel OffloadViewModel { get; }
         public PlayerViewModel PlayerViewModel { get; }
         public AudioPlayerViewModel AudioViewModel { get; }
         public VideoPlayerViewModel VideoPlayerViewModel { get; }
@@ -75,7 +75,7 @@ namespace Veriflow.Desktop.ViewModels
         public SessionViewModel SessionViewModel { get; }
 
         // Private backing fields
-        private readonly SecureCopyViewModel _secureCopyViewModel;
+        private readonly OffloadViewModel _offloadViewModel;
         private readonly PlayerViewModel _playerViewModel;
         private readonly AudioPlayerViewModel _audioViewModel;
         private readonly VideoPlayerViewModel _videoPlayerViewModel;
@@ -90,7 +90,7 @@ namespace Veriflow.Desktop.ViewModels
         public ICommand ShowMediaCommand { get; }
         public ICommand ShowTranscodeCommand { get; }
         public ICommand ShowSyncCommand { get; }
-        public ICommand ShowSecureCopyCommand { get; }
+        public ICommand ShowOffloadCommand { get; }
         public ICommand ShowReportsCommand { get; }
         public ICommand SwitchToAudioCommand { get; }
         public ICommand SwitchToVideoCommand { get; }
@@ -122,7 +122,7 @@ namespace Veriflow.Desktop.ViewModels
         public MainViewModel()
         {
             // Initialize ViewModels
-            _secureCopyViewModel = new();
+            _offloadViewModel = new(new Services.OffloadService(), new Services.MhlService());
             _playerViewModel = new();
             _audioViewModel = new();
             _videoPlayerViewModel = new();
@@ -132,7 +132,7 @@ namespace Veriflow.Desktop.ViewModels
             _reportsViewModel = new();
 
             // Expose as public properties
-            SecureCopyViewModel = _secureCopyViewModel;
+            OffloadViewModel = _offloadViewModel;
             PlayerViewModel = _playerViewModel;
             AudioViewModel = _audioViewModel;
             VideoPlayerViewModel = _videoPlayerViewModel;
@@ -152,7 +152,7 @@ namespace Veriflow.Desktop.ViewModels
             ShowMediaCommand = new RelayCommand(() => NavigateTo(PageType.Media));
             ShowTranscodeCommand = new RelayCommand(() => NavigateTo(PageType.Transcode));
             ShowSyncCommand = new RelayCommand(() => NavigateTo(PageType.Sync));
-            ShowSecureCopyCommand = new RelayCommand(() => NavigateTo(PageType.SecureCopy));
+            ShowOffloadCommand = new RelayCommand(() => NavigateTo(PageType.Offload));
             ShowReportsCommand = new RelayCommand(() => NavigateTo(PageType.Reports));
 
             SwitchToAudioCommand = new RelayCommand(() => SetMode(AppMode.Audio));
@@ -182,7 +182,7 @@ namespace Veriflow.Desktop.ViewModels
 
             // Default
             SetMode(AppMode.Video);
-            NavigateTo(PageType.SecureCopy); // Set start page to SECURE COPY
+            NavigateTo(PageType.Offload); // Set start page to OFFLOAD
 
             // Navigation Wiring
             _mediaViewModel.RequestOpenInPlayer += async (path) =>
@@ -207,8 +207,8 @@ namespace Veriflow.Desktop.ViewModels
 
             _mediaViewModel.RequestOffloadSource += (path) =>
             {
-                _secureCopyViewModel.SourcePath = path;
-                NavigateTo(PageType.SecureCopy);
+                _offloadViewModel.SourcePath = path;
+                NavigateTo(PageType.Offload);
             };
 
             _mediaViewModel.RequestTranscode += (files) =>
@@ -360,11 +360,12 @@ namespace Veriflow.Desktop.ViewModels
                 CurrentMode = CurrentAppMode == AppMode.Audio ? "Audio" : "Video",
                 CurrentPage = CurrentPageType.ToString(),
                 MediaFiles = _mediaViewModel.GetLoadedFiles(),
-                SecureCopySettings = new Veriflow.Core.Models.SecureCopySettings
+
+                OffloadSettings = new Veriflow.Core.Models.OffloadSettings
                 {
-                    SourcePath = _secureCopyViewModel.SourcePath ?? string.Empty,
-                    MainDestination = _secureCopyViewModel.Destination1Path ?? string.Empty,
-                    SecondaryDestination = _secureCopyViewModel.Destination2Path ?? string.Empty
+                    SourcePath = _offloadViewModel.SourcePath ?? string.Empty,
+                    MainDestination = _offloadViewModel.Destination1Path ?? string.Empty,
+                    SecondaryDestination = _offloadViewModel.Destination2Path ?? string.Empty
                 },
                 TranscodeQueue = _transcodeViewModel.GetQueuedFiles(),
                 ReportSettings = _reportsViewModel.ReportSettings.Clone()
@@ -434,12 +435,12 @@ namespace Veriflow.Desktop.ViewModels
                 // Restore Media Files
                 _mediaViewModel.LoadFiles(session.MediaFiles);
 
-                // Restore SecureCopy Settings
-                if (session.SecureCopySettings != null)
+                // Restore Offload Settings
+                if (session.OffloadSettings != null)
                 {
-                    _secureCopyViewModel.SourcePath = session.SecureCopySettings.SourcePath;
-                    _secureCopyViewModel.Destination1Path = session.SecureCopySettings.MainDestination;
-                    _secureCopyViewModel.Destination2Path = session.SecureCopySettings.SecondaryDestination;
+                    _offloadViewModel.SourcePath = session.OffloadSettings.SourcePath;
+                    _offloadViewModel.Destination1Path = session.OffloadSettings.MainDestination;
+                    _offloadViewModel.Destination2Path = session.OffloadSettings.SecondaryDestination;
                 }
 
                 // Restore Transcode Queue
@@ -574,8 +575,8 @@ namespace Veriflow.Desktop.ViewModels
                     else
                         CurrentView = _videoPlayerViewModel;
                     break;
-                case PageType.SecureCopy:
-                    CurrentView = _secureCopyViewModel;
+                case PageType.Offload:
+                    CurrentView = _offloadViewModel;
                     break;
                 case PageType.Transcode:
                     CurrentView = _transcodeViewModel;
@@ -597,7 +598,7 @@ namespace Veriflow.Desktop.ViewModels
             OnPropertyChanged(nameof(IsPlayerActive));
             OnPropertyChanged(nameof(IsTranscodeActive));
             OnPropertyChanged(nameof(IsSyncActive));
-            OnPropertyChanged(nameof(IsSecureCopyActive));
+            OnPropertyChanged(nameof(IsOffloadActive));
             OnPropertyChanged(nameof(IsReportsActive));
             OnPropertyChanged(nameof(IsAudioActive));
             OnPropertyChanged(nameof(IsVideoActive));
@@ -606,7 +607,7 @@ namespace Veriflow.Desktop.ViewModels
         public bool IsMediaActive => CurrentPageType == PageType.Media;
         public bool IsPlayerActive => CurrentPageType == PageType.Player;
         public bool IsTranscodeActive => CurrentPageType == PageType.Transcode;
-        public bool IsSecureCopyActive => CurrentPageType == PageType.SecureCopy;
+        public bool IsOffloadActive => CurrentPageType == PageType.Offload;
         public bool IsSyncActive => CurrentPageType == PageType.Sync;
         public bool IsReportsActive => CurrentPageType == PageType.Reports;
 
@@ -733,7 +734,7 @@ namespace Veriflow.Desktop.ViewModels
             _playerViewModel?.Dispose();
             (_sessionViewModel as IDisposable)?.Dispose();
             
-            // Note: Other ViewModels (MediaViewModel, SecureCopyViewModel, etc.) 
+            // Note: Other ViewModels (MediaViewModel, OffloadViewModel, etc.) 
             // don't implement IDisposable as they don't have timers or unmanaged resources
             
             GC.SuppressFinalize(this);
@@ -1113,8 +1114,8 @@ namespace Veriflow.Desktop.ViewModels
             {
                 switch (CurrentPageType)
                 {
-                    case PageType.SecureCopy:
-                        ClearSecureCopyPage();
+                case PageType.Offload:
+                    ClearOffloadPage();
                         break;
                     case PageType.Media:
                         ClearMediaPage();
@@ -1149,12 +1150,12 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
-        private void ClearSecureCopyPage()
+        private void ClearOffloadPage()
         {
             // Clear source and destination paths
-            _secureCopyViewModel.SourcePath = string.Empty;
-            _secureCopyViewModel.Destination1Path = string.Empty;
-            _secureCopyViewModel.Destination2Path = string.Empty;
+            _offloadViewModel.SourcePath = string.Empty;
+            _offloadViewModel.Destination1Path = string.Empty;
+            _offloadViewModel.Destination2Path = string.Empty;
         }
 
         private void ClearMediaPage()

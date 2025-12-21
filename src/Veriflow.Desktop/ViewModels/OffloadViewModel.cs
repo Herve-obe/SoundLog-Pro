@@ -14,10 +14,11 @@ using Veriflow.Desktop.Helpers;
 
 namespace Veriflow.Desktop.ViewModels
 {
-    public partial class SecureCopyViewModel : ObservableObject
+    public partial class OffloadViewModel : ObservableObject
     {
         // --- SERVICES & TOKENS ---
-        private readonly SecureCopyService _secureCopyService;
+        private readonly OffloadService _offloadService;
+        private readonly MhlService _mhlService;
         private CancellationTokenSource? _cts;
 
         // Transaction Tracking
@@ -103,10 +104,32 @@ namespace Veriflow.Desktop.ViewModels
         private string? _destination2Path;
 
         // --- CONSTRUCTOR ---
-        public SecureCopyViewModel()
+        public OffloadViewModel(OffloadService offloadService, MhlService mhlService)
         {
-            _secureCopyService = new SecureCopyService();
+            _offloadService = offloadService;
+            _mhlService = mhlService;
+            
+            _offloadService.LogMessage += Service_LogMessage;
+            _offloadService.ProgressChanged += Service_ProgressChanged; // "OFFLOAD" or "VERIFY" // This property doesn't exist yet, commenting out.
+
+            // Initialize commands
+            // SelectSourceCommand = new RelayCommand(SelectSource);
+            // SelectDestinationCommand = new RelayCommand(SelectDestination);
+            // StartOffloadCommand = new AsyncRelayCommand(StartOffloadAsync);
+            // ViewReportCommand = new RelayCommand(ViewReport);
+            // SetViewModeCommand = new RelayCommand<string>(SetViewMode);
+
             InitializeExplorer();
+        }
+
+        private void Service_LogMessage(object? sender, string message)
+        {
+            UpdateUI(() => LogText = message);
+        }
+
+        private void Service_ProgressChanged(object? sender, double progress)
+        {
+            UpdateUI(() => ProgressValue = progress);
         }
 
         // --- COMMANDS ---
@@ -246,7 +269,7 @@ namespace Veriflow.Desktop.ViewModels
                     CurrentHashDisplay = "xxHash64: -";
                     CurrentSpeedDisplay = "0 MB/s";
                     
-                    ProMessageBox.Show("SECURE COPY annulée par l'utilisateur.\nAttention, suite à l'annulation du processus de copie, certains fichiers copiés sont peut-être partiels ou corrompus.", "Annulation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ProMessageBox.Show("OFFLOAD annulée par l'utilisateur.\nAttention, suite à l'annulation du processus de copie, certains fichiers copiés sont peut-être partiels ou corrompus.", "Annulation", MessageBoxButton.OK, MessageBoxImage.Warning);
                 });
             }
             catch (Exception ex)
@@ -406,7 +429,7 @@ namespace Veriflow.Desktop.ViewModels
                 // The service handles ALL writes sequentially reading the source ONCE.
                 try
                 {
-                    var fileResults = await _secureCopyService.CopyFileMultiDestSecureAsync(file.FullName, destPaths, progress, ct);
+                    var fileResults = await _offloadService.CopyFileMultiDestSecureAsync(file.FullName, destPaths, progress, ct);
                     
                     // Dispatch Results
                     bool allSuccess = true;
@@ -454,13 +477,13 @@ namespace Veriflow.Desktop.ViewModels
             
             if (!string.IsNullOrEmpty(Destination1Path) && sessionResults1.Any(r => r.Success))
             {
-                await _secureCopyService.GenerateOffloadReportAsync(Destination1Path, sessionResults1);
+                await _offloadService.GenerateOffloadReportAsync(Destination1Path, sessionResults1);
                 var mhlService = new MhlService();
                 await mhlService.GenerateMhlAsync(Destination1Path, sessionResults1);
             }
             if (!string.IsNullOrEmpty(Destination2Path) && sessionResults2.Any(r => r.Success))
             {
-                await _secureCopyService.GenerateOffloadReportAsync(Destination2Path, sessionResults2);
+                await _offloadService.GenerateOffloadReportAsync(Destination2Path, sessionResults2);
                 var mhlService = new MhlService(); // New instance is fine, stateless
                 await mhlService.GenerateMhlAsync(Destination2Path, sessionResults2);
             }

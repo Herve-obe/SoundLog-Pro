@@ -905,14 +905,14 @@
                         </StackPanel>
                     </Button>
                     
-                    <Button Command="{Binding DataContext.SendToSecureCopyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            Height="26" ToolTip="Send selected folder to Secure Copy" Margin="0,0,0,5"
+                    <Button Command="{Binding DataContext.SendToOffloadCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            Height="26" ToolTip="Send selected folder to Offload" Margin="0,0,0,5"
                             Style="{StaticResource ContextualActionButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z"
                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                   Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
-                            <TextBlock Text="Secure Copy"/>
+                            <TextBlock Text="Send to Offload"/>
                         </StackPanel>
                     </Button>
 

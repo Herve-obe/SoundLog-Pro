@@ -41,7 +41,7 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
         [NotifyCanExecuteChangedFor(nameof(StopCommand))]
-        [NotifyCanExecuteChangedFor(nameof(SendFileToTranscodeCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SendToOffloadCommand))]
         [NotifyCanExecuteChangedFor(nameof(UnloadMediaCommand))]
         [NotifyPropertyChangedFor(nameof(HasMedia))]
         private bool _isAudioLoaded;
@@ -594,12 +594,12 @@ namespace Veriflow.Desktop.ViewModels
         public event Action<string>? RequestModifyReport;
         public event Action<string>? RequestOffloadSource;
 
-        private bool CanSendToSecureCopy() => IsAudioLoaded && !string.IsNullOrEmpty(FilePath);
+        private bool CanSendToOffload() => IsAudioLoaded && !string.IsNullOrEmpty(FilePath);
 
-        [RelayCommand(CanExecute = nameof(CanSendToSecureCopy))]
-        private void SendToSecureCopy()
+        [RelayCommand(CanExecute = nameof(CanSendToOffload))]
+        private void SendToOffload()
         {
-            if (CanSendToSecureCopy())
+            if (CanSendToOffload())
             {
                 string dir = System.IO.Path.GetDirectoryName(FilePath) ?? "";
                 if (!string.IsNullOrEmpty(dir))

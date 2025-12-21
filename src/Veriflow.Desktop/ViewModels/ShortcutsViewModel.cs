@@ -44,7 +44,7 @@ namespace Veriflow.Desktop.ViewModels
         private void LoadShortcuts()
         {
             // Global Shortcuts
-            Shortcuts.Add(new ShortcutInfo("Global", "F1", "Go to Secure Copy page"));
+            Shortcuts.Add(new ShortcutInfo("Global", "F1", "Go to Offload page"));
             Shortcuts.Add(new ShortcutInfo("Global", "F2", "Go to Media page"));
             Shortcuts.Add(new ShortcutInfo("Global", "F3", "Go to Player page"));
             Shortcuts.Add(new ShortcutInfo("Global", "F4", "Go to Sync page"));

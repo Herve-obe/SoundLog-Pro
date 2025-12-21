@@ -14,7 +14,7 @@ namespace Veriflow.Core.Models
         
         // Application State
         public string CurrentMode { get; set; } = "Video"; // "Audio" or "Video"
-        public string CurrentPage { get; set; } = "SecureCopy"; // "Media", "Player", "SecureCopy", etc.
+        public string CurrentPage { get; set; } = "Offload"; // "Media", "Player", "Offload", etc.
         
         // Media Files
         public List<string> MediaFiles { get; set; } = new();
@@ -23,8 +23,8 @@ namespace Veriflow.Core.Models
         public List<ReportItemData> AudioReportItems { get; set; } = new();
         public List<ReportItemData> VideoReportItems { get; set; } = new();
         
-        // SecureCopy Settings
-        public SecureCopySettings? SecureCopySettings { get; set; }
+        // Offload Settings
+        public OffloadSettings? OffloadSettings { get; set; }
         
         // Transcode Queue
         public List<string> TranscodeQueue { get; set; } = new();
@@ -59,9 +59,9 @@ namespace Veriflow.Core.Models
     }
 
     /// <summary>
-    /// SecureCopy configuration
+    /// Offload configuration
     /// </summary>
-    public class SecureCopySettings
+    public class OffloadSettings
     {
         public string SourcePath { get; set; } = string.Empty;
         public string MainDestination { get; set; } = string.Empty;

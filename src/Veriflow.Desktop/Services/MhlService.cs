@@ -159,7 +159,7 @@ namespace Veriflow.Desktop.Services
 
         private async Task<string> CalculateFileHashAsync(string path, long fileSize, IProgress<CopyProgress> progress, long processedGlobal, long totalGlobal, DateTime startTime, CancellationToken ct)
         {
-             // Reusing implementation concept from SecureCopyService but strictly for reading
+             // Reusing implementation concept from OffloadService but strictly for reading
              var xxHash = new System.IO.Hashing.XxHash64();
              var buffer = new byte[1024 * 1024 * 4]; // 4MB
              using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 1024 * 4, true);

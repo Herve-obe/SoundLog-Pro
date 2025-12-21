@@ -21,8 +21,9 @@
         <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding OpenSessionCommand}"/>
         <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveSessionCommand}"/>
         
+        
         <!-- F-Key Navigation Shortcuts -->
-        <KeyBinding Key="F1" Command="{Binding ShowSecureCopyCommand}"/>
+        <KeyBinding Key="F1" Command="{Binding ShowOffloadCommand}"/>
         <KeyBinding Key="F2" Command="{Binding ShowMediaCommand}"/>
         <KeyBinding Key="F3" Command="{Binding ShowPlayerCommand}"/>
         <KeyBinding Key="F4" Command="{Binding ShowSyncCommand}"/>
@@ -112,7 +113,7 @@
                 <MenuItem Header="Full Screen" InputGestureText="F11" />
                 <MenuItem Header="Minimize to Tray" />
                 <Separator/>
-                <MenuItem Header="Secure Copy" InputGestureText="F1" Command="{Binding ShowSecureCopyCommand}" />
+                <MenuItem Header="Offload" InputGestureText="F1" Command="{Binding ShowOffloadCommand}" />
                 <MenuItem Header="Media" InputGestureText="F2" Command="{Binding ShowMediaCommand}" />
                 <MenuItem Header="Player" InputGestureText="F3" Command="{Binding ShowPlayerCommand}" />
                 <MenuItem Header="Sync" InputGestureText="F4" Command="{Binding ShowSyncCommand}" />
@@ -169,10 +170,10 @@
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                     
 
-                    <!-- SECURE COPY -->
-                    <RadioButton Content="SECURE COPY" 
-                                 Command="{Binding ShowSecureCopyCommand}" 
-                                 IsChecked="{Binding IsSecureCopyActive, Mode=OneWay}"
+                    <!-- OFFLOAD (Renamed from Secure Copy) -->
+                    <RadioButton Content="OFFLOAD" 
+                                 Command="{Binding ShowOffloadCommand}" 
+                                 IsChecked="{Binding IsOffloadActive, Mode=OneWay}"
                                  Style="{StaticResource NavButtonStyle}">
                          <RadioButton.Tag>
                              <Path Data="M12,1L3,5V11C3,16.55 6.9,21.74 12,23C17.1,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" 

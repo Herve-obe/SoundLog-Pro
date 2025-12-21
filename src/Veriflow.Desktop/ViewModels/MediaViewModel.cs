@@ -41,7 +41,7 @@ namespace Veriflow.Desktop.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(CreateReportCommand))]
         [NotifyCanExecuteChangedFor(nameof(AddToReportCommand))]
-        [NotifyCanExecuteChangedFor(nameof(SendToSecureCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SendToOffloadCommand))]
         [NotifyCanExecuteChangedFor(nameof(SendToTranscodeCommand))]
         private bool _isBusy;
 
@@ -66,7 +66,7 @@ namespace Veriflow.Desktop.ViewModels
         private bool _isStopPressed;
         
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(SendToSecureCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SendToOffloadCommand))]
         [NotifyCanExecuteChangedFor(nameof(SendToTranscodeCommand))]
         private string? _currentPath = null;
 
@@ -154,7 +154,7 @@ namespace Veriflow.Desktop.ViewModels
             AddToReportCommand.NotifyCanExecuteChanged();
         }
 
-        private bool CanSendToSecureCopy() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && !IsBusy;
+        private bool CanSendToOffload() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && !IsBusy;
         private bool CanSendToTranscode() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && FileList.Any() && !IsBusy;
 
         private bool CanCreateReport() => FileList.Any() && !IsBusy;
@@ -198,8 +198,8 @@ namespace Veriflow.Desktop.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(CanSendToSecureCopy))]
-        private void SendToSecureCopy()
+        [RelayCommand(CanExecute = nameof(CanSendToOffload))]
+        private void SendToOffload()
         {
              RequestOffloadSource?.Invoke(CurrentPath ?? "");
         }

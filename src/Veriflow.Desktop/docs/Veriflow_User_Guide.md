@@ -43,7 +43,7 @@ Veriflow is a professional media verification and workflow tool designed for vid
 ## 3. Getting Started
 
 ### First Launch
-Upon first launch, Veriflow opens to the **SECURE COPY** page. You can navigate between different modules using:
+Upon first launch, Veriflow opens to the **OFFLOAD** page. You can navigate between different modules using:
 - Function keys (F1-F6)
 - Menu: View > [Module Name]
 - Bottom navigation bar
@@ -58,7 +58,7 @@ Upon first launch, Veriflow opens to the **SECURE COPY** page. You can navigate 
 
 ## 4. Features Overview
 
-### SECURE COPY (F1)
+### OFFLOAD (F1)
 Dual-destination file copying with hash verification for secure media transfers.
 
 ### MEDIA (F2)
@@ -80,7 +80,7 @@ Quality control reporting and EDL generation.
 
 ## 5. Detailed Module Guide
 
-### SECURE COPY
+### OFFLOAD
 **Purpose**: Copy media files to two destinations simultaneously with integrity verification.
 
 **Features**:
@@ -103,7 +103,7 @@ Quality control reporting and EDL generation.
 Veriflow 1.1.0 introduces a dedicated **Verify Only** mode for checking the integrity of previously offloaded media using MHL files.
 
 **How to use:**
-1.  Go to the **Secure Copy** page.
+1.  Go to the **Offload** page.
 2.  Switch the mode toggle at the top from **OFFLOAD** to **VERIFY**.
 3.  Click **Open Folder** to select the directory containing your media and the `.mhl` file.
     - Veriflow supports folder drag-and-drop.
@@ -225,7 +225,7 @@ Veriflow will parse the existing MHL file and re-calculate xxHash64 checksums fo
 - **F1**: Help
 
 ### Navigation
-- **F1**: SECURE COPY
+- **F1**: OFFLOAD
 - **F2**: MEDIA
 - **F3**: PLAYER
 - **F4**: SYNC
