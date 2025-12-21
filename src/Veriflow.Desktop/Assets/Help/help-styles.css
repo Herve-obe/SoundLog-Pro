@@ -32,6 +32,8 @@ a[href]::after {
     background-color: #252526;
     padding: 20px;
     overflow-y: auto;
+    overflow-x: hidden;
+    /* Hide horizontal scrollbar */
     border-right: 1px solid #3E3E42;
 }
 
