@@ -39,6 +39,16 @@ namespace Veriflow.Desktop.ViewModels
         [NotifyCanExecuteChangedFor(nameof(EditMetadataCommand))]
         private MediaItemViewModel? _selectedMedia;
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(CreateReportCommand))]
+        [NotifyCanExecuteChangedFor(nameof(AddToReportCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SendToSecureCopyCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SendToTranscodeCommand))]
+        private bool _isBusy;
+
+        [ObservableProperty]
+        private string _busyMessage = "";
+
         partial void OnSelectedMediaChanged(MediaItemViewModel? value)
         {
             value?.LoadMetadata(); // Fire and forget OK here for UI responsiveness
@@ -145,10 +155,10 @@ namespace Veriflow.Desktop.ViewModels
             AddToReportCommand.NotifyCanExecuteChanged();
         }
 
-        private bool CanSendToSecureCopy() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath);
-        private bool CanSendToTranscode() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && FileList.Any();
+        private bool CanSendToSecureCopy() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && !IsBusy;
+        private bool CanSendToTranscode() => !string.IsNullOrWhiteSpace(CurrentPath) && Directory.Exists(CurrentPath) && FileList.Any() && !IsBusy;
 
-        private bool CanCreateReport() => FileList.Any();
+        private bool CanCreateReport() => FileList.Any() && !IsBusy;
 
         [RelayCommand(CanExecute = nameof(CanCreateReport))]
         private async Task CreateReport()
@@ -380,6 +390,9 @@ namespace Veriflow.Desktop.ViewModels
 
                 try
                 {
+                    IsBusy = true;
+                    BusyMessage = "Loading files...";
+
                     // Filter based on Mode
                     var targetExtensions = IsVideoMode ? VideoExtensions : AudioExtensions;
                     
@@ -391,8 +404,15 @@ namespace Veriflow.Desktop.ViewModels
                     {
                         FileList.Add(new MediaItemViewModel(file));
                     }
+
+                    BusyMessage = "Loading metadata...";
                 }
-                catch { /* Access denied or other error */ }
+                catch 
+                { 
+                    /* Access denied or other error */ 
+                    IsBusy = false;
+                    BusyMessage = "";
+                }
 
                 // Re-evaluate "Add To Report" in case this folder contains duplicates
                 AddToReportCommand.NotifyCanExecuteChanged();
@@ -404,9 +424,17 @@ namespace Veriflow.Desktop.ViewModels
 
         private async Task PreloadMetadataAsync()
         {
-            // Load metadata for all files in parallel (non-blocking)
-            var tasks = FileList.Select(item => item.LoadMetadata()).ToList();
-            await Task.WhenAll(tasks);
+            try
+            {
+                // Load metadata for all files in parallel (non-blocking)
+                var tasks = FileList.Select(item => item.LoadMetadata()).ToList();
+                await Task.WhenAll(tasks);
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = "";
+            }
         }
 
         partial void OnIsVideoModeChanged(bool value)
