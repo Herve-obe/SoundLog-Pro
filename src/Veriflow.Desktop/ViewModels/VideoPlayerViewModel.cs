@@ -677,6 +677,12 @@ namespace Veriflow.Desktop.ViewModels
                 return;
             }
 
+            // Ignore arrow keys when Ctrl is pressed (for Previous/Next navigation)
+            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                return; // Let InputBindings handle Ctrl+Arrow
+            }
+
             if (e.Key == Key.Right)
             {
                 StartJog(1);
@@ -692,6 +698,12 @@ namespace Veriflow.Desktop.ViewModels
         [RelayCommand]
         private void KeyUp(KeyEventArgs e)
         {
+            // Ignore arrow keys when Ctrl is pressed (for Previous/Next navigation)
+            if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                return; // Let InputBindings handle Ctrl+Arrow
+            }
+
             if (e.Key == Key.Right || e.Key == Key.Left)
             {
                 StopJog();
