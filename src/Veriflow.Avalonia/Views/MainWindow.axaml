@@ -99,20 +99,32 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Tools: A/V Switch -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0" Spacing="10">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="40,0,0,0" Spacing="10">
                     <ToggleButton Classes="ViewFilter" 
                                   IsChecked="{Binding IsVideoMode}" 
-                                  Content="Video"
                                   Command="{Binding SwitchToVideoCommand}"
                                   Background="{DynamicResource Brush.Accent.Video}"
-                                  ToolTip.Tip="Switch to Video Workflow"/>
+                                  ToolTip.Tip="Switch to Video Workflow">
+                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- Clapperboard Icon (Filled) -->
+                            <PathIcon Data="M18,4l2,4h-3l-2-4h-2l2,4h-3l-2-4H8l2,4H7L5,4H4C2.9,4,2,4.9,2,6v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V4H18z"
+                                      Width="14" Height="14" Foreground="White" VerticalAlignment="Center"/>
+                            <TextBlock Text="Video" FontSize="14" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
                                   
                     <ToggleButton Classes="ViewFilter" 
                                   IsChecked="{Binding IsAudioMode}" 
-                                  Content="Audio"
                                   Command="{Binding SwitchToAudioCommand}"
                                   Background="{DynamicResource Brush.Accent.Audio}"
-                                  ToolTip.Tip="Switch to Audio Workflow"/>
+                                  ToolTip.Tip="Switch to Audio Workflow">
+                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- Waveform Icon (Filled) -->
+                            <PathIcon Data="M3 9h2v6H3zM7 5h2v14H7zM11 2h2v20h-2zM15 5h2v14h-2zM19 9h2v6h-2z"
+                                      Width="14" Height="14" Foreground="White" VerticalAlignment="Center"/>
+                            <TextBlock Text="Audio" FontSize="14" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
                 </StackPanel>
 
                 <!-- Navigation -->

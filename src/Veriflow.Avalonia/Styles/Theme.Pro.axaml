@@ -191,12 +191,48 @@
     <Style Selector="Button:pressed">
         <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
     </Style>
+    
+    <!-- PathIcon in Disabled Buttons -->
+    <Style Selector="Button:disabled PathIcon">
+        <Setter Property="Opacity" Value="0.4"/>
+    </Style>
+    
+    <!-- PathIcon in Disabled ToggleButtons -->
+    <Style Selector="ToggleButton:disabled PathIcon">
+        <Setter Property="Opacity" Value="0.4"/>
+    </Style>
 
     <!-- ============================================ -->
     <!-- WPF LEGACY BUTTON STYLES (ControlThemes)    -->
     <!-- ============================================ -->
     <Style>
         <Style.Resources>
+            <!-- TOGGLE VIEW MODE BUTTON (Offload/Verify style) -->
+            <ControlTheme x:Key="ToggleViewModeButton" TargetType="Button">
+                <Setter Property="Width" Value="90"/>
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="10,0"/>
+                <Setter Property="Opacity" Value="0.2"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter>
+            </ControlTheme>
+
             <!-- VIEW MODE TOGGLE (Offload/Verify buttons) -->
             <ControlTheme x:Key="ViewModeToggleStyle" TargetType="Button">
                 <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
@@ -265,9 +301,15 @@
     
     <!-- Primary Button Style -->
     <Style Selector="Button.Primary">
+        <Setter Property="Width" Value="90"/>
+        <Setter Property="Height" Value="26"/>
         <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
     </Style>
     
     <Style Selector="Button.Primary:pointerover">
@@ -343,6 +385,61 @@
     <Style Selector="TextBlock.Label">
         <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
         <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- PAGE HEADER STYLES -->
+    <!-- ============================================ -->
+    
+    <!-- Page Title (e.g., "OFFLOAD", "MEDIA", "PLAYER") -->
+    <Style Selector="TextBlock.PageTitle">
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="20,0,0,0"/>
+    </Style>
+    
+    <!-- Page Icon (24x24) -->
+    <Style Selector="PathIcon.PageIcon">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- SECTION HEADER STYLES -->
+    <!-- ============================================ -->
+    
+    <!-- Section Header Text (e.g., "MEDIA SOURCE", "DESTINATION") -->
+    <Style Selector="TextBlock.SectionHeader">
+        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- Section Icon (17x17) -->
+    <Style Selector="PathIcon.SectionIcon">
+        <Setter Property="Width" Value="17"/>
+        <Setter Property="Height" Value="17"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
+        <Setter Property="Margin" Value="0,0,10,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <!-- ============================================ -->
+    <!-- FIELD LABEL STYLES -->
+    <!-- ============================================ -->
+    
+    <!-- Field Label (e.g., "MAIN DESTINATION (A)") -->
+    <Style Selector="TextBlock.FieldLabel">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}"/>
+        <Setter Property="Opacity" Value="0.5"/>
+        <Setter Property="Margin" Value="0,0,0,3"/>
     </Style>
     
     <!-- ============================================ -->
@@ -547,27 +644,27 @@
     <!-- ============================================ -->
     
     <Style Selector="ToggleButton.ViewFilter">
-        <Setter Property="Width" Value="60"/>
-        <Setter Property="Height" Value="32"/>
+        <Setter Property="Width" Value="90"/>
+        <Setter Property="Height" Value="26"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Padding" Value="10,0"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Opacity" Value="0.2"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="4">
-                    <TextBlock Text="{TemplateBinding Content}"
-                              Foreground="{TemplateBinding Foreground}"
-                              FontSize="{TemplateBinding FontSize}"
-                              FontWeight="{TemplateBinding FontWeight}"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"/>
+                        CornerRadius="4"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                 </Border>
             </ControlTemplate>
         </Setter>
