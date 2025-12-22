@@ -17,7 +17,7 @@ public partial class OffloadView : UserControl
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         PopulateFileTree();
     }
