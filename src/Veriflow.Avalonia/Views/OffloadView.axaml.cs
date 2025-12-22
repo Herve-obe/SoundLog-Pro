@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Selection;
+using Avalonia.Interactivity;
 using Veriflow.Avalonia.ViewModels;
 using System.IO;
 using System.Linq;
