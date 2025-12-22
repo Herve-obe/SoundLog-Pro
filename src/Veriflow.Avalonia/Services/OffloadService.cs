@@ -12,9 +12,11 @@ namespace Veriflow.Avalonia.Services
     {
         private const int BufferSize = 1024 * 1024 * 4; // 4MB Buffer
 
-        // Events for ViewModel interaction
+        // Events for ViewModel interaction - reserved for future use
+#pragma warning disable CS0067 // Event is never used
         public event EventHandler<string>? LogMessage;
         public event EventHandler<double>? ProgressChanged;
+#pragma warning restore CS0067
 
         /// <summary>
         /// Copies a file with strict Read-Back Verification (Silverstack Level).

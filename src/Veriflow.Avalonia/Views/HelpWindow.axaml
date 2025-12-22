@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:md="https://github.com/whistyun/Markdown.Avalonia"
+        xmlns:views="clr-namespace:Veriflow.Avalonia.Views"
         mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
         x:Class="Veriflow.Avalonia.Views.HelpWindow"
         Title="Veriflow Pro - User Guide"
@@ -18,7 +19,6 @@
             <TextBlock Classes="Subtitle" Text="Veriflow Pro Documentation"/>
         </StackPanel>
         
-        <!-- Content -->
         <Border Grid.Row="1"
                 Background="{StaticResource Brush.Background.Deep}"
                 BorderBrush="{StaticResource Brush.Border}"
@@ -27,8 +27,8 @@
                 Padding="20">
             <ScrollViewer>
                 <md:MarkdownScrollViewer x:Name="MarkdownViewer"
-                                        Markdown="{Binding MarkdownContent}"
-                                        Background="Transparent"/>
+                                        x:DataType="views:HelpWindow"
+                                        Markdown="{Binding MarkdownContent}"/>
             </ScrollViewer>
         </Border>
         

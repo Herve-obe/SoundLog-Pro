@@ -538,7 +538,7 @@ namespace Veriflow.Avalonia.ViewModels
                     if (!videoWavCache.TryGetValue(vid.FullPath, out string? vidWav)) return; // Skip if prep failed
 
                     SyncPair? bestPair = null;
-                    double bestCorr = double.MaxValue; // Not used yet, taking first match
+                    // double bestCorr = double.MaxValue; // Reserved for future correlation calculation
 
                     foreach (var aud in AudioPool)
                     {
