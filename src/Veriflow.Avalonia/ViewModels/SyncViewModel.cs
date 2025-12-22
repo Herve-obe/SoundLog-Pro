@@ -83,22 +83,25 @@ namespace Veriflow.Avalonia.ViewModels
         public bool HasMatches => Matches.Count > 0;
 
         // ==========================================
+        // FILE PICKER EVENT
+        // ==========================================
+        public event Action<string>? RequestFilePicker;
+
+        // ==========================================
         // COMMANDS
         // ==========================================
 
         [RelayCommand]
         private async Task ImportVideo()
         {
-             // Stub for OpenFileDialog - use StorageProvider in View
-            System.Diagnostics.Debug.WriteLine("ImportVideo needs StorageProvider implementation");
+            RequestFilePicker?.Invoke("video");
             await Task.CompletedTask;
         }
 
         [RelayCommand]
         private async Task ImportAudio()
         {
-             // Stub for OpenFileDialog
-            System.Diagnostics.Debug.WriteLine("ImportAudio needs StorageProvider implementation");
+            RequestFilePicker?.Invoke("audio");
             await Task.CompletedTask;
         }
 
