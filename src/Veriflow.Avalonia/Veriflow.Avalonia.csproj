@@ -34,4 +34,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Veriflow.Core\Veriflow.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
 </Project>

@@ -33,7 +33,7 @@
             <!-- App Icon -->
             <Image Grid.Column="0"
                    Classes="AppIcon"
-                   Source="/Assets/veriflow.ico"/>
+                   Source="avares://Veriflow.Avalonia/Assets/veriflow.ico"/>
             
             <!-- Menu Bar -->
             <Menu Grid.Column="1" Classes="TitleBarMenu">
