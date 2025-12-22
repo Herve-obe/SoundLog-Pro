@@ -112,16 +112,24 @@ namespace Veriflow.Avalonia.ViewModels
             _mhlService = mhlService;
             
             _offloadService.LogMessage += Service_LogMessage;
-            // _offloadService.ProgressChanged += Service_ProgressChanged; // "OFFLOAD" or "VERIFY"
-
-            // Initialize commands
-            // SelectSourceCommand = new RelayCommand(SelectSource);
-            // SelectDestinationCommand = new RelayCommand(SelectDestination);
-            // StartOffloadCommand = new AsyncRelayCommand(StartOffloadAsync);
-            // ViewReportCommand = new RelayCommand(ViewReport);
-            // SetViewModeCommand = new RelayCommand<string>(SetViewMode);
 
             InitializeExplorer();
+        }
+
+        // --- ASSIGNMENT COMMANDS (FileExplorer Integration) ---
+        
+        [RelayCommand]
+        private void SetSourceFromExplorer()
+        {
+            // TODO: Get selected directory from FileExplorer and set SourcePath
+            // This will be wired up with proper binding
+        }
+
+        [RelayCommand]
+        private void SetDestFromExplorer()
+        {
+            // TODO: Get selected directory from FileExplorer and set Destination1Path
+            // This will be wired up with proper binding
         }
 
         private void Service_LogMessage(object? sender, string message)
