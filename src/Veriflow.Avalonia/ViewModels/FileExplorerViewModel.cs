@@ -41,6 +41,16 @@ public partial class FileExplorerViewModel : ObservableObject
                     name: $"{drive.Name} ({drive.VolumeLabel})",
                     fullPath: drive.RootDirectory.FullName
                 );
+
+                // Set node type based on drive type
+                node.NodeType = drive.DriveType switch
+                {
+                    DriveType.Fixed => DirectoryNodeType.FixedDrive,
+                    DriveType.Removable => DirectoryNodeType.RemovableDrive,
+                    DriveType.Network => DirectoryNodeType.NetworkDrive,
+                    DriveType.CDRom => DirectoryNodeType.CDRom,
+                    _ => DirectoryNodeType.Folder
+                };
                 
                 node.PropertyChanged += Node_PropertyChanged;
                 RootNodes.Add(node);

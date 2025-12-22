@@ -4,6 +4,18 @@ using System.Collections.ObjectModel;
 namespace Veriflow.Avalonia.Models;
 
 /// <summary>
+/// Type of directory node (drive or folder).
+/// </summary>
+public enum DirectoryNodeType
+{
+    Folder,
+    FixedDrive,      // HDD/SSD
+    RemovableDrive,  // USB, SD Card
+    NetworkDrive,
+    CDRom
+}
+
+/// <summary>
 /// Represents a directory node in the file explorer tree.
 /// Supports lazy loading of subdirectories.
 /// </summary>
@@ -23,6 +35,9 @@ public partial class DirectoryNode : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<DirectoryNode> _children = new();
+
+    [ObservableProperty]
+    private DirectoryNodeType _nodeType = DirectoryNodeType.Folder;
 
     /// <summary>
     /// Indicates if this node has a placeholder child (for lazy loading).
