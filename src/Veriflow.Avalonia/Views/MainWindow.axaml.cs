@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Veriflow.Avalonia.ViewModels;
@@ -65,10 +66,14 @@ public partial class MainWindow : Window
             ? WindowState.Normal 
             : WindowState.Maximized;
         
-        // Update button symbol
-        if (this.FindControl<Button>("MaximizeButton") is Button btn)
+        // Update button icon geometry
+        if (this.FindControl<Path>("MaximizeIcon") is Path icon)
         {
-            btn.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+            // Maximized: show restore icon (two overlapping squares)
+            // Normal: show maximize icon (single square)
+            icon.Data = WindowState == WindowState.Maximized
+                ? Avalonia.Media.Geometry.Parse("M 0,2 L 8,2 L 8,10 L 0,10 Z M 2,0 L 10,0 L 10,8 L 8,8")
+                : Avalonia.Media.Geometry.Parse("M 0,0 L 10,0 L 10,10 L 0,10 Z");
         }
     }
 
