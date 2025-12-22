@@ -21,10 +21,12 @@ public partial class FileExplorerView : UserControl
             panel.DataContext is DirectoryNode node &&
             !string.IsNullOrEmpty(node.FullPath))
         {
+#pragma warning disable CS0618
             var dragData = new DataObject();
             dragData.Set(DataFormats.Text, node.FullPath);
             
             await DragDrop.DoDragDrop(e, dragData, DragDropEffects.Copy);
+#pragma warning restore CS0618
         }
     }
 }

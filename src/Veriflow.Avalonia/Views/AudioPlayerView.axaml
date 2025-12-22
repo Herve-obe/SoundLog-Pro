@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             xmlns:vlc="clr-namespace:LibVLCSharp.Avalonia;assembly=LibVLCSharp.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             x:Class="Veriflow.Avalonia.Views.AudioPlayerView"
+             x:DataType="vm:AudioPlayerViewModel"
+             Background="{StaticResource Brush.Background.Panel}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,20">
+            <TextBlock Classes="Title" Text="PLAYER"/>
+            <TextBlock Classes="Subtitle" Text="Audio/Video playback and editing"/>
+        </StackPanel>
+        
+        <!-- Content -->
+        <Border Grid.Row="1"
+                Background="{StaticResource Brush.Background.Deep}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Margin="0,0,0,16">
+            <Grid>
+                <!-- Video Player Area (LibVLC Ready) -->
+                <vlc:VideoView x:Name="VideoPlayer" MediaPlayer="{Binding MediaPlayerInstance}"/>
+                
+                <!-- Placeholder when no media loaded -->
+                <StackPanel VerticalAlignment="Center" 
+                            HorizontalAlignment="Center"
+                            Spacing="16">
+                    <TextBlock Classes="Header" 
+                               Text="No Media Loaded" 
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource Brush.Text.Secondary}"/>
+                    <TextBlock Classes="Subtitle" 
+                               Text="Open a file to start playback" 
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource Brush.Text.Tertiary}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Transport Controls -->
+        <Border Grid.Row="2"
+                Background="{StaticResource Brush.Background.Elevated}"
+                BorderBrush="{StaticResource Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="16">
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                
+                <!-- Transport Buttons -->
+                <StackPanel Grid.Row="0" Grid.Column="0" 
+                            Orientation="Horizontal" 
+                            Spacing="8"
+                            VerticalAlignment="Center">
+                    <Button Content="OPEN FILE" 
+                            Classes="Primary"
+                            Command="{Binding LoadFileCommand}"/>
+                    <Button Content="▶ PLAY" 
+                            Command="{Binding PlayCommand}"/>
+                    <Button Content="⏸ PAUSE" 
+                            Command="{Binding PauseCommand}"/>
+                    <Button Content="⏹ STOP" 
+                            Command="{Binding StopCommand}"/>
+                </StackPanel>
+                
+                <!-- Timecode Display -->
+                <StackPanel Grid.Row="0" Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            Spacing="12"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentTimeDisplay}" 
+                               FontFamily="Consolas"
+                               FontSize="16"
+                               Foreground="{StaticResource Brush.Text.Primary}"/>
+                    <TextBlock Text="/" 
+                               Foreground="{StaticResource Brush.Text.Tertiary}"/>
+                    <TextBlock Text="{Binding TotalTimeDisplay}" 
+                               FontFamily="Consolas"
+                               FontSize="16"
+                               Foreground="{StaticResource Brush.Text.Secondary}"/>
+                </StackPanel>
+                
+                <!-- Volume Control -->
+                <StackPanel Grid.Row="0" Grid.Column="2" 
+                            IsVisible="{Binding ShowVolumeControls}"
+                            Orientation="Horizontal" 
+                            Spacing="8"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="🔊" FontSize="14" VerticalAlignment="Center"/>
+                    <Slider Width="100" 
+                            Minimum="0" 
+                            Maximum="100"
+                            Value="100"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Text="100%" 
+                               Width="40"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <!-- Timeline Scrubber -->
+                <Slider Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                        Margin="0,12,0,0"
+                        Minimum="0"
+                        Maximum="{Binding PlaybackMaximum}"
+                        Value="{Binding PlaybackPosition}"/>
+            </Grid>
+        </Border>
+        
+    </Grid>
+    
+</UserControl>

@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.Platform.Storage;
 using Veriflow.Avalonia.Services;
+using Avalonia.Controls;
 
 namespace Veriflow.Avalonia.ViewModels
 {
@@ -463,25 +464,19 @@ namespace Veriflow.Avalonia.ViewModels
         [RelayCommand]
         private void DropFiles(DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files))
+            var files = DragDropHelper.GetFiles(e).ToArray();
+            if (files.Length > 0)
             {
-                var files = e.Data.GetFiles();
-                if (files != null)
-                {
-                    var filePaths = files.Select(f => f.Path.LocalPath).ToArray();
-                
-                    // Auto-switch Audio/Video mode based on file type
-                    var mainVM = Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop 
-                        ? desktop.MainWindow?.DataContext as MainViewModel 
-                        : null;
+                // Auto-switch Audio/Video mode based on file type
+                var mainVM = Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop 
+                    ? desktop.MainWindow?.DataContext as MainViewModel 
+                    : null;
                         
-                    mainVM?.AutoSwitchModeForFiles(filePaths);
+                mainVM?.AutoSwitchModeForFiles(files);
 
-                    foreach (var file in filePaths)
-                    {
-                        // Filter explicit audio extensions if needed, or allow all and let ffmpeg handle
-                        AddFile(file);
-                    }
+                foreach (var file in files)
+                {
+                    AddFile(file);
                 }
             }
         }
@@ -489,10 +484,30 @@ namespace Veriflow.Avalonia.ViewModels
         [RelayCommand]
         private async Task AddFiles()
         {
-             // Stub for file picker - requires Window reference or Service
-             // For now, we'll just log
-             System.Diagnostics.Debug.WriteLine("File Picker Stub - Implement using StorageProvider");
-             await Task.CompletedTask;
+             if (Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+             {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                     {
+                         Title = "Add Files to Transcode",
+                         AllowMultiple = true
+                         // Filter logic could be added here if needed, but ffmpeg handles most
+                     });
+
+                     if (files != null && files.Count > 0)
+                     {
+                         var paths = files.Select(x => x.Path.LocalPath).ToArray();
+                         
+                         // Auto-switch mode
+                         var mainVM = desktop.MainWindow?.DataContext as MainViewModel;
+                         mainVM?.AutoSwitchModeForFiles(paths);
+
+                         foreach (var path in paths) AddFile(path);
+                     }
+                 }
+             }
         }
 
         public void AddFiles(IEnumerable<string> paths)
@@ -579,10 +594,25 @@ namespace Veriflow.Avalonia.ViewModels
         }
 
         [RelayCommand]
-        private void PickDestination()
+        private async Task PickDestination()
         {
-             // Stub for folder picker
-             System.Diagnostics.Debug.WriteLine("Folder Picker Stub");
+             if (Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+             {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var folder = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+                     {
+                         Title = "Select Destination Folder",
+                         AllowMultiple = false
+                     });
+
+                     if (folder != null && folder.Count > 0)
+                     {
+                         DestinationFolder = folder[0].Path.LocalPath;
+                     }
+                 }
+             }
         }
 
         [RelayCommand(CanExecute = nameof(CanStartTranscode))]

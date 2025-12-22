@@ -88,7 +88,12 @@ namespace Veriflow.Avalonia.Models
         public MediaItemViewModel OriginalMedia { get; }
 
         // Core Identity
-        [ObservableProperty] private string _clipName = "";
+        [ObservableProperty] 
+        [NotifyPropertyChangedFor(nameof(Name))]
+        private string _clipName = "";
+        
+        public string Name => ClipName; // Alias for binding compatibility
+
         [ObservableProperty] private string _filename = "";
         [ObservableProperty] private string _status = "Ready";
 

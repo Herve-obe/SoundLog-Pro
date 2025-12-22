@@ -3,9 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Veriflow.Avalonia.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="850"
              x:Class="Veriflow.Avalonia.Views.TranscodeView"
              x:DataType="vm:TranscodeViewModel"
+             x:Name="Root"
              Background="{StaticResource Brush.Background.Panel}">
     
     <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
@@ -16,74 +17,190 @@
             <TextBlock Classes="Subtitle" Text="Convert media files to different formats"/>
         </StackPanel>
         
-        <!-- Preset Selection -->
+        <!-- SETTINGS AREA -->
         <Border Grid.Row="1"
                 Background="{StaticResource Brush.Background.Elevated}"
                 BorderBrush="{StaticResource Brush.Border}"
                 BorderThickness="1"
-                CornerRadius="4"
-                Padding="16"
-                Margin="0,0,0,16">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <TextBlock Grid.Column="0" 
-                           Classes="Label" 
-                           Text="PRESET:" 
-                           VerticalAlignment="Center"
-                           Margin="0,0,12,0"/>
-                <ComboBox Grid.Column="1"
-                          SelectedIndex="0"
-                          HorizontalAlignment="Stretch">
-                    <ComboBoxItem Content="ProRes 422 HQ"/>
-                    <ComboBoxItem Content="ProRes 422"/>
-                    <ComboBoxItem Content="H.264 High Quality"/>
-                    <ComboBoxItem Content="DNxHD 185"/>
-                    <ComboBoxItem Content="WAV 48kHz 24-bit"/>
-                </ComboBox>
-                <Button Grid.Column="2" 
-                        Content="ADD FILES" 
-                        Classes="Primary"
-                        Margin="12,0,0,0"/>
+                CornerRadius="5"
+                Padding="20"
+                Margin="0,0,0,20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Category Tabs -->
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/> <!-- Settings Form -->
+                </Grid.RowDefinitions>
+
+                <!-- Category Tabs (Visual only, bound to SelectCategoryCommand) -->
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Left">
+                     <RadioButton Content="VIDEO" GroupName="TranscodeMode" 
+                                  IsChecked="{Binding IsVideoCategory, Mode=OneWay}"
+                                  Command="{Binding SelectCategoryCommand}" CommandParameter="Video"
+                                  Theme="{StaticResource RadioButton.ModeToggle}" 
+                                  Height="32" Width="100"/>
+                     <RadioButton Content="AUDIO" GroupName="TranscodeMode" 
+                                  IsChecked="{Binding IsAudioCategory, Mode=OneWay}"
+                                  Command="{Binding SelectCategoryCommand}" CommandParameter="Audio"
+                                  Theme="{StaticResource RadioButton.ModeToggle}" 
+                                  Height="32" Width="100"/>
+                </StackPanel>
+
+                <!-- SETTINGS FORM -->
+                <Grid Grid.Row="2" ColumnDefinitions="2*, 30, 1.5*">
+                    
+                    <!-- COLUMN 1: FORMAT & CODEC -->
+                    <StackPanel Grid.Column="0" Spacing="15">
+                        <TextBlock Text="FORMAT SETTINGS" Classes="SectionHeader" Foreground="{StaticResource Brush.Text.Secondary}" FontWeight="Bold"/>
+                        
+                        <!-- VIDEO SETTINGS (Visible if Video) -->
+                        <StackPanel IsVisible="{Binding IsVideoCategory}" Spacing="10">
+                            <Grid ColumnDefinitions="120,*">
+                                <TextBlock Text="CONTAINER:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding VideoFormats}" SelectedItem="{Binding SelectedFormat}" PlaceholderText="Select Format"/>
+                            </Grid>
+                            
+                            <Grid ColumnDefinitions="120,*">
+                                <TextBlock Text="BITRATE:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableBitrates}" SelectedItem="{Binding SelectedBitrate}" IsEnabled="{Binding SelectedFormat, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="120,*" Margin="0,5,0,0">
+                                <TextBlock Text="BIT DEPTH:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableVideoBitDepths}" SelectedItem="{Binding SelectedVideoBitDepth}"/>
+                            </Grid>
+
+                             <Grid ColumnDefinitions="120,*" Margin="0,5,0,0">
+                                <TextBlock Text="ENGINE:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableEngines}" SelectedItem="{Binding SelectedEngine}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding DisplayName}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+
+                             <!-- Options -->
+                             <CheckBox Content="Burn-in Timecode" IsChecked="{Binding IsBurnInEnabled}" IsEnabled="{Binding IsBurnInAllowed}" Margin="120,5,0,0"/>
+
+                        </StackPanel>
+
+                        <!-- AUDIO SETTINGS (Visible if Audio) -->
+                        <StackPanel IsVisible="{Binding IsAudioCategory}" Spacing="10">
+                             <Grid ColumnDefinitions="120,*">
+                                <TextBlock Text="FORMAT:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AudioFormats}" SelectedItem="{Binding SelectedFormat}" PlaceholderText="Select Custom Format"/>
+                            </Grid>
+                            
+                            <Grid ColumnDefinitions="120,*">
+                                <TextBlock Text="BITRATE:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableBitrates}" SelectedItem="{Binding SelectedBitrate}"/>
+                            </Grid>
+
+                             <Grid ColumnDefinitions="120,*">
+                                <TextBlock Text="SAMPLE RATE:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableSampleRates}" SelectedItem="{Binding SelectedSampleRate}"/>
+                            </Grid>
+
+                             <Grid ColumnDefinitions="120,*">
+                                <TextBlock Text="BIT DEPTH:" Classes="Label" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableBitDepths}" SelectedItem="{Binding SelectedBitDepth}"/>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- COLUMN 2: DESTINATION -->
+                    <StackPanel Grid.Column="2" Spacing="15">
+                        <TextBlock Text="DESTINATION" Classes="SectionHeader" Foreground="{StaticResource Brush.Text.Secondary}" FontWeight="Bold"/>
+                        
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Text="{Binding DestinationFolder, TargetNullValue='Same as Source'}" IsReadOnly="True" Watermark="Same as Source"/>
+                            <Button Grid.Column="1" Command="{Binding PickDestinationCommand}" Content="..." Margin="5,0,0,0" Classes="Secondary"/>
+                        </Grid>
+                        
+                        <TextBlock Text="{Binding OutputExtension, StringFormat='Output Extension: {0}'}" 
+                                   Foreground="{StaticResource Brush.Text.Tertiary}" 
+                                   HorizontalAlignment="Right" 
+                                   FontSize="12"/>
+
+                        <!-- Add Files Button (Prominent) -->
+                        <Button Command="{Binding AddFilesCommand}" 
+                                Content="ADD FILES TO QUEUE" 
+                                Classes="Primary" 
+                                Height="40" 
+                                Margin="0,20,0,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"/>
+                    </StackPanel>
+
+                </Grid>
             </Grid>
         </Border>
         
         <!-- File Queue -->
-        <Border Grid.Row="2"
+        <Border x:Name="QueueDropZone"
+                Grid.Row="2"
                 Background="{StaticResource Brush.Background.Elevated}"
                 BorderBrush="{StaticResource Brush.Border}"
                 BorderThickness="1"
-                CornerRadius="4"
-                Padding="16"
-                Margin="0,0,0,16">
+                CornerRadius="5"
+                Padding="0"
+                Margin="0,0,0,20"
+                ClipToBounds="True"
+                DragDrop.AllowDrop="True">
             <Grid RowDefinitions="Auto,*">
-                <TextBlock Grid.Row="0" Classes="Label" Text="QUEUE" Margin="0,0,0,12"/>
+                <!-- Queue Header -->
+                <Border Background="{StaticResource Brush.Panel.Header}" Padding="15,10">
+                    <Grid ColumnDefinitions="*,150,150,100,40">
+                         <TextBlock Grid.Column="0" Text="FILENAME" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text.Secondary}"/>
+                         <TextBlock Grid.Column="1" Text="DURATION" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text.Secondary}"/>
+                         <TextBlock Grid.Column="2" Text="FORMAT" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text.Secondary}"/>
+                         <TextBlock Grid.Column="3" Text="STATUS" FontWeight="SemiBold" Foreground="{StaticResource Brush.Text.Secondary}"/>
+                         <TextBlock Grid.Column="4" Text="" FontWeight="SemiBold"/>
+                    </Grid>
+                </Border>
                 
                 <ListBox Grid.Row="1"
+                         ItemsSource="{Binding Files}"
                          Background="Transparent"
-                         BorderThickness="0">
+                         BorderThickness="0"
+                         Padding="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                                <TextBlock Grid.Column="0" 
-                                           Text="Sample_File.mov"
-                                           VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1" 
-                                           Text="Ready"
-                                           Foreground="{StaticResource Brush.Text.Tertiary}"
-                                           Margin="8,0"
-                                           VerticalAlignment="Center"/>
-                                <ProgressBar Grid.Column="2"
-                                             Width="100"
-                                             Value="0"
-                                             Margin="8,0"
+                            <Border BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,0,0,1" Padding="15,10">
+                                <Grid ColumnDefinitions="*,150,150,100,40">
+                                    <TextBlock Grid.Column="0" Text="{Binding FilePath}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding DurationString}" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text.Tertiary}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding AudioInfo}" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text.Tertiary}" FontSize="11"/>
+                                    
+                                    <!-- Status / Progress -->
+                                    <Grid Grid.Column="3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Status}" IsVisible="{Binding ProgressValue, Converter={x:Static ObjectConverters.IsNull}}"/>
+                                        <ProgressBar Value="{Binding ProgressValue}" Maximum="100" Height="4" IsVisible="{Binding ProgressValue, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                    </Grid>
+
+                                    <Button Grid.Column="4"
+                                             Command="{Binding #Root.((vm:TranscodeViewModel)DataContext).RemoveFileCommand}"
+                                             CommandParameter="{Binding}"
+                                             Content="✕" 
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             Padding="5"
+                                             Foreground="{StaticResource Brush.Text.Tertiary}"
                                              VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="3" 
-                                           Text="0%"
-                                           Width="40"
-                                           VerticalAlignment="Center"/>
-                            </Grid>
+                                </Grid>
+                            </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                 
+                <!-- Empty State -->
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !Files.Count}" Opacity="0.5">
+                    <PathIcon Data="{StaticResource Icon.Upload}" Width="40" Height="40" Foreground="{StaticResource Brush.Text.Tertiary}"/>
+                    <TextBlock Text="Drag files here to add to queue" Margin="0,10,0,0" Foreground="{StaticResource Brush.Text.Tertiary}"/>
+                </StackPanel>
             </Grid>
         </Border>
         
@@ -92,19 +209,24 @@
                 Background="{StaticResource Brush.Background.Deep}"
                 BorderBrush="{StaticResource Brush.Border}"
                 BorderThickness="1"
-                CornerRadius="4"
-                Padding="16">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                <TextBlock Grid.Column="0" 
-                           Classes="Label"
-                           Text="0 files in queue"
-                           VerticalAlignment="Center"/>
-                <Button Grid.Column="1" Content="CLEAR QUEUE" Margin="0,0,8,0"/>
-                <Button Grid.Column="2" Content="START TRANSCODE" Classes="Primary" Margin="0,0,8,0"/>
-                <Button Grid.Column="3" Content="CANCEL"/>
+                CornerRadius="5"
+                Padding="15">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                     <TextBlock Text="{Binding Files.Count, StringFormat='{}{0} files ready'}" Foreground="{StaticResource Brush.Text.Secondary}"/>
+                     <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource Brush.Accent}" FontWeight="Bold" Margin="20,0,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Command="{Binding ClearListCommand}" Content="CLEAR QUEUE" Margin="0,0,10,0" Classes="Secondary"/>
+                
+                <Button Grid.Column="2" Command="{Binding StartTranscodeCommand}" Classes="Action Start">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="{StaticResource Icon.Play}" Width="12" Height="12"/>
+                        <TextBlock Text="START TRANSCODE"/>
+                    </StackPanel>
+                </Button>
             </Grid>
         </Border>
         
     </Grid>
-    
 </UserControl>

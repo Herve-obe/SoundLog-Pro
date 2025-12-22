@@ -19,10 +19,10 @@
             <views:MediaView/>
         </DataTemplate>
         <DataTemplate DataType="vm:AudioPlayerViewModel">
-            <views:PlayerView/>
+            <views:AudioPlayerView/>
         </DataTemplate>
         <DataTemplate DataType="vm:VideoPlayerViewModel">
-            <views:PlayerView/>
+            <views:VideoPlayerView/>
         </DataTemplate>
         <DataTemplate DataType="vm:SyncViewModel">
             <views:SyncView/>

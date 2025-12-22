@@ -62,7 +62,7 @@ namespace Veriflow.Avalonia.Commands.Reports
          private readonly ReportsViewModel _vm;
          private readonly bool _isVideo;
          // Storing list copy for undo
-         private System.Collections.Generic.List<ReportItem> _backup;
+         private System.Collections.Generic.List<ReportItem>? _backup;
 
          public string Description => "Clear List";
 
@@ -82,7 +82,10 @@ namespace Veriflow.Avalonia.Commands.Reports
          public void UnExecute()
          {
              var list = _isVideo ? _vm.VideoReportItems : _vm.AudioReportItems;
-             foreach(var item in _backup) list.Add(item);
+             if (_backup != null)
+             {
+                 foreach(var item in _backup) list.Add(item);
+             }
          }
          
          public void Undo() => UnExecute();

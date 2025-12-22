@@ -12,6 +12,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Veriflow.Avalonia.Models;
 using Veriflow.Avalonia.Services;
 using Veriflow.Core.Models;
+using Avalonia.Platform.Storage;
 
 namespace Veriflow.Avalonia.ViewModels
 {
@@ -61,6 +62,15 @@ namespace Veriflow.Avalonia.ViewModels
         }
 
         public string ReportTitle => CurrentReportType == ReportType.Audio ? "SOUND REPORT" : "CAMERA REPORT";
+        
+        public string ClipsCountDisplay => $"{CurrentReportItems.Count} clips";
+
+        [RelayCommand]
+        private void AddClip()
+        {
+             // Logic to add a manual clip or open file picker
+             System.Diagnostics.Debug.WriteLine("AddClip Stub");
+        }
 
         public ObservableCollection<ReportItem> CurrentReportItems => CurrentReportType == ReportType.Audio ? AudioReportItems : VideoReportItems;
 
@@ -104,7 +114,9 @@ namespace Veriflow.Avalonia.ViewModels
             ClearMediaCommand.NotifyCanExecuteChanged();
             PrintCommand.NotifyCanExecuteChanged();
             ExportPdfCommand.NotifyCanExecuteChanged();
+            ExportPdfCommand.NotifyCanExecuteChanged();
             ExportSessionEDLCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(ClipsCountDisplay));
         }
 
         public void SetAppMode(AppMode mode)
@@ -256,45 +268,43 @@ namespace Veriflow.Avalonia.ViewModels
         [RelayCommand]
         private async System.Threading.Tasks.Task DropFile(DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files))
+            var files = Veriflow.Avalonia.Services.DragDropHelper.GetFiles(e).ToArray();
+            
+            if (files != null && files.Length > 0)
             {
-                var files = e.Data.GetFiles()?.Select(f => f.Path.LocalPath).ToArray();
-                if (files != null && files.Length > 0)
+                // Auto-switch Audio/Video mode based on file type
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
+                    desktop.MainWindow?.DataContext is MainViewModel mainVM)
                 {
-                    // Auto-switch Audio/Video mode based on file type
-                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
-                        desktop.MainWindow?.DataContext is MainViewModel mainVM)
-                    {
-                        mainVM.AutoSwitchModeForFiles(files);
-                        
-                        // Wait for mode switch to complete
-                        await System.Threading.Tasks.Task.Delay(100);
-                    }
+                    mainVM.AutoSwitchModeForFiles(files);
+                    
+                    // Wait for mode switch to complete
+                    await System.Threading.Tasks.Task.Delay(100);
+                }
 
-                    // Create list of MediaItemViewModels from dropped files
-                    var mediaItems = new List<MediaItemViewModel>();
-                    foreach (var file in files)
+                // Create list of MediaItemViewModels from dropped files
+                var mediaItems = new List<MediaItemViewModel>();
+                foreach (var file in files)
+                {
+                    if (System.IO.File.Exists(file))
                     {
-                        if (System.IO.File.Exists(file))
-                        {
-                            var fileInfo = new System.IO.FileInfo(file);
-                            var mediaItem = new MediaItemViewModel(fileInfo);
-                            await mediaItem.LoadMetadata();
-                            mediaItems.Add(mediaItem);
-                        }
+                        var fileInfo = new System.IO.FileInfo(file);
+                        var mediaItem = new MediaItemViewModel(fileInfo);
+                        await mediaItem.LoadMetadata();
+                        mediaItems.Add(mediaItem);
                     }
+                }
 
-                    // Create or add to report
-                    if (mediaItems.Any())
+                // Create or add to report
+                if (mediaItems.Any())
+                {
+                    if (!IsReportActive)
                     {
-                        if (!IsReportActive)
-                        {
-                            CreateReport(mediaItems, CurrentReportType);
-                        }
-                        else
-                        {
-                            AddToReport(mediaItems);
-                        }
+                        CreateReport(mediaItems, CurrentReportType);
+                    }
+                    else
+                    {
+                        AddToReport(mediaItems);
                     }
                 }
             }
@@ -303,10 +313,43 @@ namespace Veriflow.Avalonia.ViewModels
         [RelayCommand]
         private async System.Threading.Tasks.Task AddFiles()
         {
-            // Stub for StorageProvider
-             System.Diagnostics.Debug.WriteLine("AddFiles Stub - Need StorageProvider");
-             // Simulate for now
-             await System.Threading.Tasks.Task.CompletedTask;
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                     {
+                         Title = "Add Files to Report",
+                         AllowMultiple = true
+                     });
+
+                     if (files != null && files.Count > 0)
+                     {
+                         var paths = files.Select(x => x.Path.LocalPath).ToArray();
+                         
+                         // Reuse logic from DropFile but without DragEventArgs wrapper
+                         // Refactor if needed, here duplicating slightly for speed
+                         var mediaItems = new List<MediaItemViewModel>();
+                         foreach (var file in paths)
+                         {
+                             if (System.IO.File.Exists(file))
+                             {
+                                 var fileInfo = new System.IO.FileInfo(file);
+                                 var mediaItem = new MediaItemViewModel(fileInfo);
+                                 await mediaItem.LoadMetadata();
+                                 mediaItems.Add(mediaItem);
+                             }
+                         }
+
+                         if (mediaItems.Any())
+                         {
+                             if (!IsReportActive) CreateReport(mediaItems, CurrentReportType);
+                             else AddToReport(mediaItems);
+                         }
+                     }
+                 }
+            }
         }
 
         [RelayCommand(CanExecute = nameof(HasMedia))]
@@ -494,29 +537,84 @@ namespace Veriflow.Avalonia.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(HasMedia))]
-        private void ExportPdf()
+        private async System.Threading.Tasks.Task ExportPdf()
         {
-             // Stub PDF Export
-             System.Diagnostics.Debug.WriteLine("ExportPdf Stub");
+             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+             {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                     {
+                         Title = "Export PDF Report",
+                         DefaultExtension = ".pdf",
+                         SuggestedFileName = CurrentReportType == ReportType.Video ? "camera_report" : "sound_report",
+                         FileTypeChoices = new[] { new FilePickerFileType("PDF Document") { Patterns = new[] { "*.pdf" } } }
+                     });
+
+                     if (file != null)
+                     {
+                         try
+                         {
+                             bool isVideo = CurrentReportType == ReportType.Video;
+                             _pdfService.GeneratePdf(file.Path.LocalPath, Header, CurrentReportItems, isVideo, ReportSettings);
+                             
+                             // Optional: MessageBox success
+                             // System.Diagnostics.Debug.WriteLine($"PDF Saved to {file.Path.LocalPath}");
+                         }
+                         catch (Exception ex)
+                         {
+                             System.Diagnostics.Debug.WriteLine($"PDF Export Error: {ex.Message}");
+                         }
+                     }
+                 }
+             }
         }
 
         [RelayCommand(CanExecute = nameof(CanExportSessionEDL))]
-        private void ExportSessionEDL()
+        private async System.Threading.Tasks.Task ExportSessionEDL()
         {
-            // Collect all clips from all ReportItems
+            // Collect all clips
             var allClips = CurrentReportItems
                 .Where(item => item.Clips.Any())
                 .SelectMany(item => item.Clips)
                 .ToList();
 
-            if (allClips.Count == 0)
-            {
-                System.Diagnostics.Debug.WriteLine("No clips logged.");
-                return;
-            }
+            if (allClips.Count == 0) return;
 
-            // Stub SaveFileDialog
-             System.Diagnostics.Debug.WriteLine("ExportSessionEDL Stub - Need StorageProvider");
+             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+             {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                     {
+                         Title = "Export Session EDL/ALE",
+                         DefaultExtension = ".edl",
+                         SuggestedFileName = $"Session_{DateTime.Now:yyyyMMdd_HHmmss}",
+                         FileTypeChoices = new[] { new FilePickerFileType("Edit Decision List") { Patterns = new[] { "*.edl" } } }
+                     });
+
+                     if (file != null)
+                     {
+                         try
+                         {
+                             string edlPath = file.Path.LocalPath;
+                             string alePath = System.IO.Path.ChangeExtension(edlPath, ".ale");
+
+                             var edlContent = GenerateSessionEdl(allClips);
+                             await System.IO.File.WriteAllTextAsync(edlPath, edlContent);
+
+                             var aleContent = GenerateSessionAle(allClips);
+                             await System.IO.File.WriteAllTextAsync(alePath, aleContent);
+                         }
+                         catch (Exception ex)
+                         {
+                             System.Diagnostics.Debug.WriteLine($"Export Failed: {ex.Message}");
+                         }
+                     }
+                 }
+             }
         }
 
         private bool CanExportSessionEDL()

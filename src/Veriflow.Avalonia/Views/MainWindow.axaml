@@ -1,202 +1,136 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Veriflow.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:Veriflow.Avalonia.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="Veriflow.Avalonia.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Title="Veriflow [BETA] - v1.0 (Avalonia)"
-        Width="1400" Height="900"
-        MinWidth="1200" MinHeight="700"
+        Icon="avares://Veriflow.Avalonia/Assets/veriflow.ico"
+        Title="Veriflow Pro"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="40"
-        Background="{StaticResource Brush.Background.Primary}">
-    
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
+        WindowStartupLocation="CenterScreen">
 
-    <Grid RowDefinitions="40,*,60">
-        <!-- Chromeless Title Bar (Google/VS Code Style) -->
-        <Grid Grid.Row="0" Classes="ChromelessTitleBar">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>  <!-- Icon -->
-                <ColumnDefinition Width="Auto"/>  <!-- Menu -->
-                <ColumnDefinition Width="*"/>     <!-- Center Title -->
-                <ColumnDefinition Width="46"/>    <!-- Minimize -->
-                <ColumnDefinition Width="46"/>    <!-- Maximize -->
-                <ColumnDefinition Width="46"/>    <!-- Close -->
-            </Grid.ColumnDefinitions>
+    <Design.DataContext>
+        <vm:MainViewModel/>
+    </Design.DataContext>
+
+    <!-- Main Layout -->
+    <Grid RowDefinitions="Auto, *, Auto">
+        
+        <!-- 1. CUSTOM TITLE BAR -->
+        <Grid Grid.Row="0" Classes="ChromelessTitleBar" ColumnDefinitions="Auto, Auto, *, Auto">
             
             <!-- App Icon -->
-            <Image Grid.Column="0"
-                   Classes="AppIcon"
-                   Source="avares://Veriflow.Avalonia/Assets/veriflow.ico"/>
+            <Image Grid.Column="0" Classes="AppIcon" Source="avares://Veriflow.Avalonia/Assets/veriflow.ico"/>
             
             <!-- Menu Bar -->
             <Menu Grid.Column="1" Classes="TitleBarMenu">
                 <MenuItem Header="File">
-                    <MenuItem Header="New"/>
-                    <MenuItem Header="Open..."/>
+                    <MenuItem Header="New Session..." Command="{Binding NewSessionCommand}"/>
+                    <MenuItem Header="Open Session..." Command="{Binding OpenSessionCommand}"/>
                     <Separator/>
-                    <MenuItem Header="Save"/>
-                    <MenuItem Header="Save As..."/>
+                    <MenuItem Header="Save Session" Command="{Binding SaveSessionCommand}"/>
+                    <MenuItem Header="Save Session As..." Command="{Binding SaveSessionAsCommand}"/>
                     <Separator/>
-                    <MenuItem Header="Exit"/>
+                    <MenuItem Header="Switch Workspace..." Command="{Binding SwitchWorkspaceCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
                 </MenuItem>
+                
                 <MenuItem Header="Edit">
-                    <MenuItem Header="Undo"/>
-                    <MenuItem Header="Redo"/>
+                    <MenuItem Header="Undo" Command="{Binding UndoCommand}"/>
+                    <MenuItem Header="Redo" Command="{Binding RedoCommand}"/>
                     <Separator/>
-                    <MenuItem Header="Cut"/>
-                    <MenuItem Header="Copy"/>
-                    <MenuItem Header="Paste"/>
+                    <MenuItem Header="Cut" Command="{Binding CutCommand}"/>
+                    <MenuItem Header="Copy" Command="{Binding CopyCommand}"/>
+                    <MenuItem Header="Paste" Command="{Binding PasteCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Preferences..." Command="{Binding OpenPreferencesCommand}"/>
                 </MenuItem>
+                
                 <MenuItem Header="View">
-                    <MenuItem Header="Offload"/>
-                    <MenuItem Header="Transcode"/>
-                    <MenuItem Header="Sync"/>
-                    <MenuItem Header="Media"/>
-                    <MenuItem Header="Reports"/>
+                    <MenuItem Header="Media Info" ToggleType="CheckBox" IsChecked="{Binding ShowMediaInfo}"/>
+                    <MenuItem Header="Waveform" ToggleType="CheckBox" IsChecked="{Binding ShowWaveform}"/>
                 </MenuItem>
+                
                 <MenuItem Header="Help">
-                    <MenuItem Header="Documentation"/>
-                    <MenuItem Header="About"/>
+                    <MenuItem Header="View Help" Command="{Binding ViewHelpCommand}"/>
+                    <MenuItem Header="Open Log Folder" Command="{Binding OpenLogFolderCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="About Veriflow" Command="{Binding OpenAboutCommand}"/>
                 </MenuItem>
             </Menu>
-            
-            <!-- Centered Title (Draggable Area) -->
-            <Border Grid.Column="2" 
-                    Background="Transparent"
-                    PointerPressed="TitleBar_PointerPressed">
-                <TextBlock Classes="CenteredTitle"
-                           Text="VERIFLOW - Antigravity - Migration Complete"/>
+
+            <!-- Centered Title (Draggable) -->
+            <Border Grid.Column="2" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
+                <TextBlock Text="{Binding ProjectTitle, FallbackValue='Veriflow Pro - Untitled Session'}" 
+                           Classes="CenteredTitle"/>
             </Border>
-            
-            <!-- Minimize Button -->
-            <Button Grid.Column="3"
-                    Classes="WindowControlButton"
-                    Click="MinimizeButton_Click"
-                    ToolTip.Tip="Minimize">
-                <TextBlock Classes="WindowControlIcon Minimize"/>
-            </Button>
-            
-            <!-- Maximize/Restore Button -->
-            <Button Grid.Column="4"
-                    x:Name="MaximizeButton"
-                    Classes="WindowControlButton"
-                    Click="MaximizeButton_Click"
-                    ToolTip.Tip="Maximize">
-                <TextBlock x:Name="MaximizeIcon"
-                          Classes="WindowControlIcon Maximize"/>
-            </Button>
-            
-            <!-- Close Button -->
-            <Button Grid.Column="5"
-                    Classes="WindowControlButton CloseButton"
-                    Click="CloseButton_Click"
-                    ToolTip.Tip="Close">
-                <TextBlock Classes="WindowControlIcon Close"/>
-            </Button>
+
+            <!-- Window Controls -->
+            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                <Button Classes="WindowControlButton" Command="{Binding MinimizeCommand}">
+                    <TextBlock Classes="WindowControlIcon Minimize"/>
+                </Button>
+                <Button Classes="WindowControlButton" Command="{Binding MaximizeCommand}">
+                    <TextBlock Classes="WindowControlIcon Maximize"/>
+                </Button>
+                <Button Classes="WindowControlButton CloseButton" Command="{Binding CloseCommand}">
+                    <TextBlock Classes="WindowControlIcon Close"/>
+                </Button>
+            </StackPanel>
         </Grid>
-        
-        <!-- Content Area -->
+
+        <!-- 2. CONTENT AREA -->
         <ContentControl Grid.Row="1" 
                         Content="{Binding CurrentViewModel}"
-                        Background="{StaticResource Brush.Background.Primary}"/>
-        
-        <!-- Bottom Navigation Bar -->
-        <Border Grid.Row="2" 
-                Background="#1E1E1E"
-                BorderBrush="{StaticResource Brush.Border}"
-                BorderThickness="0,1,0,0"
-                Height="60">
-            
-            <Grid ColumnDefinitions="Auto, *, Auto">
-                
-                <!-- Col 0: View Filters (Video/Audio) -->
-                <StackPanel Grid.Column="0" 
-                           Orientation="Horizontal" 
-                           Spacing="8"
-                           Margin="16,0,0,0"
-                           VerticalAlignment="Center">
-                    
-                    <ToggleButton Classes="ViewFilter"
-                                 Content="Video"
-                                 Background="{DynamicResource VideoAccentBrush}"
-                                 IsChecked="{Binding IsVideoMode}"/>
-                    
-                    <ToggleButton Classes="ViewFilter"
-                                 Content="Audio"
-                                 Background="{DynamicResource AudioAccentBrush}"
-                                 IsChecked="{Binding IsAudioMode}"/>
-                    
+                        Background="{DynamicResource Brush.Background.Primary}"/>
+
+        <!-- 3. FOOTER (Navigation) -->
+        <Border Grid.Row="2" Background="{DynamicResource Brush.Background.Secondary}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="250"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Tools: A/V Switch -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0" Spacing="10">
+                    <ToggleButton Classes="ViewFilter" 
+                                  IsChecked="{Binding IsVideoMode}" 
+                                  Content="Video"
+                                  Command="{Binding SwitchToVideoCommand}"
+                                  Background="{DynamicResource Brush.Accent.Video}"
+                                  ToolTip.Tip="Switch to Video Workflow"/>
+                                  
+                    <ToggleButton Classes="ViewFilter" 
+                                  IsChecked="{Binding IsAudioMode}" 
+                                  Content="Audio"
+                                  Command="{Binding SwitchToAudioCommand}"
+                                  Background="{DynamicResource Brush.Accent.Audio}"
+                                  ToolTip.Tip="Switch to Audio Workflow"/>
                 </StackPanel>
-                
-                <!-- Col 1: Navigation Buttons -->
-                <StackPanel Grid.Column="1" 
-                           Orientation="Horizontal" 
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Spacing="4">
-                    
-                    <!-- Offload Button -->
-                    <RadioButton Classes="NavButton Offload"
-                                GroupName="Navigation"
-                                Content="OFFLOAD"
-                                IsChecked="{Binding IsOffloadPage}"
-                                Command="{Binding NavigateToOffloadCommand}"/>
-                    
-                    <!-- Media Button -->
-                    <RadioButton Classes="NavButton Media"
-                                GroupName="Navigation"
-                                Content="MEDIA"
-                                IsChecked="{Binding IsMediaPage}"
-                                Command="{Binding NavigateToMediaCommand}"/>
-                    
-                    <!-- Player Button -->
-                    <RadioButton Classes="NavButton Player"
-                                GroupName="Navigation"
-                                Content="PLAYER"
-                                IsChecked="{Binding IsPlayerPage}"
-                                Command="{Binding NavigateToPlayerCommand}"/>
-                    
-                    <!-- Sync Button -->
-                    <RadioButton Classes="NavButton Sync"
-                                GroupName="Navigation"
-                                Content="SYNC"
-                                IsChecked="{Binding IsSyncPage}"
-                                Command="{Binding NavigateToSyncCommand}"/>
-                    
-                    <!-- Transcode Button -->
-                    <RadioButton Classes="NavButton Transcode"
-                                GroupName="Navigation"
-                                Content="TRANSCODE"
-                                IsChecked="{Binding IsTranscodePage}"
-                                Command="{Binding NavigateToTranscodeCommand}"/>
-                    
-                    <!-- Reports Button -->
-                    <RadioButton Classes="NavButton Reports"
-                                GroupName="Navigation"
-                                Content="REPORT"
-                                IsChecked="{Binding IsReportsPage}"
-                                Command="{Binding NavigateToReportsCommand}"/>
-                    
+
+                <!-- Navigation -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="0">
+                    <RadioButton Classes="NavButton Offload" Content="OFFLOAD" IsChecked="{Binding IsOffloadActive}" Command="{Binding ShowOffloadCommand}" GroupName="Nav"/>
+                    <RadioButton Classes="NavButton Media" Content="MEDIA" IsChecked="{Binding IsMediaActive}" Command="{Binding ShowMediaCommand}" GroupName="Nav"/>
+                    <RadioButton Classes="NavButton Player" Content="PLAYER" IsChecked="{Binding IsPlayerActive}" Command="{Binding ShowPlayerCommand}" GroupName="Nav"/>
+                    <RadioButton Classes="NavButton Sync" Content="SYNC" IsChecked="{Binding IsSyncActive}" Command="{Binding ShowSyncCommand}" GroupName="Nav"/>
+                    <RadioButton Classes="NavButton Transcode" Content="TRANSCODE" IsChecked="{Binding IsTranscodeActive}" Command="{Binding ShowTranscodeCommand}" GroupName="Nav"/>
+                    <RadioButton Classes="NavButton Reports" Content="REPORTS" IsChecked="{Binding IsReportsActive}" Command="{Binding ShowReportsCommand}" GroupName="Nav"/>
                 </StackPanel>
-                
-                <!-- Col 2: Version Info -->
-                <TextBlock Grid.Column="2"
-                          Text="v1.0 PRO"
-                          Foreground="#666666"
-                          FontSize="10"
-                          VerticalAlignment="Center"
-                          Margin="20,0,16,0"/>
-                
+
+                <!-- Info -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,20,0">
+                    <TextBlock Text="Veriflow 2.0.0 (Avalonia)" Opacity="0.3" FontSize="{DynamicResource Font.Size.Small}" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                </StackPanel>
             </Grid>
         </Border>
         
     </Grid>
-    
 </Window>

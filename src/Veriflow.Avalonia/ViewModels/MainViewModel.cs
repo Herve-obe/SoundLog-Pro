@@ -23,6 +23,9 @@ namespace Veriflow.Avalonia.ViewModels
         [ObservableProperty]
         private string _title = "Veriflow";
 
+        // Alias for Title used in bindings
+        public string ProjectTitle => Title;
+
         [ObservableProperty]
         private object? _currentView;
 
@@ -30,14 +33,37 @@ namespace Veriflow.Avalonia.ViewModels
         private string _applicationBackground = "#121212";
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsVideoMode))]
+        [NotifyPropertyChangedFor(nameof(IsAudioMode))]
         private AppMode _currentAppMode = AppMode.Video;
 
         partial void OnCurrentAppModeChanged(AppMode value)
         {
             _reportsViewModel.SetAppMode(value);
             _transcodeViewModel.SetAppMode(value);
-            // Propagate to other VMs if needed
+            
+            // Update Global Accent Brush
+            if (Application.Current != null)
+            {
+                 var videoAccent = Application.Current.FindResource("Brush.Accent.Video") as ISolidColorBrush;
+                 var audioAccent = Application.Current.FindResource("Brush.Accent.Audio") as ISolidColorBrush;
+                 
+                 if (value == AppMode.Video && videoAccent != null)
+                 {
+                     Application.Current.Resources["Brush.Accent"] = videoAccent;
+                 }
+                 else if (value == AppMode.Audio && audioAccent != null)
+                 {
+                     Application.Current.Resources["Brush.Accent"] = audioAccent;
+                 }
+            }
         }
+
+        [ObservableProperty]
+        private bool _showMediaInfo = true;
+
+        [ObservableProperty]
+        private bool _showWaveform = true;
 
         /// <summary>
         /// Automatically switches Audio/Video mode based on the file type of the first dragged file.
@@ -141,6 +167,16 @@ namespace Veriflow.Avalonia.ViewModels
         public ICommand ShowKeyboardShortcutsCommand { get; }
         public ICommand OpenLogFolderCommand { get; }
         
+        // Window Control Commands
+        public ICommand MinimizeCommand { get; }
+        public ICommand MaximizeCommand { get; }
+        public ICommand CloseCommand { get; }
+        
+        // Missing Stubs
+        public ICommand SwitchWorkspaceCommand { get; }
+        public ICommand SaveSessionAsCommand { get; }
+        public ICommand OpenPreferencesCommand { get; }
+        
         // Recent Files
         [ObservableProperty]
         private System.Collections.ObjectModel.ObservableCollection<RecentFileEntry> _recentFiles = new();
@@ -215,6 +251,16 @@ namespace Veriflow.Avalonia.ViewModels
             ViewHelpCommand = new RelayCommand(ViewHelp);
             ShowKeyboardShortcutsCommand = new RelayCommand(ShowKeyboardShortcuts);
             OpenLogFolderCommand = new RelayCommand(OpenLogFolder);
+
+            // Window Commands
+            MinimizeCommand = new RelayCommand(MinimizeWindow);
+            MaximizeCommand = new RelayCommand(MaximizeWindow);
+            CloseCommand = new RelayCommand(CloseWindow);
+            
+            // Missing Menu Commands Stubs
+            SwitchWorkspaceCommand = new RelayCommand(() => System.Diagnostics.Debug.WriteLine("SwitchWorkspace Stub"));
+            SaveSessionAsCommand = new RelayCommand(() => System.Diagnostics.Debug.WriteLine("SaveSessionAs Stub"));
+            OpenPreferencesCommand = new RelayCommand(() => System.Diagnostics.Debug.WriteLine("OpenPreferences Stub"));
 
             // Default
             SetMode(AppMode.Video);
@@ -799,6 +845,35 @@ namespace Veriflow.Avalonia.ViewModels
         private void Redo()
         {
             _commandHistory.Redo();
+        }
+
+        // Window Actions
+        private void MinimizeWindow()
+        {
+            if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                if (desktop.MainWindow != null) desktop.MainWindow.WindowState = WindowState.Minimized;
+            }
+        }
+
+        [RelayCommand]
+        private void MaximizeWindow()
+        {
+            if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            {
+                desktop.MainWindow.WindowState = desktop.MainWindow.WindowState == WindowState.Maximized 
+                    ? WindowState.Normal 
+                    : WindowState.Maximized;
+            }
+        }
+
+        [RelayCommand]
+        private void CloseWindow()
+        {
+            if (App.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.MainWindow?.Close();
+            }
         }
 
         private bool CanCutCopy()

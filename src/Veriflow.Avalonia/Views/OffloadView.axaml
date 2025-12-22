@@ -2,299 +2,338 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Veriflow.Avalonia.ViewModels"
-             xmlns:views="using:Veriflow.Avalonia.Views"
-             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
+             xmlns:vm="clr-namespace:Veriflow.Avalonia.ViewModels"
+             xmlns:views="clr-namespace:Veriflow.Avalonia.Views"
+             mc:Ignorable="d" d:DesignWidth="1500" d:DesignHeight="800"
              x:Class="Veriflow.Avalonia.Views.OffloadView"
-             x:DataType="vm:OffloadViewModel"
-             Background="#1E1E1E"
-             FontFamily="Segoe UI">
+             x:DataType="vm:OffloadViewModel">
 
-    <!-- Main Grid: 2 Columns (FileExplorer | Content) -->
-    <Grid ColumnDefinitions="300,*">
-        
-        <!-- COLUMN 0: File Explorer -->
-        <Border Grid.Column="0"
-                Background="{DynamicResource Brush.Background.Elevated}"
-                BorderBrush="{DynamicResource Color.Border}"
-                BorderThickness="0,0,1,0">
-            <StackPanel>
-                <TextBlock Text="EXPLORER"
-                          FontSize="11"
-                          FontWeight="SemiBold"
-                          Foreground="{DynamicResource Brush.Text.Tertiary}"
-                          Margin="16,12,16,8"/>
-                
-                <views:FileExplorerView x:Name="FileExplorer" DataContext="{Binding FileExplorer}"/>
-            </StackPanel>
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Space" Command="{Binding ToggleCopyCommand}"/>
+    </UserControl.KeyBindings>
+
+    <Grid ColumnDefinitions="280, *">
+        <!-- Explorer Section (Left Column) - WPF Legacy Width: 280px -->
+        <Border Grid.Column="0" Background="{DynamicResource Brush.Background.Secondary}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="Auto, *">
+                <TextBlock Text="EXPLORER" Margin="20,15" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource Brush.Text.Primary}"/>
+                <views:FileExplorerView Grid.Row="1" DataContext="{Binding FileExplorer}"/>
+            </Grid>
         </Border>
 
-        <!-- COLUMN 1: Offload Content -->
-        <Grid Grid.Column="1" 
-              RowDefinitions="Auto,*,30"
-              Margin="5,20,30,0">
+        <!-- Content Section (Right Column) -->
+        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, Auto, *, Auto">
             
-            <!-- ROW 0: Header (Top Left, Fixed) -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" 
-                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0">
-                <PathIcon Width="24" Height="24" Foreground="{DynamicResource Brush.Accent}" VerticalAlignment="Center"
-                         Data="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1L12,1z M10,17l-4-4l1.41-1.41L10,14.17l6.59-6.59L18,9L10,17z"/>
-                <TextBlock Text="OFFLOAD" FontSize="24" FontWeight="Bold" 
-                          Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
-            </StackPanel>
-
-            <!-- ROW 1: Centered Content Block (Modes + Form) -->
-            <!-- We add bottom padding to this container to shift the visual center upwards
-                 so that 'Main Destination A' (approx ~230px from top of block) sits at the center.
-                 Top part height ~= 230px. Bottom part height ~= 100px.
-                 Need ~130px padding at bottom to balance it. -->
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left" 
-                        Spacing="20" Margin="0,0,0,130">
-                
-                <!-- 1. Mode Selector (Centered relative to Form) -->
-                <!-- Use a Grid to align it with the form if needed, or just Center in StackPanel -->
-                <!-- The form width is 140+15+1120+10+70 = 1355px. 
-                     We want these buttons centered relative to that width? 
-                     Or just Center? User said "centre le bloc... les boutons... au-dessus".
-                     Let's center them in the StackPanel which is Left aligned? 
-                     No, StackPanel is Left aligned (to stick to Explorer). 
-                     So we need to center these buttons relative to the 1355px width of the form. -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
-                           Spacing="0" Margin="617,0,0,0"> <!-- (1355 - 240) / 2 = 557.5? No.
-                           Form Width = 1355. Center = 677.5.
-                           Buttons Width = 240. Half = 120.
-                           Left Margin = 677.5 - 120 = 557.5.
-                           Let's use a wrapper Grid of width 1355 to center perfectly. -->
-                       
+            <!-- HEADER (Row 0) -->
+            <Grid Grid.Row="0" Margin="20,10,20,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <!-- WPF Legacy Icon: Shield with User -->
+                    <PathIcon Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 1,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.82 18,15.47C17.76,16 17.47,16.5 17.13,17Z" 
+                              Height="20" Width="20" Foreground="{DynamicResource Brush.Accent}"/>
+                    <TextBlock Text="OFFLOAD" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center" Margin="20,0,0,0"/>
                 </StackPanel>
-                
-                <!-- Better Way: Wrapper Grid for Modes -->
-                <Grid Width="1355">
-                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="0">
-                        <RadioButton IsChecked="{Binding IsOffloadMode}" GroupName="Mode"
-                                    Width="120" Height="32"
-                                    Background="{DynamicResource Brush.Accent}" 
-                                    Foreground="{DynamicResource Brush.Text.Primary}"
-                                    BorderThickness="0" CornerRadius="4,0,0,4">
-                            <RadioButton.Template>
-                                <ControlTemplate>
-                                     <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
-                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                                             <PathIcon Width="14" Height="14" Foreground="{TemplateBinding Foreground}"
-                                                      Data="F0 M4,2 L18,2 L22,6 L22,20 C22,21.1 21.1,22 20,22 L4,22 C2.9,22 2,21.1 2,20 L2,4 C2,2.9 2.9,2 4,2 Z M7,11 V5 H9 V11 Z M11,11 V5 H13 V11 Z M15,11 V5 H17 V11 Z"/>
-                                             <TextBlock Text="Offload" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
-                                         </StackPanel>
-                                     </Border>
-                                </ControlTemplate>
-                            </RadioButton.Template>
-                        </RadioButton>
+            </Grid>
 
-                        <RadioButton IsChecked="{Binding IsVerifyMode}" GroupName="Mode"
-                                    Width="120" Height="32"
-                                    Background="{DynamicResource Brush.Background.Hover}" 
-                                    Foreground="{DynamicResource Brush.Text.Tertiary}"
-                                    BorderThickness="0" CornerRadius="0,4,4,0">
-                             <RadioButton.Template>
-                                <ControlTemplate>
-                                     <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
-                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                                             <PathIcon Width="14" Height="14" Foreground="{TemplateBinding Foreground}"
-                                                      Data="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1L12,1z M10,17l-4-4l1.41-1.41L10,14.17l6.59-6.59L18,9L10,17z"/>
-                                             <TextBlock Text="Verify" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
-                                         </StackPanel>
-                                     </Border>
-                                </ControlTemplate>
-                            </RadioButton.Template>
-                        </RadioButton>
-                    </StackPanel>
-                </Grid>
-
-                <!-- 2. Central Form -->
-                <!-- Columns: [AssignBtn 140] [Gap 15] [Input 1120] [Gap 10] [OpenBtn 70] = Total 1355 -->
-                <Grid ColumnDefinitions="140,15,1120,10,70"
-                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-
-                <!-- Row 0: Source Header + Reset All -->
-                <!-- Double Margin between Reset All and Open (Row 1). Current Open is Row 1. 
-                     So add Margin Bottom 20 to this Row. -->
-                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,0,20">
-                    <PathIcon Width="24" Height="24" Foreground="{DynamicResource Brush.Accent}" VerticalAlignment="Center"
-                             Data="F0 M4,2 L18,2 L22,6 L22,20 C22,21.1 21.1,22 20,22 L4,22 C2.9,22 2,21.1 2,20 L2,4 C2,2.9 2.9,2 4,2 Z M7,11 V5 H9 V11 Z M11,11 V5 H13 V11 Z M15,11 V5 H17 V11 Z"/>
-                    <TextBlock Text="MEDIA SOURCE" FontSize="24" FontWeight="Bold" 
-                              Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
-                </StackPanel>
-                
-                <!-- Reset All: Align Bottom of the header row -->
-                <Button Grid.Row="0" Grid.Column="4" Content="Reset All" FontSize="11"
-                       Height="30" Width="70" Padding="0" 
-                       HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                       Classes="Primary"
-                       CornerRadius="3"
-                       Command="{Binding ResetAllCommand}"
-                       VerticalAlignment="Bottom" Margin="0,0,0,20"/>
-
-                    <!-- Row 1: Source Buttons & Input -->
-                    <Button Grid.Row="1" Grid.Column="0" Command="{Binding SetSourceFromExplorerCommand}"
-                            ToolTip.Tip="Définir comme Source"
-                            Width="140" Height="30" Padding="10,0"
-                            Background="{DynamicResource Brush.Accent}" 
-                            BorderBrush="{DynamicResource Color.Border}" BorderThickness="1"
-                            CornerRadius="4" Cursor="Hand" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" VerticalAlignment="Center">
-                             <PathIcon Width="16" Height="16" Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                             <TextBlock Text="Source" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}"/>
-                        </StackPanel>
-                    </Button>
-
-                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding SourcePath}"
-                            Watermark="Drag folder here..."
-                            Height="30" Padding="8,0" FontSize="12"
-                            VerticalContentAlignment="Center"
-                            Background="{DynamicResource Brush.Background.Deep}" 
-                            Foreground="{DynamicResource Brush.Text.Secondary}"
-                            BorderBrush="{DynamicResource Color.Border}" BorderThickness="1"
-                            IsReadOnly="True"
-                            DragDrop.AllowDrop="True"
-                            DragDrop.DragOver="SourceTextBox_DragOver"
-                            DragDrop.Drop="SourceTextBox_Drop"
-                            VerticalAlignment="Center"/>
-
-                    <Button Grid.Row="1" Grid.Column="4" Width="70" Height="30"
-                           Background="{DynamicResource Brush.Accent}" 
-                           Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="SemiBold"
-                           BorderThickness="0" CornerRadius="3"
-                           Command="{Binding PickSourceCommand}"
-                           VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                            <PathIcon Width="14" Height="14" Foreground="{DynamicResource Brush.Text.Primary}"
-                                     Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
-                            <TextBlock Text="Open" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-                    <!-- Spacer -->
-                    <Border Grid.Row="1" Height="25" VerticalAlignment="Bottom"/>
-
-                    <!-- Row 2: Destination Header -->
-                    <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,15,0,10">
-                        <PathIcon Width="24" Height="24" Foreground="{DynamicResource Brush.Accent}" VerticalAlignment="Center"
-                                 Data="M6,2H18C19.1,2 20,2.9 20,4V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2M6,4V14H18V4H6M12,17A2,2 0 0,0 10,19A2,2 0 0,0 12,21A2,2 0 0,0 14,19A2,2 0 0,0 12,17Z"/>
-                        <TextBlock Text="DESTINATION" FontSize="24" FontWeight="Bold" 
-                                  Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <!-- Row 3: Dest A Label -->
-                    <TextBlock Grid.Row="3" Grid.Column="2" Text="MAIN DESTINATION (A)" FontSize="16" 
-                              Foreground="{DynamicResource Brush.Text.Tertiary}" Margin="2,0,0,5"/>
-
-                    <!-- Row 4: Dest A Buttons & Input -->
-                     <Button Grid.Row="4" Grid.Column="0" Command="{Binding SetDestFromExplorerCommand}"
-                            ToolTip.Tip="Définir comme Destination A"
-                            Width="140" Height="30" Padding="10,0"
-                            Background="{DynamicResource Brush.Accent}" 
-                            BorderBrush="{DynamicResource Color.Border}" BorderThickness="1"
-                            CornerRadius="4" Cursor="Hand" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" VerticalAlignment="Center">
-                             <PathIcon Width="16" Height="16" Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                             <!-- Renamed to Destination A -->
-                             <TextBlock Text="Destination A" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}"/>
-                        </StackPanel>
-                    </Button>
-
-                    <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding Destination1Path}"
-                            Watermark="Select destination..."
-                            Height="30" Padding="8,0" FontSize="12"
-                            VerticalContentAlignment="Center"
-                            Background="{DynamicResource Brush.Background.Deep}" 
-                            Foreground="{DynamicResource Brush.Text.Secondary}"
-                            BorderBrush="{DynamicResource Color.Border}" BorderThickness="1"
-                            IsReadOnly="True"
-                            DragDrop.AllowDrop="True"
-                            DragDrop.DragOver="Dest1TextBox_DragOver"
-                            DragDrop.Drop="Dest1TextBox_Drop"
-                            VerticalAlignment="Center"/>
-
-                    <Button Grid.Row="4" Grid.Column="4" Width="70" Height="30"
-                           Background="{DynamicResource Brush.Accent}" 
-                           Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="SemiBold"
-                           BorderThickness="0" CornerRadius="3"
-                           Command="{Binding PickDest1Command}"
-                           VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                            <PathIcon Width="14" Height="14" Foreground="{DynamicResource Brush.Text.Primary}"
-                                     Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
-                            <TextBlock Text="Open" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+            <!-- MODE SWITCHER (Row 1) -->
+            <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,30,0,20">
+                <StackPanel Orientation="Horizontal">
                     
-                     <!-- Spacer -->
-                    <Border Grid.Row="4" Height="25" VerticalAlignment="Bottom"/>
-
-                    <!-- Row 5: Dest B Label -->
-                    <TextBlock Grid.Row="5" Grid.Column="2" Text="SECONDARY DESTINATION (B)" FontSize="16" 
-                              Foreground="{DynamicResource Brush.Text.Tertiary}" Margin="2,10,0,5"/>
-
-                    <!-- Row 6: Dest B Buttons & Input -->
-                    <Button Grid.Row="6" Grid.Column="0" Command="{Binding SetDest2FromExplorerCommand}"
-                            ToolTip.Tip="Définir comme Destination B"
-                            Width="140" Height="30" Padding="10,0"
-                            Background="{DynamicResource Brush.Accent}" 
-                            BorderBrush="{DynamicResource Color.Border}" BorderThickness="1"
-                            CornerRadius="4" Cursor="Hand" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" VerticalAlignment="Center">
-                             <PathIcon Width="16" Height="16" Foreground="{DynamicResource Brush.Text.Primary}"
-                                      Data="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                             <!-- Renamed to Destination B -->
-                             <TextBlock Text="Destination B" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource Brush.Text.Primary}"/>
+                    <!-- OFFLOAD BUTTON - WPF: Width=120, Height=26 -->
+                    <Button Command="{Binding SwitchToOffloadCommand}" Width="120" Height="26" Margin="0,0,10,0"
+                            Background="{DynamicResource Brush.Accent}" Foreground="White" BorderThickness="0" Padding="10,0">
+                        <Button.Opacity>
+                            <Binding Path="IsVerifyMode">
+                                <Binding.Converter>
+                                    <vm:InverseBoolToOpacityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </Button.Opacity>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- WPF Legacy Icon: SD Card -->
+                            <PathIcon Data="M18,8L12,2H4A2,2 0 0,0 2,4V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V8H18M13,9H11V4H13V9M9,9H7V4H9V9"
+                                      Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Offload" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding Destination2Path}"
-                            Watermark="Optional secondary destination..."
-                            Height="30" Padding="8,0" FontSize="12"
-                            VerticalContentAlignment="Center"
-                            Background="{DynamicResource Brush.Background.Deep}" 
-                            Foreground="{DynamicResource Brush.Text.Secondary}"
-                            BorderBrush="{DynamicResource Color.Border}" BorderThickness="1"
-                            IsReadOnly="True"
-                            DragDrop.AllowDrop="True"
-                            DragDrop.DragOver="Dest2TextBox_DragOver"
-                            DragDrop.Drop="Dest2TextBox_Drop"
-                            VerticalAlignment="Center"/>
-
-                    <Button Grid.Row="6" Grid.Column="4" Width="70" Height="30"
-                           Background="{DynamicResource Brush.Accent}" 
-                           Foreground="{DynamicResource Brush.Text.Primary}" FontWeight="SemiBold"
-                           BorderThickness="0" CornerRadius="3"
-                           Command="{Binding PickDest2Command}"
-                           VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                            <PathIcon Width="14" Height="14" Foreground="{DynamicResource Brush.Text.Primary}"
-                                     Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
-                            <TextBlock Text="Open" VerticalAlignment="Center"/>
+                    <!-- VERIFY BUTTON - WPF: Width=120, Height=26 -->
+                    <Button Command="{Binding SwitchToVerifyCommand}" Width="120" Height="26"
+                            Background="{DynamicResource Brush.Accent}" Foreground="White" BorderThickness="0" Padding="10,0">
+                        <Button.Opacity>
+                            <Binding Path="IsVerifyMode">
+                                <Binding.Converter>
+                                    <vm:BoolToOpacityConverter/>
+                                </Binding.Converter>
+                            </Binding>
+                        </Button.Opacity>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- WPF Legacy Icon: Shield Check -->
+                            <PathIcon Data="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
+                                      Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Verify" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                </Grid>
-                
+
+                </StackPanel>
+            </Grid>
+
+            <!-- FORM CONTENT (Row 2) -->
+            <StackPanel Grid.Row="2" HorizontalAlignment="Stretch" MaxWidth="1200" Margin="40,0" VerticalAlignment="Center">
+
+                <!-- OFFLOAD FORM -->
+                <StackPanel IsVisible="{Binding !IsVerifyMode}">
+                    
+                    <!-- SOURCE -->
+                    <Grid Margin="0,0,0,25">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <DockPanel LastChildFill="False" Margin="0,0,0,5">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- WPF Legacy Icon: SD Card (24x24) -->
+                                <PathIcon Data="M18,8L12,2H4A2,2 0 0,0 2,4V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V8H18M13,9H11V4H13V9M9,9H7V4H9V9"
+                                          Height="24" Width="24" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,10,0"/>
+                                <TextBlock Text="MEDIA SOURCE" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Reset All Button - WPF: DockPanel.Dock="Right" -->
+                            <Button DockPanel.Dock="Right" Command="{Binding ResetAllCommand}">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Height" Value="26"/>
+                                        <Setter Property="Padding" Value="8,0"/>
+                                        <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Style>
+                                </Button.Styles>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- WPF Legacy Icon: Reset/Rotation -->
+                                    <PathIcon Data="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.4 10.9,20.3V22.3C13.9,22.4 17,21.3 19.2,19.1C23.1,15.2 23.1,8.7 19.2,4.8C17.3,2.9 14.7,2 12,2C9.3,2 6.7,2.9 4.8,4.8C0.9,8.7 0.9,15.2 4.8,19.1C6.7,21 9.3,21.9 12,21.9V19.9C9.7,19.9 7.5,19 5.9,17.4C3.1,14.6 3.1,10.1 5.9,7.3C7.5,5.8 9.6,4.9 12,4.9V4Z"
+                                              Width="12" Height="12" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Reset All" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </DockPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox x:Name="SourceBox" Text="{Binding SourcePath}"
+                                     DragDrop.DragOver="SourceTextBox_DragOver" 
+                                     DragDrop.Drop="SourceTextBox_Drop"
+                                     Classes="Input" Margin="0,0,5,0"/>
+
+                            <Button Grid.Column="1" Command="{Binding SetSourceFromExplorerCommand}" Classes="Primary">
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- WPF Legacy Icon: Folder -->
+                                    <PathIcon Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,0 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
+                                              Width="14" Height="14" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Open"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                    <!-- DESTINATIONS -->
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <!-- WPF Legacy Icon: Hard Drive (24x24) -->
+                            <PathIcon Data="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M12,18A2,2 0 0,0 14,16A2,2 0 0,0 12,14A2,2 0 0,0 10,16A2,2 0 0,0 12,18M6,4V10H18V4H6Z"
+                                      Height="24" Width="24" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,10,0"/>
+                            <TextBlock Text="DESTINATION" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Dest A -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="MAIN DESTINATION (A)" Margin="0,0,0,3" FontSize="14" Foreground="{DynamicResource Brush.Text.Primary}" Opacity="0.5"/>
+
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox x:Name="Dest1Box" Text="{Binding Destination1Path}"
+                                         DragDrop.DragOver="Dest1TextBox_DragOver" 
+                                         DragDrop.Drop="Dest1TextBox_Drop"
+                                         Classes="Input" Margin="0,0,5,0"/>
+
+                                <Button Grid.Column="1" Command="{Binding SetDestFromExplorerCommand}" Classes="Primary">
+                                    <StackPanel Orientation="Horizontal">
+                                        <PathIcon Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,0 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
+                                                  Width="14" Height="14" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Open"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Dest B -->
+                        <Grid Margin="0,0,0,10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="SECONDARY DESTINATION (B)" Margin="0,0,0,3" FontSize="14" Foreground="{DynamicResource Brush.Text.Primary}" Opacity="0.5"/>
+
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox x:Name="Dest2Box" Text="{Binding Destination2Path}"
+                                         DragDrop.DragOver="Dest2TextBox_DragOver" 
+                                         DragDrop.Drop="Dest2TextBox_Drop"
+                                         Classes="Input" Margin="0,0,5,0"/>
+
+                                <Button Grid.Column="1" Command="{Binding SetDest2FromExplorerCommand}" Classes="Primary">
+                                    <StackPanel Orientation="Horizontal">
+                                        <PathIcon Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,0 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
+                                                  Width="14" Height="14" Margin="0,0,6,0"/>
+                                        <TextBlock Text="Open"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Grid>
+
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- VERIFY FORM -->
+                <StackPanel IsVisible="{Binding IsVerifyMode}">
+                    <Grid Margin="0,0,0,25">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <DockPanel LastChildFill="False" Margin="0,0,0,5">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- WPF Legacy Icon: Home (24x24) -->
+                                <PathIcon Data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"
+                                          Height="24" Width="24" Foreground="{DynamicResource Brush.Accent}" Margin="0,0,10,0"/>
+                                <TextBlock Text="VERIFICATION TARGET" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <Button DockPanel.Dock="Right" Command="{Binding ResetAllCommand}">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Height" Value="26"/>
+                                        <Setter Property="Padding" Value="8,0"/>
+                                        <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Style>
+                                </Button.Styles>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <PathIcon Data="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.4 10.9,20.3V22.3C13.9,22.4 17,21.3 19.2,19.1C23.1,15.2 23.1,8.7 19.2,4.8C17.3,2.9 14.7,2 12,2C9.3,2 6.7,2.9 4.8,4.8C0.9,8.7 0.9,15.2 4.8,19.1C6.7,21 9.3,21.9 12,21.9V19.9C9.7,19.9 7.5,19 5.9,17.4C3.1,14.6 3.1,10.1 5.9,7.3C7.5,5.8 9.6,4.9 12,4.9V4Z"
+                                              Width="12" Height="12" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Reset" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </DockPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Text="{Binding VerifyPath}" 
+                                     Watermark="Select folder to verify (contains MHL)..."
+                                     DragDrop.AllowDrop="True" 
+                                     DragDrop.DragOver="VerifyTextBox_DragOver" 
+                                     DragDrop.Drop="VerifyTextBox_Drop"
+                                     Classes="Input" Margin="0,0,5,0"/>
+
+                            <Button Grid.Column="1" Command="{Binding PickVerifyCommand}" Classes="Primary">
+                                <StackPanel Orientation="Horizontal">
+                                    <PathIcon Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,0 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
+                                              Width="14" Height="14" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Open Folder"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </StackPanel>
+
             </StackPanel>
-            
-            <!-- ROW 2: Status Bar (DaVinci Style: Darker, clean) -->
-            <Border Grid.Row="2" Background="#121212" Height="30" Margin="-20,0,-20,0" Padding="15,0"
-                    BorderBrush="{DynamicResource Color.Border}" BorderThickness="0,1,0,0">
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                    <TextBlock Grid.Column="0" Text="{Binding CurrentHashDisplay}" 
-                              FontSize="11" Foreground="{DynamicResource Brush.Text.Tertiary}" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="2" Text="{Binding TimeRemainingDisplay}" 
-                              FontSize="11" Foreground="{DynamicResource Brush.Text.Tertiary}" VerticalAlignment="Center" Margin="0,0,20,0"/>
-                    <TextBlock Grid.Column="3" Text="{Binding CurrentSpeedDisplay}" 
-                              FontSize="11" FontWeight="Bold" Foreground="{DynamicResource Brush.Text.Primary}" VerticalAlignment="Center"/>
-                </Grid>
-            </Border>
+
+            <!-- FOOTER / ACTION AREA (Row 4) -->
+            <Grid Grid.Row="4" Margin="0,0,0,20">
+                <StackPanel HorizontalAlignment="Center" Spacing="10">
+                    
+                    <!-- Action Buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                        
+                        <!-- Start/Cancel Button (Offload Mode) -->
+                        <Button Command="{Binding ToggleCopyCommand}" Width="200" Height="32" IsVisible="{Binding !IsVerifyMode}" Classes="Primary">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Play Icon -->
+                                <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" Width="16" Height="16" Margin="0,0,8,0" IsVisible="{Binding !IsBusy}" VerticalAlignment="Center"/>
+                                <!-- Stop Icon -->
+                                <PathIcon Data="M6,4H18V20H6M18,3H6A1,1 0 0,0 5,4V20A1,1 0 0,0 6,21H18A1,1 0 0,0 19,20V4A1,1 0 0,0 18,3Z" Width="16" Height="16" Margin="0,0,8,0" IsVisible="{Binding IsBusy}" VerticalAlignment="Center"/>
+                                <!-- Text -->
+                                <TextBlock Text="Start Copy" IsVisible="{Binding !IsBusy}" VerticalAlignment="Center"/>
+                                <TextBlock Text="Cancel" IsVisible="{Binding IsBusy}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Verify Button (Verify Mode) -->
+                        <Button Command="{Binding StartVerifyCommand}" Width="200" Height="32" IsVisible="{Binding IsVerifyMode}" Classes="Primary">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <PathIcon Data="M10,17L5,12L6.41,10.58L10,14.17L17.59,6.58L19,8M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+                                          Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Verify" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+
+                    <!-- Progress Bar -->
+                    <ProgressBar Value="{Binding ProgressValue}" Minimum="0" Maximum="100" 
+                                 Height="2" Width="800" Background="#222222" Foreground="{DynamicResource Brush.Accent}"/>
+
+                    <!-- Stats Grid -->
+                    <Grid Width="800" HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding CurrentHashDisplay}" FontSize="12" Foreground="#888888" HorizontalAlignment="Left"/>
+                        <TextBlock Grid.Column="1" Text="{Binding TimeRemainingDisplay}" FontSize="12" Foreground="#888888" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="{Binding CurrentSpeedDisplay}" FontSize="12" Foreground="#888888" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <!-- Status Text -->
+                    <TextBlock Text="{Binding LogText}" FontSize="12" Foreground="#888888" HorizontalAlignment="Center"/>
+
+                </StackPanel>
+            </Grid>
 
         </Grid>
     </Grid>

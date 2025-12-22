@@ -73,12 +73,100 @@
             <SolidColorBrush x:Key="Brush.Accent.Hover" Color="{StaticResource Color.Accent.Video.Hover}"/>
             <SolidColorBrush x:Key="Brush.Accent.Pressed" Color="{StaticResource Color.Accent.Video.Pressed}"/>
             
-            <!-- Font Sizes -->
-            <x:Double x:Key="Font.Size.Small">11</x:Double>
-            <x:Double x:Key="Font.Size.Standard">12</x:Double>
-            <x:Double x:Key="Font.Size.Medium">13</x:Double>
-            <x:Double x:Key="Font.Size.Large">16</x:Double>
+            <!-- Font Sizes (WPF Legacy Parity) -->
+            <x:Double x:Key="Font.Size.Small">12</x:Double>
+            <x:Double x:Key="Font.Size.Standard">14</x:Double>
+            <x:Double x:Key="Font.Size.Body">14</x:Double>
+            <x:Double x:Key="Font.Size.Medium">16</x:Double>
+            <x:Double x:Key="Font.Size.Header">24</x:Double>
             <x:Double x:Key="Font.Size.Title">20</x:Double>
+
+            <!-- ============================================ -->
+            <!-- LEGACY NAVIGATION STYLES                     -->
+            <!-- ============================================ -->
+            <ControlTheme x:Key="NavButtonStyle" TargetType="RadioButton">
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource Brush.Text.Tertiary}"/>
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Grid Background="{TemplateBinding Background}">
+                            <StackPanel Orientation="Vertical" Spacing="4" Margin="10,5">
+                                 <!-- Icon Container -->
+                                 <Border Width="24" Height="24" HorizontalAlignment="Center">
+                                     <ContentPresenter Content="{TemplateBinding Tag}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                 </Border>
+                                 <!-- Label -->
+                                 <TextBlock Text="{TemplateBinding Content}" 
+                                            Foreground="{TemplateBinding Foreground}"
+                                            FontSize="9" 
+                                            FontWeight="SemiBold" 
+                                            HorizontalAlignment="Center"
+                                            TextAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter>
+                
+                <Style Selector="^:pointerover">
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+                </Style>
+                <Style Selector="^:checked">
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Accent}"/>
+                </Style>
+            </ControlTheme>
+
+            <!-- Video Toggle Style -->
+            <ControlTheme x:Key="VideoToggleStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource Brush.Text.Disabled}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border Background="{TemplateBinding Background}" Padding="8,4" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <ContentPresenter Content="{TemplateBinding Tag}" Width="16" Height="16"/>
+                                <TextBlock Text="{TemplateBinding Content}" 
+                                           Foreground="{TemplateBinding Foreground}" 
+                                           FontWeight="Bold" 
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter>
+                <Style Selector="^:checked">
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Accent.Video}"/>
+                </Style>
+                <Style Selector="^:unchecked">
+                     <Setter Property="Opacity" Value="0.5"/>
+                </Style>
+            </ControlTheme>
+
+            <!-- Audio Toggle Style -->
+            <ControlTheme x:Key="AudioToggleStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource Brush.Text.Disabled}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border Background="{TemplateBinding Background}" Padding="8,4" CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <ContentPresenter Content="{TemplateBinding Tag}" Width="16" Height="16"/>
+                                <TextBlock Text="{TemplateBinding Content}" 
+                                           Foreground="{TemplateBinding Foreground}" 
+                                           FontWeight="Bold" 
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter>
+                <Style Selector="^:checked">
+                    <Setter Property="Foreground" Value="{StaticResource Brush.Accent.Audio}"/>
+                </Style>
+                <Style Selector="^:unchecked">
+                     <Setter Property="Opacity" Value="0.5"/>
+                </Style>
+            </ControlTheme>
         </Style.Resources>
     </Style>
     
@@ -95,15 +183,6 @@
     <!-- ============================================ -->
     <!-- BUTTON STYLES -->
     <!-- ============================================ -->
-    <Style Selector="Button">
-        <Setter Property="Background" Value="{StaticResource Brush.Background.Elevated}"/>
-        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="CornerRadius" Value="3"/>
-        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
-    </Style>
     
     <Style Selector="Button:pointerover">
         <Setter Property="Background" Value="{StaticResource Brush.Background.Hover}"/>
@@ -112,6 +191,77 @@
     <Style Selector="Button:pressed">
         <Setter Property="Background" Value="{StaticResource Brush.Background.Deep}"/>
     </Style>
+
+    <!-- ============================================ -->
+    <!-- WPF LEGACY BUTTON STYLES (ControlThemes)    -->
+    <!-- ============================================ -->
+    <Style>
+        <Style.Resources>
+            <!-- VIEW MODE TOGGLE (Offload/Verify buttons) -->
+            <ControlTheme x:Key="ViewModeToggleStyle" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Opacity" Value="0.2"/>
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="Padding" Value="10,0"/>
+            </ControlTheme>
+
+            <!-- CONTEXTUAL ACTION BUTTON (Open, Reset All) -->
+            <ControlTheme x:Key="ContextualActionButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="Padding" Value="8,0"/>
+                <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </ControlTheme>
+
+            <!-- CLEAR FIELD BUTTON (X button inside textboxes) -->
+            <ControlTheme x:Key="ClearFieldButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#666666"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="20"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </ControlTheme>
+        </Style.Resources>
+    </Style>
+
+    <!-- Class-based button styles -->
+    <Style Selector="Button.ContextualAction">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Padding" Value="8,0"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.ContextualAction:pointerover">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <Style Selector="Button.ClearField">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#666666"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.ClearField:pointerover">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
     
     <!-- Primary Button Style -->
     <Style Selector="Button.Primary">
@@ -180,7 +330,7 @@
     </Style>
     
     <Style Selector="TextBlock.Header">
-        <Setter Property="FontSize" Value="{StaticResource Font.Size.Large}"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Header}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
     </Style>
@@ -358,28 +508,38 @@
     </Style>
     
     <!-- Specific Icons for Each Page (Material Design Filled) -->
+    <!-- Specific Icons for Each Page (Material Design Filled) -->
     <Style Selector="RadioButton.NavButton.Offload /template/ PathIcon#PART_Icon">
-        <Setter Property="Data" Value="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1L12,1z M10,17l-4-4l1.41-1.41L10,14.17l6.59-6.59L18,9L10,17z"/>
+        <Setter Property="Data" Value="M12,1L3,5V11C3,16.55 6.9,21.74 12,23C17.1,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
     </Style>
     
     <Style Selector="RadioButton.NavButton.Media /template/ PathIcon#PART_Icon">
-        <Setter Property="Data" Value="M4,11h5V5H4V11z M4,18h5v-5H4V18z M10,18h5v-5h-5V18z M10,5v6h5V5H10z"/>
+        <Setter Property="Data" Value="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3"/>
     </Style>
     
     <Style Selector="RadioButton.NavButton.Player /template/ PathIcon#PART_Icon">
-        <Setter Property="Data" Value="M8,5v14l11-7L8,5z"/>
+        <Setter Property="Data" Value="M8,5.14V19.14L19,12.14L8,5.14Z"/>
     </Style>
     
     <Style Selector="RadioButton.NavButton.Sync /template/ PathIcon#PART_Icon">
-        <Setter Property="Data" Value="M3.9,12c0-1.71,1.39-3.1,3.1-3.1h4V7H7c-2.76,0-5,2.24-5,5s2.24,5,5,5h4v-1.9H7C5.29,15.1,3.9,13.71,3.9,12z M8,13h8v-2H8V13z M17,7h-4v1.9h4c1.71,0,3.1,1.39,3.1,3.1s-1.39,3.1-3.1,3.1h-4V17h4c2.76,0,5-2.24,5-5S19.76,7,17,7z"/>
+        <Setter Property="Data" Value="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"/>
     </Style>
     
     <Style Selector="RadioButton.NavButton.Transcode /template/ PathIcon#PART_Icon">
-        <Setter Property="Data" Value="M17.65,6.35C16.2,4.9,14.21,4,12,4c-4.42,0-7.99,3.58-7.99,8s3.57,8,7.99,8c3.73,0,6.84-2.55,7.73-6h-2.08c-0.82,2.33-3.04,4-5.65,4c-3.31,0-6-2.69-6-6s2.69-6,6-6c1.66,0,3.14,0.69,4.22,1.78L13,11h7V4L17.65,6.35z"/>
+        <Setter Property="Data" Value="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"/>
     </Style>
     
     <Style Selector="RadioButton.NavButton.Reports /template/ PathIcon#PART_Icon">
-        <Setter Property="Data" Value="M14,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V8L14,2z M13,9V3.5L18.5,9H13z"/>
+        <Setter Property="Data" Value="M13,9V3.5L18.5,9M6,2C4.89,2 4,2.89 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z"/>
+    </Style>
+
+    <!-- Window Dialog Style -->
+    <Style Selector="Window.Dialog">
+        <Setter Property="SystemDecorations" Value="None"/>
+        <Setter Property="ExtendClientAreaToDecorationsHint" Value="True"/>
+        <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome"/>
+        <Setter Property="ExtendClientAreaTitleBarHeightHint" Value="40"/>
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Panel}"/>
     </Style>
     
     <!-- ============================================ -->
@@ -616,4 +776,149 @@
         <Setter Property="FontSize" Value="10"/>
     </Style>
     
+    <!-- ============================================ -->
+    <!-- MODE TOGGLE (Segmented Control / Tabs) -->
+    <!-- ============================================ -->
+    <Style Selector="RadioButton.ModeToggle">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="20,8"/>
+        <Setter Property="Margin" Value="4,0"/>
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+             <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Margin="{TemplateBinding Padding}"/>
+                </Border>
+             </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="RadioButton.ModeToggle:checked">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}"/>
+    </Style>
+    
+    <Style Selector="RadioButton.ModeToggle:pointerover">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Hover}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Text.Tertiary}"/>
+    </Style>
+    
+    <Style Selector="RadioButton.ModeToggle:checked:pointerover">
+         <Setter Property="Background" Value="{StaticResource Brush.Accent.Hover}"/>
+    </Style>
+
+    <!-- ============================================ -->
+    <!-- ACTION BUTTONS (Start/Cancel Copy) -->
+    <!-- ============================================ -->
+    <Style Selector="Button.Action">
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="Width" Value="300"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="CornerRadius" Value="25"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <Style Selector="Button.Action.Start">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent}"/>
+    </Style>
+    <Style Selector="Button.Action.Start:pointerover">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent.Hover}"/>
+    </Style>
+    <Style Selector="Button.Action.Start:pressed">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent.Pressed}"/>
+    </Style>
+
+    <Style Selector="Button.Action.Cancel">
+        <Setter Property="Background" Value="{StaticResource Brush.Error}"/>
+    </Style>
+    <Style Selector="Button.Action.Cancel:pointerover">
+        <Setter Property="Background" Value="#FF6E60"/>
+    </Style>
+    <Style Selector="Button.Action.Cancel:pressed">
+        <Setter Property="Background" Value="#C03025"/>
+    </Style>
+
+
+    <!-- ============================================ -->
+    <!-- HELPER STYLES (Added for Strict Layout)      -->
+    <!-- ============================================ -->
+    <Style Selector="TextBlock.Title">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Title}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+    </Style>
+
+    <Style Selector="TextBlock.Label">
+        <Setter Property="FontSize" Value="{StaticResource Font.Size.Standard}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="TextBox.Input">
+         <Setter Property="Background" Value="#101010"/> <!-- Brush.Input -->
+         <Setter Property="BorderThickness" Value="1"/>
+         <Setter Property="BorderBrush" Value="#444444"/>
+         <Setter Property="CornerRadius" Value="0"/>
+         <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+         <Setter Property="Height" Value="26"/>
+         <Setter Property="Padding" Value="4,0"/>
+         <Setter Property="FontSize" Value="{StaticResource Font.Size.Body}"/>
+         <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBox.Input:focus">
+         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Accent}"/>
+    </Style>
+    <Style Selector="TextBox.Input:pointerover">
+         <Setter Property="BorderBrush" Value="#666666"/>
+    </Style>
+
+    <!-- BUTTON.PRIMARY (Filled Accent) -->
+    <Style Selector="Button.Primary">
+        <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.Primary:pointerover">
+         <Setter Property="Background" Value="{DynamicResource Brush.Accent.Hover}"/>
+    </Style>
+    <Style Selector="Button.Primary:pressed">
+         <Setter Property="Background" Value="{DynamicResource Brush.Accent.Pressed}"/>
+    </Style>
+    <Style Selector="Button.Primary:disabled">
+         <Setter Property="Background" Value="#333333"/>
+         <Setter Property="Foreground" Value="#666666"/>
+    </Style>
+
+    <!-- BUTTON.SECONDARY (Outlined) -->
+    <Style Selector="Button.Secondary">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Primary}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+    </Style>
+    <Style Selector="Button.Secondary:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Accent}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Accent}"/>
+    </Style>
+
 </Styles>

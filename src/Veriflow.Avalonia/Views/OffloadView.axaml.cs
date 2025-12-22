@@ -49,7 +49,7 @@ public partial class OffloadView : UserControl
     // Drag & Drop Handlers for Source TextBox
     private void SourceTextBox_DragOver(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Text))
+        if (DragDropHelper.HasFiles(e))
         {
             e.DragEffects = DragDropEffects.Copy;
         }
@@ -61,20 +61,17 @@ public partial class OffloadView : UserControl
 
     private void SourceTextBox_Drop(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Text) && DataContext is OffloadViewModel vm)
+        var file = DragDropHelper.GetFirstFile(e);
+        if (!string.IsNullOrEmpty(file) && DataContext is OffloadViewModel vm)
         {
-            var path = e.Data.GetText();
-            if (!string.IsNullOrEmpty(path))
-            {
-                vm.SourcePath = path;
-            }
+            vm.SourcePath = file;
         }
     }
 
     // Drag & Drop Handlers for Destination 1 TextBox
     private void Dest1TextBox_DragOver(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Text))
+        if (DragDropHelper.HasFiles(e))
         {
             e.DragEffects = DragDropEffects.Copy;
         }
@@ -86,20 +83,17 @@ public partial class OffloadView : UserControl
 
     private void Dest1TextBox_Drop(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Text) && DataContext is OffloadViewModel vm)
+        var file = DragDropHelper.GetFirstFile(e);
+        if (!string.IsNullOrEmpty(file) && DataContext is OffloadViewModel vm)
         {
-            var path = e.Data.GetText();
-            if (!string.IsNullOrEmpty(path))
-            {
-                vm.Destination1Path = path;
-            }
+            vm.Destination1Path = file;
         }
     }
 
     // Drag & Drop Handlers for Destination 2 TextBox
     private void Dest2TextBox_DragOver(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Text))
+        if (DragDropHelper.HasFiles(e))
         {
             e.DragEffects = DragDropEffects.Copy;
         }
@@ -111,13 +105,31 @@ public partial class OffloadView : UserControl
 
     private void Dest2TextBox_Drop(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Text) && DataContext is OffloadViewModel vm)
+        var file = DragDropHelper.GetFirstFile(e);
+        if (!string.IsNullOrEmpty(file) && DataContext is OffloadViewModel vm)
         {
-            var path = e.Data.GetText();
-            if (!string.IsNullOrEmpty(path))
-            {
-                vm.Destination2Path = path;
-            }
+            vm.Destination2Path = file;
+        }
+    }
+    // Drag & Drop Handlers for Verify TextBox
+    private void VerifyTextBox_DragOver(object? sender, DragEventArgs e)
+    {
+        if (DragDropHelper.HasFiles(e))
+        {
+            e.DragEffects = DragDropEffects.Copy;
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+    }
+
+    private void VerifyTextBox_Drop(object? sender, DragEventArgs e)
+    {
+        var file = DragDropHelper.GetFirstFile(e);
+        if (!string.IsNullOrEmpty(file) && DataContext is OffloadViewModel vm)
+        {
+            vm.VerifyPath = file;
         }
     }
 }

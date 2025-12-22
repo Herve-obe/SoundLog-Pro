@@ -536,9 +536,30 @@ namespace Veriflow.Avalonia.ViewModels
 
         private async Task HandleDrop(DragEventArgs e)
         {
-            // STUB: Drag and drop for Avalonia needs IStorageItem logic
-            // Assuming string[] from Files for now for compatibility with stub
-            await Task.Delay(1);
+            var files = DragDropHelper.GetFiles(e).ToArray();
+            if (files.Length > 0)
+            {
+                 // Check if first item is directory
+                 if (Directory.Exists(files[0]))
+                 {
+                     LoadDirectory(files[0]);
+                     await ExpandAndSelectPath(files[0]);
+                 }
+                 else
+                 {
+                     // Dropped files? MediaView is explorer-based, so we load the parent directory of the first file
+                     var dir = Path.GetDirectoryName(files[0]);
+                     if (!string.IsNullOrEmpty(dir))
+                     {
+                         LoadDirectory(dir);
+                         await ExpandAndSelectPath(dir);
+                         
+                         // Select the file
+                         var fileVM = FileList.FirstOrDefault(f => f.FullName == files[0]);
+                         if (fileVM != null) SelectedMedia = fileVM;
+                     }
+                 }
+            }
         }
 
         private async Task<bool> ExpandAndSelectPath(string path)

@@ -58,9 +58,9 @@ namespace Veriflow.Avalonia.ViewModels
                 StartOffloadCommand.NotifyCanExecuteChanged();
 
                 // Refresh interactions
-                PickSourceCommand.NotifyCanExecuteChanged();
-                PickDest1Command.NotifyCanExecuteChanged();
-                PickDest2Command.NotifyCanExecuteChanged();
+                SetSourceFromExplorerCommand.NotifyCanExecuteChanged();
+                SetDestFromExplorerCommand.NotifyCanExecuteChanged();
+                SetDest2FromExplorerCommand.NotifyCanExecuteChanged();
                 DropSourceCommand.NotifyCanExecuteChanged();
                 DropDest1Command.NotifyCanExecuteChanged();
                 DropDest1Command.NotifyCanExecuteChanged();
@@ -108,6 +108,53 @@ namespace Veriflow.Avalonia.ViewModels
         [ObservableProperty]
         private FileExplorerViewModel _fileExplorer = new();
 
+        [ObservableProperty] private string _camera = "A";
+        [ObservableProperty] private string _reel = "1";
+        [ObservableProperty] private string _scene = "";
+        [ObservableProperty] private string _take = "";
+        [ObservableProperty] private string _clipName = "";
+
+        partial void OnSourcePathChanged(string? value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                var dirName = Path.GetFileName(value.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                ParseMetadataFromPath(dirName);
+                
+                StartOffloadCommand.NotifyCanExecuteChanged();
+                ToggleCopyCommand.NotifyCanExecuteChanged();
+                ResetAllCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        private void ParseMetadataFromPath(string name)
+        {
+            // Simple heuristic parsing for standard camera formats
+            // Ex: A001C001_... -> Cam A, Reel 1
+            // Ex: Reel_1_Card_A
+            
+            try 
+            {
+                if (System.Text.RegularExpressions.Regex.IsMatch(name, @"^[A-Z]\d{3}")) 
+                {
+                    Camera = name.Substring(0, 1);
+                    Reel = name.Substring(1, 3).TrimStart('0');
+                }
+                else if (name.Contains("Reel", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Basic fallback
+                    var parts = name.Split(new[] { '_', ' ', '-' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach(var p in parts)
+                    {
+                        if (char.IsDigit(p[0])) Reel = p;
+                        if (p.Length == 1 && char.IsLetter(p[0])) Camera = p;
+                    }
+                }
+            }
+            catch {}
+        }
+
+
         // --- CONSTRUCTOR ---
         public OffloadViewModel(OffloadService offloadService, MhlService mhlService)
         {
@@ -117,34 +164,21 @@ namespace Veriflow.Avalonia.ViewModels
             _offloadService.LogMessage += Service_LogMessage;
         }
 
-        // --- ASSIGNMENT COMMANDS (FileExplorer Integration) ---
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ActionButtonText))]
+        [NotifyPropertyChangedFor(nameof(CanStartOffload))] 
+        private bool _isOffloading;
+
+        public string ActionButtonText => IsOffloading ? "Cancel Copy" : "Start Copy";
         
-        [RelayCommand]
-        private void SetSourceFromExplorer()
-        {
-            if (!string.IsNullOrEmpty(FileExplorer.SelectedDirectory))
-            {
-                SourcePath = FileExplorer.SelectedDirectory;
-            }
-        }
+        // Helper valid property for binding Enable state if needed, though button is always enabled for toggle
+        public bool CanStartOffload => !IsOffloading; 
 
-        [RelayCommand]
-        private void SetDestFromExplorer()
-        {
-            if (!string.IsNullOrEmpty(FileExplorer.SelectedDirectory))
-            {
-                Destination1Path = FileExplorer.SelectedDirectory;
-            }
-        }
+        // Action Command and Simulation removed (Dead Code)
 
-        [RelayCommand]
-        private void SetDest2FromExplorer()
-        {
-            if (!string.IsNullOrEmpty(FileExplorer.SelectedDirectory))
-            {
-                Destination2Path = FileExplorer.SelectedDirectory;
-            }
-        }
+        // --- ASSIGNMENT COMMANDS (FileExplorer Integration) ---
+        // Removed explicit buttons for "Set from Explorer Selection" in favor of Drag & Drop or System Picker.
+
 
         private void Service_LogMessage(object? sender, string message)
         {
@@ -545,27 +579,42 @@ namespace Veriflow.Avalonia.ViewModels
         }
 
         // --- DRAG & DROP & PICKERS ---
+        // --- MODE SWITCHING ---
+        // (Defined near top of file)
+
+
+        // --- PICKERS & DRAG DROP ---
         private bool CanInteract() => !IsBusy;
 
         // Folder picker event for Avalonia
         public event Action<string>? RequestFolderPicker;
-
-        [RelayCommand(CanExecute = nameof(CanInteract))] private void PickSource() => RequestFolderPicker?.Invoke("source");
-        [RelayCommand(CanExecute = nameof(CanInteract))] private void PickDest1() => RequestFolderPicker?.Invoke("dest1");
-        [RelayCommand(CanExecute = nameof(CanInteract))] private void PickDest2() => RequestFolderPicker?.Invoke("dest2");
+        
+        // Drag & Drop Handlers (Forwarded from Code Behind)
+        // These methods are called directly by the View code-behind, not via Command usually.
+        // But we kept the Command bindings in the View code-behind? No, wait.
+        // The View Code-Behind calls: vm.SourcePath = file.
+        // The View XAML has: DragDrop.Drop="SourceTextBox_Drop" which is an event handler in Code Behind.
+        // The View XAML BUTTONS use Commands.
+        
+        [RelayCommand(CanExecute = nameof(CanInteract))] private void SetSourceFromExplorer() => RequestFolderPicker?.Invoke("source");
+        [RelayCommand(CanExecute = nameof(CanInteract))] private void SetDestFromExplorer() => RequestFolderPicker?.Invoke("dest1");
+        [RelayCommand(CanExecute = nameof(CanInteract))] private void SetDest2FromExplorer() => RequestFolderPicker?.Invoke("dest2");
+        [RelayCommand(CanExecute = nameof(CanInteract))] private void PickVerify() => RequestFolderPicker?.Invoke("verify");
+        
+        // Drop handlers in VM are not needed if View Code Behind handles it?
+        // Let's keep the Commands for the Buttons.
 
         [RelayCommand(CanExecute = nameof(CanInteract))] private void DropSource(DragEventArgs e) => HandleDrop(e, p => SourcePath = p);
         [RelayCommand(CanExecute = nameof(CanInteract))] private void DropDest1(DragEventArgs e) => HandleDrop(e, p => Destination1Path = p);
         [RelayCommand(CanExecute = nameof(CanInteract))] private void DropDest2(DragEventArgs e) => HandleDrop(e, p => Destination2Path = p);
-        [RelayCommand] private void DragOver(DragEventArgs e) { e.DragEffects = DragDropEffects.Copy; e.Handled = true; } 
+        [RelayCommand(CanExecute = nameof(CanInteract))] private void DropVerify(DragEventArgs e) => HandleDrop(e, p => VerifyPath = p);
 
-        // --- CLEAR & RESET COMMANDS ---
-        [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearSource() => SourcePath = null;
+        // --- CLEAR COMMANDS ---
+        // Used if we had clear buttons, but we now use "Reset All" or manual clear.
+        [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearSource() => SourcePath = null; 
         [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearDest1() => Destination1Path = null;
         [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearDest2() => Destination2Path = null;
         [RelayCommand(CanExecute = nameof(CanInteract))] private void ClearVerify() => VerifyPath = null;
-        [RelayCommand(CanExecute = nameof(CanInteract))] private void PickVerify() => RequestFolderPicker?.Invoke("verify");
-        [RelayCommand(CanExecute = nameof(CanInteract))] private void DropVerify(DragEventArgs e) => HandleDrop(e, p => VerifyPath = p);
 
         private bool CanReset()
         {
@@ -592,25 +641,18 @@ namespace Veriflow.Avalonia.ViewModels
 
         private void HandleDrop(DragEventArgs e, Action<string> setPath)
         {
-            if (e.Data.Contains(DataFormats.Files))
+            var files = DragDropHelper.GetFiles(e);
+            if (files.Any())
             {
-                var files = e.Data.GetFiles();
-                if (files != null)
+                var path = files.FirstOrDefault();
+                if (path != null)
                 {
-                    var fileItem = files.FirstOrDefault();
-                    if (fileItem != null)
+                    try
                     {
-                        // In Avalonia, IStorageItem is returned. Need to get Path.
-                        // Assuming simplest path for now, but Avalonia API is async and different. 
-                        // Simplified Logic: 
-                        try
-                        {
-                            var path = Uri.UnescapeDataString(fileItem.Path.AbsolutePath); // Basic URL to path
-                             if (Directory.Exists(path)) setPath(path);
-                             else if (File.Exists(path)) setPath(Path.GetDirectoryName(path)!);
-                        }
-                        catch {}
+                        if (Directory.Exists(path)) setPath(path);
+                        else if (File.Exists(path)) setPath(Path.GetDirectoryName(path)!);
                     }
+                    catch {}
                 }
             }
         }

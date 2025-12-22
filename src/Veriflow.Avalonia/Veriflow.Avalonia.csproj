@@ -36,6 +36,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ApplicationDefinition Include="App.axaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+  </ItemGroup>
+
+  <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+        x:Class="Veriflow.Avalonia.Views.CustomMessageBox"
+        Width="400" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="None"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+        CanResize="False"
+        Title="Veriflow Notification">
+    
+    <Border Background="{DynamicResource Brush.Background.Primary}" 
+            BorderBrush="{DynamicResource Brush.Border}" 
+            BorderThickness="1" 
+            CornerRadius="8"
+            Padding="20"
+            BoxShadow="0 4 10 0 #40000000">
+        
+        <Grid RowDefinitions="Auto,*,Auto">
+            <!-- Title -->
+            <TextBlock Grid.Row="0" Name="TitleText" 
+                       Text="Notification" 
+                       FontWeight="Bold" FontSize="16" 
+                       Foreground="{DynamicResource Brush.Text.Primary}"
+                       Margin="0,0,0,15"/>
+            
+            <!-- Message -->
+            <TextBlock Grid.Row="1" Name="MessageText" 
+                       Text="Message content goes here." 
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource Brush.Text.Secondary}"
+                       Margin="0,0,0,25"/>
+            
+            <!-- OK Button -->
+            <Button Grid.Row="2" Name="OkButton"
+                    Content="OK"
+                    Classes="Primary"
+                    HorizontalAlignment="Right"
+                    Width="80"
+                    Click="OkButton_Click"/>
+        </Grid>
+    </Border>
+</Window>

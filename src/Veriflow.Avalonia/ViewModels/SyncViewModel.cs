@@ -11,6 +11,8 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Veriflow.Avalonia.Models;
 using Veriflow.Avalonia.Services;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 
 namespace Veriflow.Avalonia.ViewModels
 {
@@ -83,53 +85,74 @@ namespace Veriflow.Avalonia.ViewModels
         public bool HasMatches => Matches.Count > 0;
 
         // ==========================================
-        // FILE PICKER EVENT
-        // ==========================================
-        public event Action<string>? RequestFilePicker;
-
-        // ==========================================
         // COMMANDS
         // ==========================================
 
         [RelayCommand]
         private async Task ImportVideo()
         {
-            RequestFilePicker?.Invoke("video");
-            await Task.CompletedTask;
+            if (Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                     {
+                         Title = "Import Video File",
+                         AllowMultiple = true,
+                         FileTypeFilter = new[] { new FilePickerFileType("Video Files") { Patterns = new[] { "*.mp4", "*.mov", "*.mxf", "*.avi", "*.mkv" } } }
+                     });
+
+                     if (files != null && files.Count > 0)
+                     {
+                         var paths = files.Select(x => x.Path.LocalPath).ToArray();
+                         await IngestFiles(paths, isVideo: true);
+                     }
+                 }
+            }
         }
 
         [RelayCommand]
         private async Task ImportAudio()
         {
-            RequestFilePicker?.Invoke("audio");
-            await Task.CompletedTask;
+             if (Application.Current?.ApplicationLifetime is global::Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                 if (topLevel?.StorageProvider != null)
+                 {
+                     var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                     {
+                         Title = "Import Audio File",
+                         AllowMultiple = true,
+                         FileTypeFilter = new[] { new FilePickerFileType("Audio Files") { Patterns = new[] { "*.wav", "*.bwf", "*.mp3", "*.m4a", "*.flac" } } }
+                     });
+
+                     if (files != null && files.Count > 0)
+                     {
+                         var paths = files.Select(x => x.Path.LocalPath).ToArray();
+                         await IngestFiles(paths, isVideo: false);
+                     }
+                 }
+            }
         }
 
         [RelayCommand]
         private async Task DropVideo(DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files))
+            var files = DragDropHelper.GetFiles(e).ToArray();
+            if (files.Length > 0)
             {
-                var files = e.Data.GetFiles();
-                if (files != null)
-                {
-                    var filePaths = files.Select(f => f.Path.LocalPath).ToArray();
-                    await IngestFiles(filePaths, isVideo: true);
-                }
+                await IngestFiles(files, isVideo: true);
             }
         }
 
         [RelayCommand]
         private async Task DropAudio(DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files))
+            var files = DragDropHelper.GetFiles(e).ToArray();
+            if (files.Length > 0)
             {
-                 var files = e.Data.GetFiles();
-                if (files != null)
-                {
-                    var filePaths = files.Select(f => f.Path.LocalPath).ToArray();
-                    await IngestFiles(filePaths, isVideo: false);
-                }
+                await IngestFiles(files, isVideo: false);
             }
         }
 

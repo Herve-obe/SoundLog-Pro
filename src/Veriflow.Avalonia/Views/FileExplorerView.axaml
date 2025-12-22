@@ -9,28 +9,27 @@
              x:DataType="vm:FileExplorerViewModel">
     
     <UserControl.Styles>
-        <!-- TreeView Style (VS Code inspired) -->
+        <!-- TreeView Style (WPF Legacy Parity) -->
         <Style Selector="TreeView">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
         
-        <!-- TreeViewItem Style -->
+        <!-- TreeViewItem Style - Reduced Padding -->
         <Style Selector="TreeViewItem">
-            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Padding" Value="2,1"/>
             <Setter Property="Background" Value="Transparent"/>
         </Style>
         
-        <!-- TreeViewItem Hover -->
+        <!-- TreeViewItem Hover - Single Gray Background -->
         <Style Selector="TreeViewItem:pointerover /template/ ContentPresenter#PART_HeaderPresenter">
-            <Setter Property="Background" Value="#1AFFFFFF"/>
+            <Setter Property="Background" Value="#2A2A2A"/>
         </Style>
         
-        <!-- TreeViewItem Selected -->
+        <!-- TreeViewItem Selected - Lighter Gray (no blue) -->
         <Style Selector="TreeViewItem:selected /template/ ContentPresenter#PART_HeaderPresenter">
-            <Setter Property="Background" Value="#1A1A4CB1"/>
-            <Setter Property="BorderBrush" Value="#1A4CB1"/>
-            <Setter Property="BorderThickness" Value="2,0,0,0"/>
+            <Setter Property="Background" Value="#3A3A3A"/>
+            <Setter Property="BorderThickness" Value="0"/>
         </Style>
     </UserControl.Styles>
     
