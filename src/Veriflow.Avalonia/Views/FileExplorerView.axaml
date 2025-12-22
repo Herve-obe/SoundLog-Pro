@@ -40,7 +40,9 @@
         <TreeView.ItemTemplate>
             <TreeDataTemplate ItemsSource="{Binding Children}"
                             x:DataType="models:DirectoryNode">
-                <StackPanel Orientation="Horizontal" Spacing="6">
+                <StackPanel Orientation="Horizontal" 
+                           Spacing="6"
+                           PointerPressed="TreeItem_PointerPressed">
                     
                     <!-- Fixed Drive Icon (HDD/SSD) -->
                     <PathIcon Width="16" 
