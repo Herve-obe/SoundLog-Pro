@@ -62,8 +62,8 @@
                                  Watermark="Select source folder or drag files here..."
                                  IsReadOnly="True"
                                  DragDrop.AllowDrop="True"
-                                 DragOver="SourceTextBox_DragOver"
-                                 Drop="SourceTextBox_Drop"/>
+                                 DragDrop.DragOver="SourceTextBox_DragOver"
+                                 DragDrop.Drop="SourceTextBox_Drop"/>
                         <Button Grid.Column="1" 
                                 Content="BROWSE" 
                                 Classes="Primary"
@@ -89,8 +89,8 @@
                                  Watermark="Select destination 1..."
                                  IsReadOnly="True"
                                  DragDrop.AllowDrop="True"
-                                 DragOver="Dest1TextBox_DragOver"
-                                 Drop="Dest1TextBox_Drop"/>
+                                 DragDrop.DragOver="Dest1TextBox_DragOver"
+                                 DragDrop.Drop="Dest1TextBox_Drop"/>
                         <Button Grid.Column="1" 
                                 Content="BROWSE" 
                                 Margin="8,0,0,0"
@@ -115,8 +115,8 @@
                                  Watermark="Select destination 2..."
                                  IsReadOnly="True"
                                  DragDrop.AllowDrop="True"
-                                 DragOver="Dest2TextBox_DragOver"
-                                 Drop="Dest2TextBox_Drop"/>
+                                 DragDrop.DragOver="Dest2TextBox_DragOver"
+                                 DragDrop.Drop="Dest2TextBox_Drop"/>
                         <Button Grid.Column="1" 
                                 Content="BROWSE" 
                                 Margin="8,0,0,0"
