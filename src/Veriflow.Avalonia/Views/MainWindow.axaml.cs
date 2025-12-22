@@ -67,10 +67,12 @@ public partial class MainWindow : Window
             ? WindowState.Normal 
             : WindowState.Maximized;
         
-        // Update button icon
+        // Update button icon by changing classes
         if (this.FindControl<TextBlock>("MaximizeIcon") is TextBlock icon)
         {
-            icon.Text = WindowState == WindowState.Maximized ? "🗗" : "🗖";
+            icon.Classes.Clear();
+            icon.Classes.Add("WindowControlIcon");
+            icon.Classes.Add(WindowState == WindowState.Maximized ? "Restore" : "Maximize");
         }
     }
 

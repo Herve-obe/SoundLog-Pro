@@ -409,7 +409,7 @@
     
     <!-- Window Control Button Hover -->
     <Style Selector="Button.WindowControlButton:pointerover">
-        <Setter Property="Background" Value="#1AFFFFFF"/>
+        <Setter Property="Background" Value="#2A2D2E"/>
     </Style>
     
     <Style Selector="Button.WindowControlButton:pointerover TextBlock">
@@ -423,25 +423,35 @@
     
     <!-- Window Control Icon Base -->
     <Style Selector="TextBlock.WindowControlIcon">
-        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Secondary}"/>
+        <Setter Property="Foreground" Value="#CCCCCC"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+        <Setter Property="FontSize" Value="10"/>
     </Style>
     
     <!-- Minimize Icon -->
     <Style Selector="TextBlock.WindowControlIcon.Minimize">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Margin" Value="0,-4,0,0"/>
+        <Setter Property="Text" Value="&#xE921;"/>
+        <Setter Property="FontSize" Value="10"/>
     </Style>
     
     <!-- Maximize Icon -->
     <Style Selector="TextBlock.WindowControlIcon.Maximize">
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Text" Value="&#xE922;"/>
+        <Setter Property="FontSize" Value="10"/>
+    </Style>
+    
+    <!-- Restore Icon (when maximized) -->
+    <Style Selector="TextBlock.WindowControlIcon.Restore">
+        <Setter Property="Text" Value="&#xE923;"/>
+        <Setter Property="FontSize" Value="10"/>
     </Style>
     
     <!-- Close Icon -->
     <Style Selector="TextBlock.WindowControlIcon.Close">
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Text" Value="&#xE8BB;"/>
+        <Setter Property="FontSize" Value="10"/>
     </Style>
     
 </Styles>

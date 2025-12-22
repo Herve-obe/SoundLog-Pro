@@ -77,7 +77,7 @@
                     Classes="WindowControlButton"
                     Click="MinimizeButton_Click"
                     ToolTip.Tip="Minimize">
-                <TextBlock Text="—" Classes="WindowControlIcon Minimize"/>
+                <TextBlock Classes="WindowControlIcon Minimize"/>
             </Button>
             
             <!-- Maximize/Restore Button -->
@@ -87,7 +87,6 @@
                     Click="MaximizeButton_Click"
                     ToolTip.Tip="Maximize">
                 <TextBlock x:Name="MaximizeIcon"
-                          Text="🗖"
                           Classes="WindowControlIcon Maximize"/>
             </Button>
             
@@ -96,7 +95,7 @@
                     Classes="WindowControlButton CloseButton"
                     Click="CloseButton_Click"
                     ToolTip.Tip="Close">
-                <TextBlock Text="✕" Classes="WindowControlIcon Close"/>
+                <TextBlock Classes="WindowControlIcon Close"/>
             </Button>
         </Grid>
         
