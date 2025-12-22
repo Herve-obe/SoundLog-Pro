@@ -67,14 +67,10 @@ public partial class MainWindow : Window
             ? WindowState.Normal 
             : WindowState.Maximized;
         
-        // Update button icon geometry
-        if (this.FindControl<Path>("MaximizeIcon") is Path icon)
+        // Update button icon
+        if (this.FindControl<TextBlock>("MaximizeIcon") is TextBlock icon)
         {
-            // Maximized: show restore icon (two overlapping squares)
-            // Normal: show maximize icon (single square)
-            icon.Data = WindowState == WindowState.Maximized
-                ? Geometry.Parse("M 0,2 L 8,2 L 8,10 L 0,10 Z M 2,0 L 10,0 L 10,8 L 8,8")
-                : Geometry.Parse("M 0,0 L 10,0 L 10,10 L 0,10 Z");
+            icon.Text = WindowState == WindowState.Maximized ? "🗗" : "🗖";
         }
     }
 
