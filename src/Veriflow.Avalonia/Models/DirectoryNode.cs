@@ -37,16 +37,22 @@ public partial class DirectoryNode : ObservableObject
         Name = name;
         FullPath = fullPath;
         
-        // Add placeholder to show expand arrow
-        Children.Add(new DirectoryNode("...", string.Empty));
+        // Add placeholder to show expand arrow (only if not a placeholder itself)
+        if (!string.IsNullOrEmpty(fullPath))
+        {
+            Children.Add(CreatePlaceholder());
+        }
     }
 
     /// <summary>
-    /// Creates an empty node (used for placeholders).
+    /// Creates a placeholder node for lazy loading indication.
     /// </summary>
-    private DirectoryNode(string name)
+    private static DirectoryNode CreatePlaceholder()
     {
-        Name = name;
-        FullPath = string.Empty;
+        return new DirectoryNode
+        {
+            Name = "...",
+            FullPath = string.Empty
+        };
     }
 }
