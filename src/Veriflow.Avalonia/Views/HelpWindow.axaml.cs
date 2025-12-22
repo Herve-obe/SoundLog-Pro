@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using System.IO;
 using System.Reflection;
 
@@ -48,7 +49,7 @@ public partial class HelpWindow : Window
         }
     }
 
-    private void CloseButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void CloseButton_Click(object? sender, RoutedEventArgs e)
     {
         Close();
     }

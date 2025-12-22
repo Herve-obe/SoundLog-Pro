@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 
 namespace Veriflow.Avalonia.Views;
 
@@ -9,7 +10,7 @@ public partial class AboutWindow : Window
         InitializeComponent();
     }
 
-    private void CloseButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void CloseButton_Click(object? sender, RoutedEventArgs e)
     {
         Close();
     }
