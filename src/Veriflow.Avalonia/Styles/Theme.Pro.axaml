@@ -127,6 +127,11 @@
     <Style Selector="Button.Primary:pressed">
         <Setter Property="Background" Value="{StaticResource Brush.Accent.Pressed}"/>
     </Style>
+
+    <Style Selector="Button.Primary:disabled">
+        <Setter Property="Background" Value="{StaticResource Brush.Background.Elevated}"/>
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text.Tertiary}"/>
+    </Style>
     
     <!-- ============================================ -->
     <!-- NAVIGATION BUTTON STYLE -->
