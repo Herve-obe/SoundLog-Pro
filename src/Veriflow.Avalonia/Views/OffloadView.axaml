@@ -113,7 +113,7 @@
                      So add Margin Bottom 20 to this Row. -->
                 <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="0,0,0,20">
                     <PathIcon Width="24" Height="24" Foreground="{DynamicResource Brush.Accent}" VerticalAlignment="Center"
-                             Data="F0 M4,2 L18,2 L22,6 L22,20 C22,21.1 21.1,22 20,22 L4,22 C2.9,22 2,21.1 2,20 L2,4 C2,2.9 2.9,2 4,2 Z M7,14 V8 H9 V14 Z M11,14 V8 H13 V14 Z M15,14 V8 H17 V14 Z"/>
+                             Data="F0 M4,2 L18,2 L22,6 L22,20 C22,21.1 21.1,22 20,22 L4,22 C2.9,22 2,21.1 2,20 L2,4 C2,2.9 2.9,2 4,2 Z M7,11 V5 H9 V11 Z M11,11 V5 H13 V11 Z M15,11 V5 H17 V11 Z"/>
                     <TextBlock Text="MEDIA SOURCE" FontSize="24" FontWeight="Bold" 
                               Foreground="{DynamicResource Brush.Text.Secondary}" VerticalAlignment="Center"/>
                 </StackPanel>
