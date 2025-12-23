@@ -19,42 +19,20 @@
     <TreeView ItemsSource="{Binding RootNodes}"
               SelectionMode="Single">
         
+        <!-- ItemContainerTheme for binding IsExpanded and IsSelected -->
+        <TreeView.ItemContainerTheme>
+            <ControlTheme TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}" x:DataType="models:DirectoryNode">
+                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+            </ControlTheme>
+        </TreeView.ItemContainerTheme>
+        
         <TreeView.ItemTemplate>
             <TreeDataTemplate ItemsSource="{Binding Children}"
                             x:DataType="models:DirectoryNode">
                 <StackPanel Orientation="Horizontal" 
                            Spacing="6"
                            PointerPressed="TreeItem_PointerPressed">
-                    
-                    <!-- Fixed Drive Icon (HDD/SSD) -->
-                    <PathIcon Width="16" Height="16"
-                             Foreground="{DynamicResource Brush.Accent}"
-                             Data="M6,2H18C19.1,2 20,2.9 20,4V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2M6,4V14H18V4H6M12,17A2,2 0 0,0 10,19A2,2 0 0,0 12,21A2,2 0 0,0 14,19A2,2 0 0,0 12,17Z"
-                             IsVisible="{Binding NodeType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:DirectoryNodeType.FixedDrive}}"/>
-                    
-                    <!-- Removable Drive Icon (USB/SD) -->
-                    <PathIcon Width="16" Height="16"
-                             Foreground="{DynamicResource Brush.Accent}"
-                             Data="M6,2H18C19.1,2 20,2.9 20,4V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2M6,4V14H18V4H6M12,17A2,2 0 0,0 10,19A2,2 0 0,0 12,21A2,2 0 0,0 14,19A2,2 0 0,0 12,17Z"
-                             IsVisible="{Binding NodeType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:DirectoryNodeType.RemovableDrive}}"/>
-                    
-                    <!-- Network Drive Icon -->
-                    <PathIcon Width="16" Height="16"
-                             Foreground="{DynamicResource Brush.Accent}"
-                             Data="M6,2H18C19.1,2 20,2.9 20,4V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2M6,4V14H18V4H6M12,17A2,2 0 0,0 10,19A2,2 0 0,0 12,21A2,2 0 0,0 14,19A2,2 0 0,0 12,17Z"
-                             IsVisible="{Binding NodeType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:DirectoryNodeType.NetworkDrive}}"/>
-                    
-                    <!-- CD/DVD Icon -->
-                    <PathIcon Width="16" Height="16"
-                             Foreground="{DynamicResource Brush.Accent}"
-                             Data="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,4c4.41,0,8,3.59,8,8s-3.59,8-8,8s-8-3.59-8-8S7.59,4,12,4z M12,10c-1.1,0-2,0.9-2,2s0.9,2,2,2s2-0.9,2-2S13.1,10,12,10z"
-                             IsVisible="{Binding NodeType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:DirectoryNodeType.CDRom}}"/>
-                    
-                    <!-- Folder Icon -->
-                    <PathIcon Width="16" Height="16"
-                             Foreground="#DCB67A"
-                             Data="M10,4H4C2.89,4,2,4.89,2,6v12c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V8c0-1.1-0.9-2-2-2h-8L10,4z"
-                             IsVisible="{Binding NodeType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static models:DirectoryNodeType.Folder}}"/>
                     
                     <!-- Directory Name (Drive: Bold) -->
                     <TextBlock Text="{Binding Name}"
@@ -74,14 +52,6 @@
                 </StackPanel>
             </TreeDataTemplate>
         </TreeView.ItemTemplate>
-        
-        <!-- Bind IsExpanded and IsSelected to DirectoryNode properties -->
-        <TreeView.Styles>
-            <Style Selector="TreeViewItem" x:DataType="models:DirectoryNode">
-                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-            </Style>
-        </TreeView.Styles>
         
     </TreeView>
     

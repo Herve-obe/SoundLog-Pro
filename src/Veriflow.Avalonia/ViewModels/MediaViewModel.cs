@@ -10,6 +10,7 @@ using Veriflow.Avalonia.Models;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Avalonia.Input;
+using Avalonia.Media;
 using System;
 using System.Collections.Generic;
 
@@ -30,6 +31,9 @@ namespace Veriflow.Avalonia.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<DriveViewModel> _drives = new();
+
+        [ObservableProperty]
+        private FileExplorerViewModel _fileExplorer = new();
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(OpenInPlayerCommand))]
@@ -55,6 +59,16 @@ namespace Veriflow.Avalonia.ViewModels
             {
                 _ = StopFilmstrip(); 
             }
+        }
+
+        [RelayCommand]
+        private void SelectMedia(MediaItemViewModel item)
+        {
+            if (SelectedMedia != null) 
+                SelectedMedia.IsPlaying = false;
+            
+            SelectedMedia = item;
+            // Metadata loads automatically via OnSelectedMediaChanged
         }
 
         [ObservableProperty]
@@ -83,7 +97,74 @@ namespace Veriflow.Avalonia.ViewModels
         partial void OnCurrentViewModeChanged(MediaViewMode value)
         {
             StopPreview();
+            
+            // Notify icon property changes
+            OnPropertyChanged(nameof(GridIconBrush));
+            OnPropertyChanged(nameof(ListIconBrush));
+            OnPropertyChanged(nameof(FilmstripIconBrush));
+            OnPropertyChanged(nameof(GridIconOpacity));
+            OnPropertyChanged(nameof(ListIconOpacity));
+            OnPropertyChanged(nameof(FilmstripIconOpacity));
         }
+
+        [RelayCommand]
+        private void SetViewMode(string mode)
+        {
+            CurrentViewMode = mode switch
+            {
+                "Grid" => MediaViewMode.Grid,
+                "List" => MediaViewMode.List,
+                "Filmstrip" => MediaViewMode.Filmstrip,
+                _ => CurrentViewMode
+            };
+        }
+
+        // Icon color properties for view mode buttons
+        public IBrush GridIconBrush
+        {
+            get
+            {
+                if (CurrentViewMode == MediaViewMode.Grid && 
+                    global::Avalonia.Application.Current?.TryGetResource("Brush.Accent", null, out var resource) == true &&
+                    resource is IBrush brush)
+                {
+                    return brush;
+                }
+                return Brushes.White;
+            }
+        }
+
+        public IBrush ListIconBrush
+        {
+            get
+            {
+                if (CurrentViewMode == MediaViewMode.List && 
+                    global::Avalonia.Application.Current?.TryGetResource("Brush.Accent", null, out var resource) == true &&
+                    resource is IBrush brush)
+                {
+                    return brush;
+                }
+                return Brushes.White;
+            }
+        }
+
+        public IBrush FilmstripIconBrush
+        {
+            get
+            {
+                if (CurrentViewMode == MediaViewMode.Filmstrip && 
+                    global::Avalonia.Application.Current?.TryGetResource("Brush.Accent", null, out var resource) == true &&
+                    resource is IBrush brush)
+                {
+                    return brush;
+                }
+                return Brushes.White;
+            }
+        }
+
+        public double GridIconOpacity => CurrentViewMode == MediaViewMode.Grid ? 1.0 : 0.4;
+        public double ListIconOpacity => CurrentViewMode == MediaViewMode.List ? 1.0 : 0.4;
+        public double FilmstripIconOpacity => CurrentViewMode == MediaViewMode.Filmstrip ? 1.0 : 0.4;
 
         public void SetAppMode(AppMode mode)
         {
@@ -242,6 +323,18 @@ namespace Veriflow.Avalonia.ViewModels
             };
 
             InitializePreviewPlayer();
+            
+            // Connect FileExplorer selection to LoadDirectory
+            FileExplorer.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(FileExplorerViewModel.SelectedDirectory))
+                {
+                    if (!string.IsNullOrEmpty(FileExplorer.SelectedDirectory))
+                    {
+                        LoadDirectory(FileExplorer.SelectedDirectory);
+                    }
+                }
+            };
         }
 
         private void RefreshDrives()
@@ -345,13 +438,18 @@ namespace Veriflow.Avalonia.ViewModels
         {
             StopPreview();
             AddToReportCommand.NotifyCanExecuteChanged();
+            
+            // Notify icon color changes when profile switches (Video/Audio)
+            OnPropertyChanged(nameof(GridIconBrush));
+            OnPropertyChanged(nameof(ListIconBrush));
+            OnPropertyChanged(nameof(FilmstripIconBrush));
         }
 
         [ObservableProperty]
         private bool _isVideoPlaying;
 
         public MediaPlayer? PreviewPlayer { get; private set; }
-        // private VideoPreviewWindow? _previewWindow;
+        private Views.VideoPreviewWindow? _previewWindow;
 
         private void InitializePreviewPlayer()
         {
@@ -366,7 +464,7 @@ namespace Veriflow.Avalonia.ViewModels
         }
 
         [RelayCommand]
-        private void PreviewFile(MediaItemViewModel item)
+        private async Task PreviewFile(MediaItemViewModel item)
         {
              if (SelectedMedia == item && (IsPreviewing || IsVideoPlaying))
              {
@@ -387,9 +485,21 @@ namespace Veriflow.Avalonia.ViewModels
                      IsVideoPlaying = true;
                      using var media = new Media(VideoEngineService.Instance.LibVLC, item.FullName, FromType.FromPath);
                      media.AddOption(":avcodec-hw=d3d11va"); 
+                     
+                     // Create and show chromeless preview window
+                     _previewWindow = new Views.VideoPreviewWindow();
+                     _previewWindow.SetPlayer(PreviewPlayer);
+                     _previewWindow.SetTitle(item.Name);
+                     _previewWindow.Closed += (s, e) => 
+                     {
+                         StopPreview();
+                         _previewWindow = null;
+                     };
+                     _previewWindow.Show();
+                     
+                     // CRITICAL: Wait for VideoView to initialize before playing
+                     await _previewWindow.InitializeAsync();
                      PreviewPlayer.Play(media);
-
-                     // STUB: Video Preview Window
                  }
              }
              else
@@ -402,23 +512,24 @@ namespace Veriflow.Avalonia.ViewModels
         [RelayCommand]
         private void StopPreview()
         {
-            if (IsVideoMode)
+            if (IsVideoPlaying)
             {
+                PreviewPlayer?.Stop();
+                _previewWindow?.Close();
+                _previewWindow = null;
                 IsVideoPlaying = false;
-                if (PreviewPlayer != null && PreviewPlayer.IsPlaying)
-                {
-                    PreviewPlayer.Stop();
-                }
-
-                // Close Window Stub
             }
-            else
+            
+            if (IsPreviewing)
             {
                 _audioService.Stop();
                 IsPreviewing = false;
             }
             
-            if (SelectedMedia != null) SelectedMedia.IsPlaying = false;
+            if (SelectedMedia != null)
+            {
+                SelectedMedia.IsPlaying = false;
+            }
         }
 
         [RelayCommand]
@@ -587,7 +698,7 @@ namespace Veriflow.Avalonia.ViewModels
                   folder.IsExpanded = true;
                   await Task.Delay(50); 
                   
-                  currentCollection = folder.Children;
+                  currentCollection = folder.Folders;
                   currentItem = folder;
               }
               
@@ -659,7 +770,10 @@ namespace Veriflow.Avalonia.ViewModels
         [ObservableProperty] private string _bitDepth = "";
         [ObservableProperty] private string _format = "";
         
-        [ObservableProperty] private string? _thumbnailPath; 
+        [ObservableProperty] private string? _thumbnailPath;
+        
+        // Avalonia requires Bitmap object for Image binding (string path doesn't auto-convert like WPF)
+        [ObservableProperty] private global::Avalonia.Media.Imaging.Bitmap? _thumbnailBitmap;
 
         private bool _metadataLoaded;
 
@@ -681,18 +795,30 @@ namespace Veriflow.Avalonia.ViewModels
                 try
                 {
                     var thumbService = new ThumbnailService(); 
-                    string? thumb = await thumbService.GetThumbnailAsync(File.FullName);
-                    if (thumb != null)
+                    string? thumbPath = await thumbService.GetThumbnailAsync(File.FullName);
+                    
+                    if (!string.IsNullOrEmpty(thumbPath) && System.IO.File.Exists(thumbPath))
                     {
-                        Dispatcher.UIThread.Invoke(() => 
+                        // Load Bitmap on background thread to avoid UI blocking
+                        var bitmap = await Task.Run(() => new global::Avalonia.Media.Imaging.Bitmap(thumbPath));
+                        
+                        // Update UI on UI thread
+                        await Dispatcher.UIThread.InvokeAsync(() => 
                         {
-                            ThumbnailPath = thumb;
+                            ThumbnailPath = thumbPath; // Keep path for reference
+                            ThumbnailBitmap = bitmap;  // Avalonia needs Bitmap object
                         });
+                        
+                        Debug.WriteLine($"[MediaItemViewModel] Thumbnail loaded: {thumbPath}");
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"[MediaItemViewModel] Thumbnail generation failed for: {File.FullName}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[MediaVM] Background Error: {ex}");
+                    Debug.WriteLine($"[MediaItemViewModel] Thumbnail error: {ex.Message}");
                 }
             });
         }

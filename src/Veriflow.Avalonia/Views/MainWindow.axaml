@@ -17,6 +17,11 @@
         <vm:MainViewModel/>
     </Design.DataContext>
 
+    <Window.KeyBindings>
+        <!-- Global shortcut: CTRL+TAB to toggle Video/Audio profile -->
+        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding ToggleAudioVideoModeCommand}" />
+    </Window.KeyBindings>
+
     <!-- Main Layout -->
     <Grid RowDefinitions="Auto, *, Auto">
         

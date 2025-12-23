@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Veriflow.Avalonia.ViewModels"
+             xmlns:views="using:Veriflow.Avalonia.Views"
              mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
              x:Class="Veriflow.Avalonia.Views.MediaView"
              x:DataType="vm:MediaViewModel"
@@ -12,14 +13,22 @@
         
         <!-- Header -->
         <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,20">
-            <TextBlock Classes="Title" Text="MEDIA"/>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <!-- Media Icon -->
+                <PathIcon Data="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,3V13H11V3"
+                         Width="20" Height="20"
+                         Foreground="{DynamicResource Brush.Accent}"
+                         VerticalAlignment="Center"/>
+                <!-- Title -->
+                <TextBlock Classes="Title" Text="MEDIA" VerticalAlignment="Center"/>
+            </StackPanel>
             <TextBlock Classes="Subtitle" Text="Browse and preview media files"/>
         </StackPanel>
         
         <!-- Content -->
         <Grid Grid.Row="1" ColumnDefinitions="250,*,320" Margin="0,0,0,16">
             
-            <!-- Sources Tree -->
+            <!-- Sources Explorer -->
             <Border Grid.Column="0" 
                     Background="{StaticResource Brush.Background.Elevated}"
                     BorderBrush="{StaticResource Brush.Border}"
@@ -29,16 +38,7 @@
                     Margin="0,0,8,0">
                 <Grid RowDefinitions="Auto,*">
                      <TextBlock Grid.Row="0" Classes="Label" Text="SOURCES" Margin="0,0,0,8"/>
-                     <TreeView Grid.Row="1" ItemsSource="{Binding Drives}" SelectionMode="Single">
-                        <TreeView.ItemTemplate>
-                            <TreeDataTemplate ItemsSource="{Binding Folders}">
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <PathIcon Data="{StaticResource Icon.Folder}" Width="14" Height="14" Foreground="{StaticResource Brush.Accent.Secondary}"/>
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </TreeDataTemplate>
-                        </TreeView.ItemTemplate>
-                     </TreeView>
+                     <views:FileExplorerView Grid.Row="1" DataContext="{Binding FileExplorer}"/>
                 </Grid>
             </Border>
 
@@ -52,14 +52,148 @@
                     Padding="16"
                     Margin="0,0,8,0"
                     DragDrop.AllowDrop="True">
-                <Grid RowDefinitions="Auto,*">
-                    <TextBlock Grid.Row="0" Classes="Label" Text="MEDIA FILES" Margin="0,0,0,12"/>
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <!-- Header with View Mode Toggles -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+                        <TextBlock Grid.Column="0" Classes="Label" Text="MEDIA FILES" VerticalAlignment="Center"/>
+                        
+                        <!-- View Mode Toggle Buttons with Icons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <!-- Grid View Icon -->
+                            <Button Command="{Binding SetViewModeCommand}" 
+                                    CommandParameter="Grid"
+                                    Width="36" Height="36" 
+                                    Padding="0"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ToolTip.Tip="Grid View"
+                                    Cursor="Hand">
+                                <PathIcon Data="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" 
+                                         Width="22" Height="22"
+                                         Foreground="{Binding GridIconBrush}"
+                                         Opacity="{Binding GridIconOpacity}"/>
+                            </Button>
+                            
+                            <!-- List View Icon -->
+                            <Button Command="{Binding SetViewModeCommand}" 
+                                    CommandParameter="List"
+                                    Width="36" Height="36" 
+                                    Padding="0"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ToolTip.Tip="List View"
+                                    Cursor="Hand">
+                                <PathIcon Data="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4" 
+                                         Width="22" Height="22"
+                                         Foreground="{Binding ListIconBrush}"
+                                         Opacity="{Binding ListIconOpacity}"/>
+                            </Button>
+                            
+                            <!-- Filmstrip View Icon -->
+                            <Button Command="{Binding SetViewModeCommand}" 
+                                    CommandParameter="Filmstrip"
+                                    Width="36" Height="36" 
+                                    Padding="0"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ToolTip.Tip="Filmstrip View"
+                                    Cursor="Hand">
+                                <PathIcon Data="M4,6H2V20H4V6M20,6H18V20H20V6M6,4H16V20H6V4M8,6V18H14V6H8M10,8L13,12L10,16V8Z" 
+                                         Width="22" Height="22"
+                                         Foreground="{Binding FilmstripIconBrush}"
+                                         Opacity="{Binding FilmstripIconOpacity}"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
                     
-                    <ListBox Grid.Row="1"
+                    <!-- Grid View -->
+                    <ScrollViewer Grid.Row="2" IsVisible="{Binding CurrentViewMode, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:MediaViewMode.Grid}}">
+                        <ItemsControl ItemsSource="{Binding FileList}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="Transparent" 
+                                            Padding="8"
+                                            Margin="4"
+                                            PointerEntered="Thumbnail_PointerEnter"
+                                            PointerExited="Thumbnail_PointerLeave">
+                                        <StackPanel Width="120" Spacing="4">
+                                            <!-- Thumbnail with play overlay -->
+                                            <Border Background="#2A2A2A" 
+                                                    Height="90" 
+                                                    CornerRadius="4"
+                                                    BorderBrush="{StaticResource Brush.Accent}"
+                                                    BorderThickness="0"
+                                                    Name="ThumbnailBorder">
+                                                <Grid PointerPressed="Thumbnail_PointerPressed">
+                                                    <Image Source="{Binding ThumbnailBitmap}" 
+                                                           Stretch="UniformToFill" 
+                                                           IsVisible="{Binding ThumbnailBitmap, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                                    <PathIcon Data="{StaticResource Icon.Folder}" 
+                                                             Width="32" Height="32" 
+                                                             Foreground="#555" 
+                                                             IsVisible="{Binding ThumbnailBitmap, Converter={x:Static ObjectConverters.IsNull}}"/>
+                                                    
+                                                    <!-- Play button overlay (visible on hover) -->
+                                                    <Border Name="PlayOverlay" 
+                                                            Background="#AA000000"
+                                                            IsVisible="False"
+                                                            PointerPressed="PlayButton_PointerPressed">
+                                                        <Grid>
+                                                            <!-- Circle background with hover effect -->
+                                                            <Ellipse Name="PlayCircle"
+                                                                    Width="60" Height="60" 
+                                                                    Fill="Transparent"
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    PointerEntered="PlayCircle_PointerEnter"
+                                                                    PointerExited="PlayCircle_PointerExit"/>
+                                                            <!-- Play icon -->
+                                                            <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" 
+                                                                     Width="24" Height="24" 
+                                                                     Foreground="White"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center"
+                                                                     IsHitTestVisible="False"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    
+                                                    <!-- Duration overlay -->
+                                                    <Border Background="#AA000000" 
+                                                            VerticalAlignment="Bottom" 
+                                                            HorizontalAlignment="Right"
+                                                            Padding="4,2"
+                                                            Margin="4"
+                                                            CornerRadius="2"
+                                                            IsVisible="{Binding Duration, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                        <TextBlock Text="{Binding Duration}" FontSize="10" Foreground="White"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                            <!-- File name -->
+                                            <TextBlock Text="{Binding Name}" 
+                                                       FontSize="11" 
+                                                       TextTrimming="CharacterEllipsis"
+                                                       TextWrapping="NoWrap"
+                                                       ToolTip.Tip="{Binding Name}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    
+                    <!-- List View -->
+                    <ListBox Grid.Row="2"
                              ItemsSource="{Binding FileList}"
                              SelectedItem="{Binding SelectedMedia}"
                              Background="Transparent"
-                             BorderThickness="0">
+                             BorderThickness="0"
+                             IsVisible="{Binding CurrentViewMode, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:MediaViewMode.List}}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid ColumnDefinitions="Auto,*,Auto,Auto">
@@ -94,6 +228,71 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    
+                    <!-- Filmstrip View -->
+                    <Grid Grid.Row="2" 
+                          ColumnDefinitions="0.3*,0.7*" 
+                          IsVisible="{Binding CurrentViewMode, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:MediaViewMode.Filmstrip}}">
+                        <!-- File List (Left) -->
+                        <ListBox Grid.Column="0" 
+                                 ItemsSource="{Binding FileList}"
+                                 SelectedItem="{Binding SelectedMedia}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Margin="0,0,8,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding Name}" 
+                                                   FontSize="11" 
+                                                   TextTrimming="CharacterEllipsis"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Duration}" 
+                                                   FontSize="10" 
+                                                   Foreground="{StaticResource Brush.Text.Tertiary}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        
+                        <!-- Preview Area (Right) -->
+                        <Border Grid.Column="1" 
+                                Background="#1A1A1A" 
+                                CornerRadius="4"
+                                BorderBrush="{StaticResource Brush.Border}"
+                                BorderThickness="1">
+                            <Grid RowDefinitions="*,Auto">
+                                <!-- VLC Preview -->
+                                <Viewbox Grid.Row="0" Stretch="Uniform">
+                                    <ContentControl Content="{Binding PreviewPlayer}" Width="640" Height="360"/>
+                                </Viewbox>
+                                
+                                <!-- Controls -->
+                                <StackPanel Grid.Row="1" 
+                                            Orientation="Horizontal" 
+                                            HorizontalAlignment="Center"
+                                            Spacing="8"
+                                            Margin="0,8">
+                                    <Button Command="{Binding PlayFilmstripCommand}" 
+                                            Width="80" Height="32"
+                                            IsVisible="{Binding !IsVideoPlaying}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" Width="12" Height="12"/>
+                                            <TextBlock Text="Play"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding StopFilmstripCommand}" 
+                                            Width="80" Height="32"
+                                            IsVisible="{Binding IsVideoPlaying}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <PathIcon Data="M6,4H18V20H6M18,3H6A1,1 0 0,0 5,4V20A1,1 0 0,0 6,21H18A1,1 0 0,0 19,20V4A1,1 0 0,0 18,3Z" Width="12" Height="12"/>
+                                            <TextBlock Text="Stop"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </Grid>
             </Border>
             
@@ -135,18 +334,70 @@
                             
                             <Separator Background="{StaticResource Brush.Divider}" Margin="0,8"/>
                             
-                            <!-- Technical Info -->
-                            <TextBlock Classes="Label" Text="TECHNICAL" FontWeight="SemiBold"/>
-                            <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Sample Rate:" Classes="Label"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.SampleRate}"/>
+                            <!-- VIDEO STREAM (for video files) -->
+                            <StackPanel Spacing="8" IsVisible="{Binding SelectedMedia.CurrentVideoMetadata, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <TextBlock Classes="Label" Text="VIDEO STREAM" FontWeight="SemiBold"/>
+                                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Codec:" Classes="Label"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.Codec}" TextWrapping="Wrap"/>
+                                    
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Resolution:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.Resolution}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Aspect Ratio:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.AspectRatio}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Frame Rate:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.FrameRate}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Bit Depth:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.BitDepth}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Chroma:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.ChromaSubsampling}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Color Space:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.ColorSpace}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Scan Type:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.ScanType}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="GOP Structure:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.GopStructure}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Bitrate:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.Bitrate}" Margin="0,4,0,0"/>
+                                </Grid>
                                 
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Bit Depth:" Classes="Label" Margin="0,4,0,0"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.BitDepth}" Margin="0,4,0,0"/>
+                                <Separator Background="{StaticResource Brush.Divider}" Margin="0,8"/>
                                 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Channels:" Classes="Label" Margin="0,4,0,0"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.Channels}" Margin="0,4,0,0"/>
-                            </Grid>
+                                <TextBlock Classes="Label" Text="AUDIO &amp; TIMECODE" FontWeight="SemiBold"/>
+                                <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Audio Format:" Classes="Label"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.AudioFormat}" TextWrapping="Wrap"/>
+                                    
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Channels:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.AudioChannels}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Start TC:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.CurrentVideoMetadata.StartTimecode}" Margin="0,4,0,0"/>
+                                </Grid>
+                            </StackPanel>
+                            
+                            <!-- TECHNICAL (for audio files) -->
+                            <StackPanel Spacing="8" IsVisible="{Binding SelectedMedia.CurrentMetadata, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <TextBlock Classes="Label" Text="TECHNICAL" FontWeight="SemiBold"/>
+                                <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Sample Rate:" Classes="Label"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedMedia.SampleRate}"/>
+                                    
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Bit Depth:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedMedia.BitDepth}" Margin="0,4,0,0"/>
+                                    
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Channels:" Classes="Label" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedMedia.Channels}" Margin="0,4,0,0"/>
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
                         
                         <!-- Show when no file selected -->

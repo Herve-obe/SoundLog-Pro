@@ -17,7 +17,13 @@ namespace Veriflow.Avalonia.ViewModels
         public bool IsExpanded
         {
             get => _isExpanded;
-            set => SetProperty(ref _isExpanded, value);
+            set
+            {
+                if (SetProperty(ref _isExpanded, value) && value)
+                {
+                    LoadFolders();
+                }
+            }
         }
 
         private bool _isSelected;
@@ -55,26 +61,30 @@ namespace Veriflow.Avalonia.ViewModels
             Path = drive.Name;
             _onSelect = onSelect;
             
-            // Lazy loading dummy
-            Folders.Add(new FolderViewModel("Loading...", "", null!)); 
-            LoadFolders();
+            // Lazy loading placeholder - load on expansion
+            Folders.Add(new FolderViewModel("...", "", null!)); 
+            // Do NOT load here - wait for expansion
         }
 
         private void LoadFolders()
         {
-            Folders.Clear();
-            try
+            // Only load if it contains the placeholder
+            if (Folders.Count == 1 && Folders[0].Name == "...")
             {
-                foreach (var dir in new DirectoryInfo(Path).GetDirectories())
+                Folders.Clear();
+                try
                 {
-                    // Basic hidden check
-                    if ((dir.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                    foreach (var dir in new DirectoryInfo(Path).GetDirectories())
                     {
-                         Folders.Add(new FolderViewModel(dir.Name, dir.FullName, _onSelect));
+                        // Basic hidden check
+                        if ((dir.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
+                        {
+                             Folders.Add(new FolderViewModel(dir.Name, dir.FullName, _onSelect));
+                        }
                     }
                 }
+                catch { }
             }
-            catch { }
         }
         
     }
@@ -83,7 +93,7 @@ namespace Veriflow.Avalonia.ViewModels
     {
         public string Name { get; }
         public string FullPath { get; }
-        public ObservableCollection<FolderViewModel> Children { get; } = new();
+        public ObservableCollection<FolderViewModel> Folders { get; } = new();  // Renamed from Children
         private readonly Action<string> _onSelect;
         private bool _isExpanded;
 
@@ -118,18 +128,17 @@ namespace Veriflow.Avalonia.ViewModels
             FullPath = fullPath;
             _onSelect = onSelect;
 
-            // Add dummy item for lazy loading if it has children
-            // Simplified: just always add dummy to show expansion arrow, verify later
-             if (!string.IsNullOrEmpty(fullPath)) 
-                 Children.Add(new FolderViewModel("...", "", null!));
+             // Add placeholder for lazy loading
+              if (!string.IsNullOrEmpty(fullPath)) 
+                  Folders.Add(new FolderViewModel("...", "", null!));
         }
 
         private void LoadChildren()
         {
-            // Only load if it contains the dummy
-            if (Children.Count == 1 && Children[0].Name == "...")
+            // Only load if it contains the placeholder
+            if (Folders.Count == 1 && Folders[0].Name == "...")
             {
-                Children.Clear();
+                Folders.Clear();
                 try
                 {
                     var dirInfo = new DirectoryInfo(FullPath);
@@ -137,7 +146,7 @@ namespace Veriflow.Avalonia.ViewModels
                     {
                         if ((dir.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                         {
-                            Children.Add(new FolderViewModel(dir.Name, dir.FullName, _onSelect));
+                            Folders.Add(new FolderViewModel(dir.Name, dir.FullName, _onSelect));
                         }
                     }
                 }

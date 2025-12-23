@@ -37,12 +37,16 @@ public partial class DirectoryNode : ObservableObject
     private ObservableCollection<DirectoryNode> _children = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDrive))]
+    [NotifyPropertyChangedFor(nameof(IsFolder))]
     private DirectoryNodeType _nodeType = DirectoryNodeType.Folder;
 
     /// <summary>
     /// Indicates if this node has a placeholder child (for lazy loading).
     /// </summary>
-    public bool HasPlaceholder => Children.Count == 1 && Children[0].Name == "...";
+    public bool HasPlaceholder => Children.Count == 1 && 
+                                   Children[0].FullPath == string.Empty && 
+                                   Children[0].Name == "...";
 
     public bool IsDrive => NodeType != DirectoryNodeType.Folder;
     public bool IsFolder => NodeType == DirectoryNodeType.Folder;

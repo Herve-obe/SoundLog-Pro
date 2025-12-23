@@ -62,19 +62,21 @@ public partial class FileExplorerViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Handles property changes on directory nodes (expansion, selection).
-    /// </summary>
     private void Node_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (sender is not DirectoryNode node) return;
 
         if (e.PropertyName == nameof(DirectoryNode.IsExpanded) && node.IsExpanded)
         {
-            // Lazy load children when expanded
+            // Lazy load children when expanded (only if not already loaded)
             if (node.HasPlaceholder)
             {
+                System.Diagnostics.Debug.WriteLine($"Expanding node: {node.Name}, HasPlaceholder: {node.HasPlaceholder}");
                 LoadChildren(node);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Node already loaded: {node.Name}, Children count: {node.Children.Count}");
             }
         }
         else if (e.PropertyName == nameof(DirectoryNode.IsSelected) && node.IsSelected)
@@ -91,6 +93,8 @@ public partial class FileExplorerViewModel : ObservableObject
     {
         try
         {
+            System.Diagnostics.Debug.WriteLine($"LoadChildren called for: {parent.FullPath}");
+            
             // Remove placeholder
             parent.Children.Clear();
 
@@ -98,27 +102,30 @@ public partial class FileExplorerViewModel : ObservableObject
             var subdirectories = directory.GetDirectories()
                 .OrderBy(d => d.Name);
 
+            System.Diagnostics.Debug.WriteLine($"Found {subdirectories.Count()} subdirectories");
+
             foreach (var subdir in subdirectories)
             {
                 // Skip hidden and system directories
                 if ((subdir.Attributes & FileAttributes.Hidden) != 0 ||
                     (subdir.Attributes & FileAttributes.System) != 0)
                 {
+                    System.Diagnostics.Debug.WriteLine($"Skipping hidden/system: {subdir.Name}");
                     continue;
                 }
 
                 try
                 {
-                    // Test if we can access this directory
-                    _ = subdir.GetDirectories();
-
+                    // Create child node without testing accessibility upfront
+                    // The accessibility test will happen when the user tries to expand this folder
                     var childNode = new DirectoryNode(subdir.Name, subdir.FullName);
                     childNode.PropertyChanged += Node_PropertyChanged;
                     parent.Children.Add(childNode);
+                    System.Diagnostics.Debug.WriteLine($"Added folder: {subdir.Name}");
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // Skip inaccessible directories silently
+                    System.Diagnostics.Debug.WriteLine($"Access denied to: {subdir.Name}");
                     continue;
                 }
                 catch (Exception ex)
@@ -127,6 +134,8 @@ public partial class FileExplorerViewModel : ObservableObject
                     continue;
                 }
             }
+
+            System.Diagnostics.Debug.WriteLine($"Total children added: {parent.Children.Count}");
 
             // If no children, add a placeholder to indicate empty folder
             if (parent.Children.Count == 0)

@@ -25,13 +25,66 @@ namespace Veriflow.Avalonia.Services
                 Directory.CreateDirectory(_cacheDirectory);
             }
 
-            // Locate FFmpeg
-            _ffmpegPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg.exe");
+            // Locate FFmpeg with fallback paths
+            _ffmpegPath = LocateFFmpeg();
+            
+            if (string.IsNullOrEmpty(_ffmpegPath) || !File.Exists(_ffmpegPath))
+            {
+                Debug.WriteLine("[ThumbnailService] WARNING: FFmpeg not found. Thumbnails will be disabled.");
+                Debug.WriteLine($"[ThumbnailService] Base Directory: {AppDomain.CurrentDomain.BaseDirectory}");
+            }
+            else
+            {
+                Debug.WriteLine($"[ThumbnailService] FFmpeg found at: {_ffmpegPath}");
+            }
+        }
+
+        private string LocateFFmpeg()
+        {
+            // Try multiple possible locations
+            var searchPaths = new[]
+            {
+                // Output directory (after build with copy rule)
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg.exe"),
+                // Alternative base directory
+                Path.Combine(AppContext.BaseDirectory, "ffmpeg.exe"),
+                // Development: ExternalTools folder (relative to bin)
+                Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "ExternalTools", "ffmpeg.exe")),
+                // Current directory
+                Path.Combine(Directory.GetCurrentDirectory(), "ffmpeg.exe"),
+            };
+
+            foreach (var path in searchPaths)
+            {
+                if (File.Exists(path))
+                {
+                    Debug.WriteLine($"[ThumbnailService] Found FFmpeg at: {path}");
+                    return path;
+                }
+            }
+
+            Debug.WriteLine("[ThumbnailService] FFmpeg not found in any search path:");
+            foreach (var path in searchPaths)
+            {
+                Debug.WriteLine($"  - Checked: {path}");
+            }
+
+            return "";
         }
 
         public async Task<string?> GetThumbnailAsync(string videoPath)
         {
-            if (!File.Exists(videoPath) || !File.Exists(_ffmpegPath)) return null;
+            if (!File.Exists(videoPath))
+            {
+                Debug.WriteLine($"[ThumbnailService] Video file not found: {videoPath}");
+                return null;
+            }
+
+            if (!File.Exists(_ffmpegPath))
+            {
+                Debug.WriteLine($"[ThumbnailService] FFmpeg not found at: {_ffmpegPath}");
+                return null;
+            }
 
             // Generate unique filename based on path hash
             string hash = CreateMd5(videoPath + File.GetLastWriteTime(videoPath).Ticks); // Invalidate if file changes

@@ -87,7 +87,8 @@ namespace Veriflow.Avalonia.Services
             {
                 string ffprobePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffprobe.exe");
                 
-
+                Debug.WriteLine($"[FFprobeMetadataProvider] Looking for ffprobe at: {ffprobePath}");
+                Debug.WriteLine($"[FFprobeMetadataProvider] File exists: {File.Exists(ffprobePath)}");
 
                 if (!File.Exists(ffprobePath)) return;
 
@@ -534,6 +535,10 @@ namespace Veriflow.Avalonia.Services
             try
             {
                 string ffprobePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffprobe.exe");
+                
+                Debug.WriteLine($"[FFprobeMetadataProvider] VIDEO - Looking for ffprobe at: {ffprobePath}");
+                Debug.WriteLine($"[FFprobeMetadataProvider] VIDEO - File exists: {File.Exists(ffprobePath)}");
+                
                 if (!File.Exists(ffprobePath)) return;
 
                 var args = $"-v quiet -print_format json -show_format -show_streams -i \"{filePath}\"";
